@@ -1,19 +1,28 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-</script>
+@import './assets/main.css';
 
 <template>
   <header>
     <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+      <div>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
+      </div>
   </header>
 
   <main>
-    <TheWelcome />
+    <form style="text-align: center">
+      <label style="text-align: center">User:</label><br>
+      <input type="text" name="user"></input>
+      <br>
+      <label style="text-align: center">Password:</label><br>
+      <input type="password" name="password"></input>
+      <br><br>
+      <input type="submit" value="Submit"></input>
+
+
+
+
+    </form>
+
   </main>
 </template>
 
@@ -45,3 +54,5 @@ header {
   }
 }
 </style>
+<script setup lang="ts">
+</script>
