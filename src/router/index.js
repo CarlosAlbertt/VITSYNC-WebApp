@@ -2,13 +2,13 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 // 1. Importa tus componentes de "página" (Vistas)
 // (Estos son los componentes que quieres que se muestren en cada ruta)
-import HomeView from '../components/HomeView.vue';
+import HomeView from '../pages/HomeView.vue';
 
 // 2. Define el array de rutas
 const routes = [
     {
         path: '/',          // La URL en el navegador
-        name: 'home',       // Un nombre opcional para la ruta
+        name: 'page',       // Un nombre opcional para la ruta
         component: HomeView // El componente que se cargará
     },
     /*
