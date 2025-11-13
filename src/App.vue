@@ -14,6 +14,7 @@ const mensaje = ref("Hola Mundo desde Vue 3!");
       <div class="flex-shrink-0">
         <!-- Icono simple (emoji o SVG inline) -->
         <span class="text-4xl">👋</span>
+        <div></div>
       </div>
       <div>
         <div class="text-xl font-medium text-indigo-600">Aplicación Vue</div>
