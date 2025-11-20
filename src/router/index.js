@@ -12,6 +12,7 @@ const routes = [
         path: '/',
         name: 'home',
         component: Home,
+        /*
         beforeEnter: (to, from, next) => {
             if (isAuthenticated()) {
                 next();
@@ -19,6 +20,7 @@ const routes = [
                 next({ name: 'login' });
             }
         }
+        */
     },
     {
         path: '/login',
