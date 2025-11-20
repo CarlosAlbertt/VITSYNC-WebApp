@@ -33,29 +33,46 @@ const handleLogin = async () => {
 </script>
 
 <template>
-    <div class="flex items-center justify-center h-screen bg-gray-100">
-        <div class="bg-white p-8 rounded-lg shadow-md w-96">
-            <h2 class="text-2xl font-bold mb-6 text-center text-black">Iniciar Sesión</h2>
+    <div class="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+
+        <h2 class="text-teal-600 font-large m4-8">VITSYNC</h2>
+        <h1 class="text-4xl font-semibold text-gray-800 mb-2">Mi VitSync</h1>
+
+        <div class="w-full max-w-sm bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-lg font-medium text-gray-800 mb-6">Inicia sesión</h3>
+
             <form @submit.prevent="handleLogin">
                 <div class="mb-4">
-                    <label class="block text-gray-700" for="username">Usuario:</label>
-                    <input type="text" v-model="username" required
-                        class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-black" />
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Usuario</label>
+                    <input id="username" type="text" v-model="username" placeholder="nombre@mail.com"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                        required />
                 </div>
+
                 <div class="mb-4">
-                    <label class="block text-gray-700" for="password">Contraseña:</label>
-                    <input type="password" v-model="password" required
-                        class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-black" />
+                    <div class="flex justify-between items-center mb-1">
+                        <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                        <a href="#" class="text-sm text-teal-600 hover:text-teal-800">¿Has olvidado tu contraseña?</a>
+                    </div>
+                    <input id="password" type="password" v-model="password"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                        required />
                 </div>
-                <button type="submit"
-                    class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition duration-200">
+
+                <button type="submit" 
+                    class="w-full bg-teal-600 text-white py-2 px-4 rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors">
                     Entrar
                 </button>
-
-                <div v-if="errorMessage" class="text-red-500 mt-4 text-center">
-                    {{ errorMessage }}
-                </div>
             </form>
+
+            <p class="mt-6 text-center text-sm text-gray-600">
+                ¿No tienes usuario?
+                <a href="#" class="font-medium text-teal-600 hover:text-teal-800">Date de alta ahora</a>
+            </p>
+
+            <p class="mt-4 text-center text-xs text-gray-500">
+                <a href="#" class="hover:text-gray-700">¿Problemas con el acceso o alta?</a>
+            </p>
         </div>
     </div>
 </template>

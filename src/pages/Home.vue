@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col min-h-screen">
-    <HeaderComponent title="Bienvenido a nuestra Tienda" :navItems="navItems" loginText="Iniciar Sesión" />
+    <Header />
     <main class="flex-grow flex flex-col items-center justify-center p-6">
       <h2 class="text-2xl font-bold mb-4">Explora Nuestros Médicos especialistas</h2>
       <p class="mb-8">Descubre una variedad de especialidades que tenemos para ofrecerte.</p>
@@ -13,18 +13,18 @@
         </div>
       </section>
     </main>
-    <footer class="bg-gray-800 text-white text-center py-4">
-      <h3>@Copyright 2025</h3>
-    </footer>
+    <Footer />
   </div>
 </template>
 
 <script>
 import Header from '../components/HeaderComponent.vue';
+import Footer from '../components/FooterComponent.vue';
 
 export default {
   components: {
     Header,
+    Footer,
   },
   data() {
     return {

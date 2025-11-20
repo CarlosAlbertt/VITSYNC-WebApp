@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [
     vue(),
     vueDevTools(),
-      tailwindcss(), // Add Tailwind CSS plugin
+    tailwindcss(),
   ],
   resolve: {
     alias: {
