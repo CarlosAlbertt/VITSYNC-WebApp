@@ -4,7 +4,7 @@
     <div class="bg-teal-600 text-white text-sm px-4 py-2">
       <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
         <div class="flex items-center space-x-6">
-          <span>Atención al paciente: 000 000 000</span>
+          <span>Atención al paciente: 912 33 77 99</span>
           <div class="flex space-x-4">
             <a href="#" class="hover:underline">Trabaja con nosotros</a>
             <a href="#" class="hover:underline">International patient</a>
@@ -20,9 +20,9 @@
     <nav class="max-w-7xl mx-auto px-4 py-4">
       <div class="flex flex-wrap items-center justify-between">
         <!-- Logo -->
-        <div class="text-2xl font-bold text-teal-600">
+        <router-link to="/" class="text-2xl font-bold text-teal-600 hover:text-teal-700 transition-colors cursor-pointer">
           VitSync
-        </div>
+        </router-link>
 
         <!-- Barra de búsqueda -->
         <div class="flex-1 max-w-2xl mx-6">
@@ -47,10 +47,22 @@
       <!-- Menú de navegación (oculto en móviles) -->
       <div class="hidden md:flex pt-4 border-t border-gray-100 mt-4">
         <nav class="flex space-x-8">
-          <a v-for="item in menuItems" :key="item" href="#"
-            class="text-gray-700 hover:text-teal-600 text-sm font-medium">
-            {{ item }}
-          </a>
+          <template v-for="item in menuItems" :key="item.name">
+            <router-link 
+              v-if="item.route" 
+              :to="item.route"
+              class="text-gray-700 hover:text-teal-600 text-sm font-medium"
+            >
+              {{ item.name }}
+            </router-link>
+            <a 
+              v-else 
+              href="#"
+              class="text-gray-700 hover:text-teal-600 text-sm font-medium"
+            >
+              {{ item.name }}
+            </a>
+          </template>
         </nav>
       </div>
     </nav>
@@ -71,15 +83,15 @@ export default {
   data() {
     return {
       menuItems: [
-        'Hospitales',
-        'Cuadro médico',
-        'Especialidades',
-        'Enfermedades y tratamientos',
-        'Unidades médicas',
-        'Investigación',
-        'El grupo',
-        'Comunicación',
-        'Orientador de salud'
+        { name: 'Hospitales', route: null },
+        { name: 'Cuadro médico', route: null },
+        { name: 'Especialidades', route: '/especialidades' },
+        { name: 'Enfermedades y tratamientos', route: null },
+        { name: 'Unidades médicas', route: null },
+        { name: 'Investigación', route: null },
+        { name: 'El grupo', route: null },
+        { name: 'Comunicación', route: null },
+        { name: 'Orientador de salud', route: null }
       ]
     }
   }
