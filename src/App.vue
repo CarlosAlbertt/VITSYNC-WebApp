@@ -4,8 +4,6 @@
 
 import { ref } from 'vue';
 
-const mensaje = ref("Hola Mundo desde Vue 3!");
-
 </script>
 
 <template>
