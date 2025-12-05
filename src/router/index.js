@@ -1,36 +1,48 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-// 1. Importa tus componentes de "página" (Vistas)
-// (Estos son los componentes que quieres que se muestren en cada ruta)
-import HomeView from '../pages/HomeView.vue';
+import Home from '../pages/Home.vue';
+import Login from '../pages/Login.vue';
+import Especialidades from '../pages/Especialidades.vue';
 
-// 2. Define el array de rutas
+const isAuthenticated = () => {
+    return localStorage.getItem('token') !== null;
+};
+
 const routes = [
     {
-        path: '/',          // La URL en el navegador
-        name: 'page',       // Un nombre opcional para la ruta
-        component: HomeView // El componente que se cargará
+        path: '/',
+        name: 'home',
+        component: Home,
+        beforeEnter: (to, from, next) => {
+            if (isAuthenticated()) {
+                next();
+            } else {
+                next({ name: 'login' });
+            }
+        }
     },
-    /*
     {
-        path: '/about',
-        name: 'about',
-        component: AboutView
+        path: '/especialidades',
+        name: 'especialidades',
+        component: Especialidades,
+        beforeEnter: (to, from, next) => {
+            if (isAuthenticated()) {
+                next();
+            } else {
+                next({ name: 'login' });
+            }
+        }
     },
     {
-        path: '/login',     // La ruta para tu formulario
+        path: '/login',
         name: 'login',
-        component: LoginView
-    }*/
-    // ...puedes añadir más rutas aquí
+        component: Login
+    },
 ];
 
-// 3. Crea la instancia del router
 const router = createRouter({
-    // 'history' le dice al router cómo gestionar el historial de navegación
-    history: createWebHistory(), // Usa las URLs "limpias" (ej. /about)
-    routes, // (equivale a routes: routes)
+    history: createWebHistory(),
+    routes,
 });
 
-// 4. Exporta el router para que tu app principal lo use
 export default router;
