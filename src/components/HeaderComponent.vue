@@ -14,7 +14,7 @@
           class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium">
           Iniciar sesion
         </router-link>
-        <button v-else @click="handleLogout" class="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium">
+        <button v-else @click="handleLogout" class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium">
           Cerrar sesion
         </button>
       </div>
