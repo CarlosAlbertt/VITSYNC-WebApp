@@ -12,13 +12,13 @@ export const currentUser = ref({
 });
 
 // Función de login
-export const login = async (username, password) => {
+export const login = async (nif, password) => {
     const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ nif, password })
     });
 
     const data = await response.json();
@@ -29,14 +29,14 @@ export const login = async (username, password) => {
 
     // Guardar datos en localStorage
     localStorage.setItem('token', data.token);
-    localStorage.setItem('username', data.username);
+    localStorage.setItem('username', data.nif);
     localStorage.setItem('email', data.email);
     localStorage.setItem('role', data.role);
 
     // Actualizar estado reactivo
     isAuthenticated.value = true;
     currentUser.value = {
-        username: data.username,
+        nif: data.nif,
         email: data.email,
         role: data.role
     };
@@ -62,14 +62,14 @@ export const register = async (userData) => {
 
     // Guardar datos en localStorage
     localStorage.setItem('token', data.token);
-    localStorage.setItem('username', data.username);
+    localStorage.setItem('nif', data.nif);
     localStorage.setItem('email', data.email);
     localStorage.setItem('role', data.role);
 
     // Actualizar estado reactivo
     isAuthenticated.value = true;
     currentUser.value = {
-        username: data.username,
+        nif: data.nif,
         email: data.email,
         role: data.role
     };
@@ -80,13 +80,13 @@ export const register = async (userData) => {
 // Función de logout
 export const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('username');
+    localStorage.removeItem('nif');
     localStorage.removeItem('email');
     localStorage.removeItem('role');
 
     isAuthenticated.value = false;
     currentUser.value = {
-        username: null,
+        nif: null,
         email: null,
         role: null
     };

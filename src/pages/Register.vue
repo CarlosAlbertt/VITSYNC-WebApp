@@ -6,9 +6,9 @@ import { useRouter } from 'vue-router';
 // Refs para los datos del formulario
 const formData = ref({
     name: '',
+    firstName: '',
     secondName: '',
-    lastName: '',
-    username: '',
+    nif: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -91,14 +91,14 @@ const handleRegister = async () => {
                             required :disabled="isLoading" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Segundo nombre *</label>
-                        <input type="text" v-model="formData.secondName"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
+                        <input type="text" v-model="formData.lastName"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
                             required :disabled="isLoading" />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
-                        <input type="text" v-model="formData.lastName"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Segundo Apellido *</label>
+                        <input type="text" v-model="formData.secondName"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
                             required :disabled="isLoading" />
                     </div>
@@ -128,8 +128,8 @@ const handleRegister = async () => {
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Usuario *</label>
-                        <input type="text" v-model="formData.username"
+                        <label class="block text-sm font-medium text-gray-700 mb-1">NIF/CIF *</label>
+                        <input type="text" v-model="formData.nif"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
                             required :disabled="isLoading" />
                     </div>
