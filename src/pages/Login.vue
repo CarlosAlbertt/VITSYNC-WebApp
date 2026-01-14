@@ -1,4 +1,5 @@
 <script setup>
+import { login } from '../store/auth';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -20,7 +21,7 @@ const handleLogin = async () => {
 
         if (username.value === testUser.username && password.value === testUser.password) {
             console.log('Login exitoso');
-            localStorage.setItem('token', 'dummyToken');
+            login('dummyToken'); // Usa la función del store para actualizar el estado reactivo
             router.push({ name: 'home' });
         } else {
             throw new Error('Usuario o contraseña incorrectos.');
@@ -67,7 +68,8 @@ const handleLogin = async () => {
 
             <p class="mt-6 text-center text-sm text-gray-600">
                 ¿No tienes usuario?
-                <a href="#" class="font-medium text-teal-600 hover:text-teal-800">Date de alta ahora</a>
+                <router-link :to="{ name: 'register' }" class="font-medium text-teal-600 hover:text-teal-800">Date de
+                    alta ahora</router-link>
             </p>
 
             <p class="mt-4 text-center text-xs text-gray-500">

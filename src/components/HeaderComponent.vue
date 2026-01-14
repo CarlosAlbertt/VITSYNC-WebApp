@@ -10,9 +10,13 @@
             <a href="#" class="hover:underline">International patient</a>
           </div>
         </div>
-        <router-link to="/login" class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium">
+        <router-link v-if="!isAuthenticated" to="/login"
+          class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium">
           Iniciar sesion
         </router-link>
+        <button v-else @click="handleLogout" class="bg-white text-red-600 px-3 py-1 rounded text-sm font-medium">
+          Cerrar sesion
+        </button>
       </div>
     </div>
 
@@ -20,7 +24,8 @@
     <nav class="max-w-7xl mx-auto px-4 py-4">
       <div class="flex flex-wrap items-center justify-between">
         <!-- Logo -->
-        <router-link to="/" class="text-2xl font-bold text-teal-600 hover:text-teal-700 transition-colors cursor-pointer">
+        <router-link to="/"
+          class="text-2xl font-bold text-teal-600 hover:text-teal-700 transition-colors cursor-pointer">
           VitSync
         </router-link>
 
@@ -37,7 +42,7 @@
 
         <!-- Enlaces principales -->
         <div class="flex items-center space-x-6">
-          <a href="#" class="text-teal-600 font-medium hover:text-teal-800">Mi Perfil</a>
+          <a v-if="isAuthenticated" href="#" class="text-teal-600 font-medium hover:text-teal-800">Mi Perfil</a>
           <button class="md:hidden text-gray-600">
             ☰
           </button>
@@ -48,18 +53,11 @@
       <div class="hidden md:flex pt-4 border-t border-gray-100 mt-4">
         <nav class="flex space-x-8">
           <template v-for="item in menuItems" :key="item.name">
-            <router-link 
-              v-if="item.route" 
-              :to="item.route"
-              class="text-gray-700 hover:text-teal-600 text-sm font-medium"
-            >
+            <router-link v-if="item.route" :to="item.route"
+              class="text-gray-700 hover:text-teal-600 text-sm font-medium">
               {{ item.name }}
             </router-link>
-            <a 
-              v-else 
-              href="#"
-              class="text-gray-700 hover:text-teal-600 text-sm font-medium"
-            >
+            <a v-else href="#" class="text-gray-700 hover:text-teal-600 text-sm font-medium">
               {{ item.name }}
             </a>
           </template>
@@ -69,31 +67,26 @@
   </header>
 </template>
 
-<script>
+<script setup>
 import { useRouter } from 'vue-router'
+import { isAuthenticated, logout } from '../store/auth'
 
 const router = useRouter()
 
-const goToLogin = () => {
-  router.push('/login')
+const handleLogout = () => {
+  logout()
+  router.push('/')
 }
 
-export default {
-  name: 'HeaderQuironsalud',
-  data() {
-    return {
-      menuItems: [
-        { name: 'Hospitales', route: null },
-        { name: 'Cuadro médico', route: null },
-        { name: 'Especialidades', route: '/especialidades' },
-        { name: 'Enfermedades y tratamientos', route: null },
-        { name: 'Unidades médicas', route: null },
-        { name: 'Investigación', route: null },
-        { name: 'El grupo', route: null },
-        { name: 'Comunicación', route: null },
-        { name: 'Orientador de salud', route: null }
-      ]
-    }
-  }
-}
+const menuItems = [
+  { name: 'Hospitales', route: null },
+  { name: 'Cuadro médico', route: null },
+  { name: 'Especialidades', route: '/especialidades' },
+  { name: 'Enfermedades y tratamientos', route: null },
+  { name: 'Unidades médicas', route: null },
+  { name: 'Investigación', route: null },
+  { name: 'El grupo', route: null },
+  { name: 'Comunicación', route: null },
+  { name: 'Orientador de salud', route: null }
+]
 </script>
