@@ -92,7 +92,7 @@ const handleRegister = async () => {
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
-                        <input type="text" v-model="formData.lastName"
+                        <input type="text" v-model="formData.firstName"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
                             required :disabled="isLoading" />
                     </div>
