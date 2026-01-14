@@ -40,6 +40,11 @@ const routes = [
         name: 'login',
         component: Login
     },
+    {
+        path: '/register',
+        name: 'register',
+        component: () => import('../pages/Register.vue') // Lazy loading para optimizar
+    },
 ];
 
 const router = createRouter({
