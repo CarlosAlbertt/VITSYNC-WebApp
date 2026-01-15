@@ -69,14 +69,23 @@
                 class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
               >
                 <!-- Specialty Image/Icon -->
-                <div class="h-48 overflow-hidden bg-gradient-to-br from-teal-100 to-teal-200 flex items-center justify-center">
-                  <div class="text-6xl text-teal-600">
+                <div class="h-48 overflow-hidden bg-linear-to-br from-teal-100 to-teal-200 flex items-center justify-center relative group">
+                   <!-- Try to load image first -->
+                   <img 
+                      v-if="hasImage(especialidad.nombre)"
+                      :src="getEspecialidadImage(especialidad.nombre)" 
+                      :alt="especialidad.nombre"
+                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      @error="handleImageError(especialidad.nombre)"
+                   >
+                   <!-- Fallback to icon -->
+                   <div v-else class="text-6xl text-teal-600">
                     {{ getEspecialidadIcon(especialidad.tipo) }}
                   </div>
                 </div>
                 
                 <!-- Specialty Info -->
-                <div class="p-6 flex flex-col flex-grow">
+                <div class="p-6 flex flex-col grow">
                   <h3 class="text-xl font-bold text-gray-800 mb-2">{{ especialidad.nombre }}</h3>
                   <p class="text-sm text-gray-600 mb-4">{{ especialidad.descripcion }}</p>
                   
@@ -136,6 +145,51 @@ export default {
       especialidades: [],
       isLoading: false,
       errorMessage: null,
+      imageLoadErrors: {}, // Track which images failed to load
+      // Normalized mapping of specialty names to image filenames (without extension)
+        // Mappings for user-provided images
+        'aparato digestivo': 'Aparato',
+        'análisis clínicos': 'analisis',
+        'analisis clinicos': 'analisis',
+        'cirugía general y del aparato digestivo': 'cirugiaGeneral',
+        'cirugia general y del aparato digestivo': 'cirugiaGeneral',
+        'cirugía oral y maxilofacial': 'cirujiamaxi',
+        'cirugia oral y maxilofacial': 'cirujiamaxi',
+        'medicina general': 'medicalCheckup', // Assuming this image is for general medicine
+        
+        // Existing mappings
+        'cardiologia': 'cardiologia',
+        'cardiología': 'cardiologia',
+        'pediatria': 'pediatria',
+        'pediatría': 'pediatria',
+        'traumatologia': 'traumatologia',
+        'traumatología': 'traumatologia',
+        'dermatologia': 'dermatologia',
+        'dermatología': 'dermatologia',
+        'oftalmologia': 'oftalmologia',
+        'oftalmología': 'oftalmologia',
+        'neurologia': 'neurologia',
+        'neurología': 'neurologia',
+        'alergología': 'alergologia',
+        'alergologia': 'alergologia',
+        'anestesiología': 'anestosiologia', // Note spelling difference in file: anestosiologia
+        'anestesiologia': 'anestosiologia',
+        'angiológia': 'angiologia',
+        'angiologia': 'angiologia',
+        'endocrinología': 'endocrinologia',
+        'endocrinologia': 'endocrinologia',
+        'gastroenterología': 'gastroenterologia',
+        'gastroenterologia': 'gastroenterologia',
+        'hematología': 'hematologia',
+        'hematologia': 'hematologia',
+        'neumologia': 'neumologia',
+        'neumología': 'neumologia',
+        'oncologia': 'oncologia',
+        'oncología': 'oncologia',
+        'psiquiatria': 'psiquiatria',
+        'psiquiatría': 'psiquiatria',
+        'urologia': 'urologia',
+        'urología': 'urologia',
     };
   },
   computed: {
@@ -190,6 +244,29 @@ export default {
         'UNIDAD': '🏨'
       };
       return icons[tipo] || '🏥';
+    },
+
+    // Check if we have an image for this specialty and it hasn't failed to load
+    hasImage(nombre) {
+      if (!nombre) return false;
+      const normalizedName = nombre.toLowerCase();
+      // Check if mapped and not in error list
+      return (!!this.imageMapping[normalizedName] && !this.imageLoadErrors[normalizedName]);
+    },
+
+    getEspecialidadImage(nombre) {
+       if (!nombre) return '';
+       const normalizedName = nombre.toLowerCase();
+       const filename = this.imageMapping[normalizedName];
+       return `/images/specialties/${filename}.png`;
+    },
+
+    handleImageError(nombre) {
+      if (nombre) {
+        const normalizedName = nombre.toLowerCase();
+        // Use Vue.set or reassign to ensure reactivity if needed, though simple assignment works in Vue 3 proxy
+        this.imageLoadErrors[normalizedName] = true;
+      }
     },
     
     getTipoBadgeClass(tipo) {
