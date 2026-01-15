@@ -189,7 +189,7 @@ export default {
       const especialidadIcons = {
         'Alergología': '🌸',
         'Análisis Clínicos': '🧪',
-        'Anestesiología y Reanimación': '😴',
+        'Anestesiología y Reanimación': '',
         'Angiología y Cirugía Vascular': '🫀',
         'Aparato Digestivo': '�',
         'Cardiología': '❤️',
