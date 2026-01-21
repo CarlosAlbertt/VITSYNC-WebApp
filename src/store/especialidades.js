@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { API_URL } from './auth';
+import api from '../services/api';
 
 // Estado reactivo de especialidades
 export const especialidades = ref([]);
@@ -12,18 +12,8 @@ export const fetchEspecialidades = async () => {
         isLoading.value = true;
         error.value = null;
 
-        const response = await fetch(`${API_URL}/api/especialidades`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Error al cargar las especialidades');
-        }
-
-        const data = await response.json();
+        const response = await api.get('/api/especialidades');
+        const data = response.data;
         especialidades.value = data;
         return data;
 
@@ -39,13 +29,8 @@ export const fetchEspecialidades = async () => {
 // Buscar especialidad por ID
 export const fetchEspecialidadById = async (id) => {
     try {
-        const response = await fetch(`${API_URL}/api/especialidades/${id}`);
-
-        if (!response.ok) {
-            throw new Error('Especialidad no encontrada');
-        }
-
-        return await response.json();
+        const response = await api.get(`/api/especialidades/${id}`);
+        return response.data;
 
     } catch (err) {
         console.error('Error buscando especialidad:', err);
@@ -56,13 +41,8 @@ export const fetchEspecialidadById = async (id) => {
 // Buscar especialidad por slug
 export const fetchEspecialidadBySlug = async (slug) => {
     try {
-        const response = await fetch(`${API_URL}/api/especialidades/slug/${slug}`);
-
-        if (!response.ok) {
-            throw new Error('Especialidad no encontrada');
-        }
-
-        return await response.json();
+        const response = await api.get(`/api/especialidades/slug/${slug}`);
+        return response.data;
 
     } catch (err) {
         console.error('Error buscando especialidad:', err);
@@ -73,13 +53,8 @@ export const fetchEspecialidadBySlug = async (slug) => {
 // Filtrar por tipo
 export const fetchEspecialidadesByTipo = async (tipo) => {
     try {
-        const response = await fetch(`${API_URL}/api/especialidades/tipo/${tipo}`);
-
-        if (!response.ok) {
-            throw new Error('Error al filtrar especialidades');
-        }
-
-        return await response.json();
+        const response = await api.get(`/api/especialidades/tipo/${tipo}`);
+        return response.data;
 
     } catch (err) {
         console.error('Error filtrando especialidades:', err);
