@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { API_URL } from '../store/auth';
+import api from '../services/api';
 
 const route = useRoute();
 const router = useRouter();
@@ -25,22 +25,10 @@ const handleVerify = async () => {
     isError.value = false;
 
     try {
-        const response = await fetch(`${API_URL}/api/auth/verify`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email.value,
-                code: code.value
-            })
+        await api.post('/api/auth/verify', {
+            email: email.value,
+            code: code.value
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || 'Error en la verificación');
-        }
 
         message.value = '¡Cuenta verificada con éxito! Redirigiendo al login...';
         isError.value = false;
@@ -50,7 +38,7 @@ const handleVerify = async () => {
         }, 2000);
 
     } catch (error) {
-        message.value = error.message;
+        message.value = error.response?.data?.message || error.message || 'Error en la verificación';
         isError.value = true;
     } finally {
         isLoading.value = false;
