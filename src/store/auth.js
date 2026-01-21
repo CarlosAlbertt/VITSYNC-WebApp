@@ -1,8 +1,8 @@
 import { ref } from 'vue';
 
 // URL base de la API (cambiar según entorno)
-//export const API_URL = 'http://localhost:8080';
-export const API_URL = 'https://vitsync-api-production.up.railway.app';
+//export const API_URL = 'https://vitsync-api-production.up.railway.app';
+export const API_URL = 'https://vitsync-api-testing.up.railway.app';
 
 // Estado reactivo de autenticación
 export const isAuthenticated = ref(localStorage.getItem('token') !== null);
