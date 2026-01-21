@@ -46,14 +46,19 @@ const handleRegister = async () => {
         const { confirmPassword, ...registerData } = formData.value;
 
         // Llamar a la función de registro del store
-        await register(registerData);
+        // await register(registerData); 
+        // Nota: register ya no hace auto-login
 
-        successMessage.value = '¡Registro exitoso! Redirigiendo...';
+         await register(registerData);
+
+        successMessage.value = '¡Registro exitoso! Por favor revisa tu correo para el código de verificación.';
         
         setTimeout(() => {
-            router.push({ name: 'home' });
+            router.push({ 
+                name: 'verify', 
+                query: { email: formData.value.email } 
+            });
         }, 1500);
-        
     } catch (error) {
         console.error('Error en el registro:', error);
         errorMessage.value = error.message || 'Error de conexión con el servidor';

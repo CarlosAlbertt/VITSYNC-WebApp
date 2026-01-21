@@ -45,6 +45,11 @@ const routes = [
         name: 'register',
         component: () => import('../pages/Register.vue') // Lazy loading para optimizar
     },
+    {
+        path: '/verify',
+        name: 'verify',
+        component: () => import('../pages/VerifyAccount.vue')
+    },
 ];
 
 const router = createRouter({

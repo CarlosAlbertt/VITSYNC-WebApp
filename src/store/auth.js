@@ -61,6 +61,8 @@ export const register = async (userData) => {
         throw new Error(data.message || 'Error en el registro');
     }
 
+    /* 
+    // Comentado para evitar auto-login y forzar verificación
     // Guardar datos en localStorage
     localStorage.setItem('token', data.token);
     localStorage.setItem('nif', data.nif);
@@ -74,6 +76,7 @@ export const register = async (userData) => {
         email: data.email,
         role: data.role
     };
+    */
 
     return data;
 };
