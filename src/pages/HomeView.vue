@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import axios from 'axios';
+import api from '../services/api'; // Usar servicio centralizado
 import { useRouter } from 'vue-router'; // Importante para redirigir
 
 // 1. Refs para los datos del formulario
@@ -18,7 +18,7 @@ const handleLogin = async () => {
     errorMessage.value = null;
 
     // 5. Enviamos el POST a Spring Boot
-    const response = await axios.post('http://localhost:8080/api/auth/login', {
+    const response = await api.post('/api/auth/login', {
       // El cuerpo (body) de la petición
       username: username.value,
       password: password.value
