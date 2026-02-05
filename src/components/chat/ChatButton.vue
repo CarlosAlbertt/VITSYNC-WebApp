@@ -16,8 +16,8 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: bg-orange-500;
-  color: bg-teal-600;
+  background-color: #f97316; /* Orange 500 */
+  color: white;
   border: none;
   font-size: 24px;
   cursor: pointer;
