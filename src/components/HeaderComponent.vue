@@ -23,7 +23,6 @@
     <!-- Navegación principal -->
     <nav class="max-w-7xl mx-auto px-4 py-4">
       <div class="flex flex-wrap items-center justify-between">
-        <!-- Logo -->
         <router-link to="/"
           class="text-2xl font-bold text-teal-600 hover:text-teal-700 transition-colors cursor-pointer">
           VitSync
