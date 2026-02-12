@@ -62,10 +62,10 @@
               <div 
                 v-for="especialidad in getSpecialtiesByLetter(letter)" 
                 :key="especialidad.id"
-                class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
+                class="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
               >
                 <!-- Specialty Icon (Updated) -->
-                <div class="h-40 bg-white flex items-center justify-center relative group border-b border-gray-100 overflow-hidden">
+                <div class="h-40 bg-white dark:bg-gray-800 flex items-center justify-center relative group border-b border-gray-100 overflow-hidden">
                   <img 
                     :src="getEspecialidadImage(especialidad.nombre, especialidad.tipo)" 
                     :alt="especialidad.nombre"
