@@ -61,3 +61,40 @@ export const fetchEspecialidadesByTipo = async (tipo) => {
         throw err;
     }
 };
+// Crear especialidad
+export const createEspecialidad = async (data) => {
+    try {
+        const response = await api.post('/api/especialidades', data);
+        especialidades.value.push(response.data);
+        return response.data;
+    } catch (err) {
+        console.error('Error creando especialidad:', err);
+        throw err;
+    }
+};
+
+// Actualizar especialidad
+export const updateEspecialidad = async (id, data) => {
+    try {
+        const response = await api.put(`/api/especialidades/${id}`, data);
+        const index = especialidades.value.findIndex(s => s.id === id);
+        if (index !== -1) {
+            especialidades.value[index] = response.data;
+        }
+        return response.data;
+    } catch (err) {
+        console.error('Error actualizando especialidad:', err);
+        throw err;
+    }
+};
+
+// Eliminar especialidad
+export const deleteEspecialidad = async (id) => {
+    try {
+        await api.delete(`/api/especialidades/${id}`);
+        especialidades.value = especialidades.value.filter(s => s.id !== id);
+    } catch (err) {
+        console.error('Error eliminando especialidad:', err);
+        throw err;
+    }
+};
