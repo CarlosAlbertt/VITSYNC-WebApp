@@ -6,7 +6,8 @@ export const isAuthenticated = ref(localStorage.getItem('token') !== null);
 export const currentUser = ref({
     username: localStorage.getItem('username') || null,
     email: localStorage.getItem('email') || null,
-    role: localStorage.getItem('role') || null
+    role: localStorage.getItem('role') || null,
+    id: localStorage.getItem('id') || null
 });
 
 // Función de login
@@ -20,13 +21,15 @@ export const login = async (nif, password) => {
         localStorage.setItem('username', data.nif);
         localStorage.setItem('email', data.email);
         localStorage.setItem('role', data.role);
+        localStorage.setItem('id', data.id);
 
         // Actualizar estado reactivo
         isAuthenticated.value = true;
         currentUser.value = {
             nif: data.nif,
             email: data.email,
-            role: data.role
+            role: data.role,
+            id: data.id
         };
 
         return data;
@@ -53,12 +56,14 @@ export const logout = () => {
     localStorage.removeItem('nif');
     localStorage.removeItem('email');
     localStorage.removeItem('role');
+    localStorage.removeItem('id');
 
     isAuthenticated.value = false;
     currentUser.value = {
         nif: null,
         email: null,
-        role: null
+        role: null,
+        id: null
     };
 };
 

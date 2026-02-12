@@ -1,0 +1,15 @@
+  VITSYNC-11-control-de-especialidades-medicas-mediante-api
+  VITSYNC-22-implementacion-de-manejo-de-envio-de-correo-de-confirmacion-y-bienvenida
+* develop
+  master
+  remotes/origin/CarlosAlbert
+  remotes/origin/HEAD -> origin/master
+  remotes/origin/JavierCrespo
+  remotes/origin/PabloEscolano
+  remotes/origin/VITSYNC-11-control-de-especialidades-medicas-mediante-api
+  remotes/origin/VITSYNC-14-creacion-de-tests-login-y-registros
+  remotes/origin/VITSYNC-15-creacion-y-asignacion-de-imagenes-a-especialidades
+  remotes/origin/VITSYNC-22-implementacion-de-manejo-de-envio-de-correo-de-confirmacion-y-bienvenida
+  remotes/origin/desarrollo
+  remotes/origin/develop
+  remotes/origin/master
