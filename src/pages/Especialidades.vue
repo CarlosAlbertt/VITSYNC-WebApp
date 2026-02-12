@@ -68,14 +68,13 @@
                 :key="especialidad.id"
                 class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
               >
-                <!-- Specialty Icon -->
-                <div class="h-40 bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center relative group">
-                  <div class="text-7xl transition-transform duration-300 group-hover:scale-110 drop-shadow-lg">
-                    {{ getEspecialidadIcon(especialidad.nombre, especialidad.tipo) }}
-                  </div>
-                  <!-- Decorative circles -->
-                  <div class="absolute top-4 right-4 w-16 h-16 bg-white/10 rounded-full"></div>
-                  <div class="absolute bottom-4 left-4 w-10 h-10 bg-white/10 rounded-full"></div>
+                <!-- Specialty Icon (Updated) -->
+                <div class="h-40 bg-white flex items-center justify-center relative group border-b border-gray-100 overflow-hidden">
+                  <img 
+                    :src="getEspecialidadImage(especialidad.nombre, especialidad.tipo)" 
+                    :alt="especialidad.nombre"
+                    class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
                 </div>
                 
                 <!-- Specialty Info -->
@@ -127,6 +126,9 @@
 import Header from '../components/HeaderComponent.vue';
 import Footer from '../components/FooterComponent.vue';
 import { fetchEspecialidades } from '../store/especialidades';
+
+// Import all specialty images
+const specialtyImages = import.meta.glob('../assets/images/specialties/*.png', { eager: true, query: '?url', import: 'default' });
 
 export default {
   components: {
@@ -184,56 +186,54 @@ export default {
       }
     },
     
-    getEspecialidadIcon(nombre, tipo) {
-      // Iconos específicos para cada especialidad
-      const especialidadIcons = {
-        'Alergología': '🌸',
-        'Análisis Clínicos': '🧪',
-        'Anestesiología y Reanimación': '',
-        'Angiología y Cirugía Vascular': '🫀',
-        'Aparato Digestivo': '�',
-        'Cardiología': '❤️',
-        'Chequeos Médicos': '📋',
-        'Cirugía General y del Aparato Digestivo': '⚕️',
-        'Cirugía Oral y Maxilofacial': '🦷',
-        'Cirugía Ortopédica y Traumatología': '🦴',
-        'Cirugía Pediátrica': '👶',
-        'Cirugía Plástica, Reparadora y Estética': '✨',
-        'Dermatología y Venereología': '�',
-        'Diagnóstico por la Imagen': '�',
-        'Endocrinología y Nutrición': '⚖️',
-        'Ginecología y Obstetricia': '🤰',
-        'Hematología y Hemoterapia': '🩸',
-        'Medicina General': '👨‍⚕️',
-        'Medicina Interna': '🩺',
-        'Neumología': '🫁',
-        'Neurología': '🧠',
-        'Oftalmología': '👁️',
-        'Oncología Médica': '🎗️',
-        'Otorrinolaringología': '👂',
-        'Pediatría': '🧒',
-        'Psicología Clínica': '�',
-        'Rehabilitación y Fisioterapia': '🏃',
-        'Reumatología': '�',
-        'Unidad del Dolor': '💊',
-        'Urgencias': '🚑',
-        'Urología': '🏥',
+    getEspecialidadImage(nombre, tipo) {
+      // Mapa de nombres de especialidad a nombres de archivo (sin extensión)
+      const imageMap = {
+        'Cardiología': 'cardiologia',
+        'Medicina General': 'medicina_general',
+        'Pediatría': 'pediatria',
+        'Cirugía Ortopédica y Traumatología': 'traumatologia',
+        'Dermatología y Venereología': 'dermatologia',
+        'Ginecología y Obstetricia': 'ginecologia',
+        'Oftalmología': 'oftalmologia',
+        'Urología': 'urologia',
+        'Psicología Clínica': 'psicologia',
+        'Neumología': 'neumologia',
+        'Alergología': 'alergologia',
+        'Medicina Interna': 'medicina_interna',
+        'Cirugía General y del Aparato Digestivo': 'cirugia_general',
+        'Angiología y Cirugía Vascular': 'angiologia',
+        'Rehabilitación y Fisioterapia': 'rehabilitacion',
+        'Hematología y Hemoterapia': 'hematologia',
+        'Reumatología': 'reumatologia',
+        'Cirugía Plástica, Reparadora y Estética': 'cirugia_plastica',
+        'Oncología Médica': 'oncologia',
+        'Aparato Digestivo': 'aparato_digestivo',
+        'Urgencias': 'urgencias',
+        'Otorrinolaringología': 'otorrinolaringologia',
+        'Cirugía Pediátrica': 'cirugia_pediatrica',
+        'Análisis Clínicos': 'analisis_clinicos',
+        'Anestesiología y Reanimación': 'anestesiologia',
+        'Chequeos Médicos': 'chequeos_medicos',
+        'Cirugía Oral y Maxilofacial': 'cirugia_maxilofacial',
+        'Diagnóstico por la Imagen': 'diagnostico_imagen',
+        'Endocrinología y Nutrición': 'endocrinologia',
+        'Unidad del Dolor': 'unidad_dolor',
+        'Neurología': 'neurologia',
       };
       
-      // Buscar icono específico, si no hay usar fallback por tipo
-      if (especialidadIcons[nombre]) {
-        return especialidadIcons[nombre];
+      const fileName = imageMap[nombre];
+      
+      // Intentar encontrar la imagen específica
+      if (fileName) {
+        const path = `../assets/images/specialties/${fileName}.png`;
+        if (specialtyImages[path]) {
+          return specialtyImages[path];
+        }
       }
       
-      // Fallback por tipo
-      const tipoIcons = {
-        'MEDICA': '🏥',
-        'QUIRURGICA': '🔬',
-        'DIAGNOSTICO': '📋',
-        'GENERAL': '👨‍⚕️',
-        'UNIDAD': '🏨'
-      };
-      return tipoIcons[tipo] || '🏥';
+      // Fallback: usar medicina_general por defecto si no hay imagen específica
+      //return specialtyImages['../assets/images/specialties/medicina_general.png'];
     },
     
     getTipoBadgeClass(tipo) {
