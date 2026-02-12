@@ -7,10 +7,15 @@ const api = axios.create({
     }
 });
 
-// Interceptor para debugging (opcional)
-api.interceptors.request.use(request => {
-    // console.log('Starting Request', request)
-    return request
-})
+// Interceptor para añadir el token de autenticación
+api.interceptors.request.use(config => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+}, error => {
+    return Promise.reject(error);
+});
 
 export default api;
