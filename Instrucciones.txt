@@ -1,0 +1,8 @@
+Se ha de adaptar el diseño de la app para cumplir los siguientes requisitos:
+- Diseño responsive: que se adapte a diferentes tamaños de pantalla, deben usarse las directivas de tailwind para responsive design. Se ha de utilizar para la adaptacion de este diseño, al menos en un conjunto de elementos, el display:grid.
+- Implementación responsive para elementos como menús, tarjetas, pantallas…
+- Estructuración correcta de las plantillas, que sea facil de mantener y escalar.
+
+Además, se ha de realizar una reforma concreta:
+En VITSYNC-WebApp/src/pages/Home.vue se debe de modificar la imagen de fondo de la sección "Hero Section with Background Image" para que pase a ser un carrusel de imágenes que rote cada 5 segundos.
+De momento no se especifica el número de imágenes, por lo que se debe de implementar de forma que sea facil de añadir o quitar imágenes en el futuro.

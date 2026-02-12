@@ -27,13 +27,14 @@ const routes = [
         path: '/especialidades',
         name: 'especialidades',
         component: Especialidades,
+        /*
         beforeEnter: (to, from, next) => {
             if (isAuthenticated()) {
                 next();
             } else {
                 next({ name: 'login' });
             }
-        }
+        }*/
     },
     {
         path: '/login',
