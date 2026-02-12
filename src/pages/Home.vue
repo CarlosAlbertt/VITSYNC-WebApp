@@ -3,11 +3,17 @@
     <Header />
 
     <!-- Hero Section with Background Image -->
-    <section class="hero-section relative h-[650px] flex items-center text-white"
-      :style="{ backgroundImage: `url(${heroBackground})` }">
-      <!-- Gradient Overlay for better readability -->
-      <div class="absolute inset-0 bg-gradient-to-r from-teal-900 opacity-70 via-teal-800 opacity-70 to-transparent">
-      </div>
+    <section class="hero-section relative h-[650px] flex items-center text-white overflow-hidden">
+      <!-- Image Carousel -->
+      <transition-group name="slide-left" tag="div" class="absolute inset-0 w-full h-full">
+        <div v-for="(image, index) in heroImages" :key="index" v-show="index === currentHeroIndex"
+          class="absolute inset-0 w-full h-full bg-cover bg-center" :style="{ backgroundImage: `url(${image})` }">
+          <!-- Gradient Overlay -->
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-teal-900 opacity-70 via-teal-800 opacity-70 to-transparent">
+          </div>
+        </div>
+      </transition-group>
 
       <!-- Hero Content - Aligned Left -->
       <div class="relative z-10 px-6 md:px-12 lg:px-20 max-w-2xl">
@@ -37,18 +43,18 @@
     </section>
 
     <!-- Medical Professionals Section -->
-    <section class="py-32 bg-gray-50">
+    <section class="py-32 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-gray-800 mb-4">Nuestros Especialistas</h2>
-          <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h2 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">Nuestros Especialistas</h2>
+          <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Profesionales médicos altamente calificados dedicados a tu bienestar
           </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div v-for="medico in medicos" :key="medico.id"
-            class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
+            class="bg-white dark:bg-gray-700 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
             <!-- Doctor Image -->
             <div class="h-64 overflow-hidden bg-gray-200">
               <img :src="medico.image" :alt="medico.name" class="w-full h-full object-cover">
@@ -56,7 +62,7 @@
 
             <!-- Doctor Info -->
             <div class="p-6">
-              <h3 class="text-2xl font-bold text-gray-800 mb-3">Dr. {{ medico.name }}</h3>
+              <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-3">Dr. {{ medico.name }}</h3>
 
               <!-- Specialty Badge -->
               <div class="inline-block bg-teal-100 text-teal-700 px-4 py-1 rounded-full text-sm font-semibold mb-4">
@@ -64,7 +70,7 @@
               </div>
 
               <!-- Contact and Schedule Info -->
-              <div class="space-y-2 text-gray-600 mb-4">
+              <div class="space-y-2 text-gray-600 dark:text-gray-300 mb-4">
                 <p class="text-sm">
                   <span class="font-semibold">Contacto:</span> {{ medico.telefono }}
                 </p>
@@ -85,30 +91,30 @@
     </section>
 
     <!-- Company Values Section -->
-    <section class="py-24 bg-white">
+    <section class="py-24 bg-white dark:bg-gray-900 transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-gray-800 mb-4">Nuestros Valores</h2>
-          <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h2 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">Nuestros Valores</h2>
+          <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Comprometidos con la excelencia en cada aspecto de nuestro servicio
           </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div v-for="value in values" :key="value.title"
-            class="text-center p-6 border border-gray-200 rounded-lg hover:border-teal-500 transition-all duration-300 hover:shadow-md">
-            <h3 class="text-xl font-bold text-gray-800 mb-3">{{ value.title }}</h3>
-            <p class="text-gray-600 leading-relaxed">{{ value.description }}</p>
+            class="text-center p-6 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-teal-500 transition-all duration-300 hover:shadow-md">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">{{ value.title }}</h3>
+            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">{{ value.description }}</p>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Call to Action Section -->
-    <section class="py-24 bg-teal-50">
+    <section class="py-24 bg-teal-50 dark:bg-teal-900/20 transition-colors duration-300">
       <div class="max-w-4xl mx-auto px-6 text-center">
-        <h2 class="text-4xl font-bold text-gray-800 mb-4">¿Listo para cuidar de tu salud?</h2>
-        <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+        <h2 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">¿Listo para cuidar de tu salud?</h2>
+        <p class="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
           Agenda tu cita con nuestros especialistas y da el primer paso hacia una vida más saludable.
           Estamos aquí para acompañarte en cada momento.
         </p>
@@ -136,6 +142,14 @@ export default {
   data() {
     return {
       heroBackground,
+      currentHeroIndex: 0,
+      // Array de imágenes para el carrusel (actualmente usando la misma imagen como placeholder)
+      heroImages: [
+        heroBackground,
+        '/images/monkey.jpg',
+        heroBackground
+      ],
+      heroInterval: null,
 
       statistics: [
         { value: '15,000+', label: 'Pacientes Atendidos' },
@@ -191,14 +205,49 @@ export default {
       ],
     };
   },
+  mounted() {
+    this.startCarousel();
+  },
+  beforeUnmount() {
+    if (this.heroInterval) {
+      clearInterval(this.heroInterval);
+    }
+  },
+  methods: {
+    startCarousel() {
+      this.heroInterval = setInterval(() => {
+        this.currentHeroIndex = (this.currentHeroIndex + 1) % this.heroImages.length;
+      }, 5000);
+    }
+  }
 };
 </script>
 
 <style scoped>
 .hero-section {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  position: relative;
+}
+
+/* Slide Left Transition */
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform 1s ease-in-out;
+}
+
+.slide-left-enter-from {
+  transform: translateX(100%);
+  z-index: 1;
+  /* Incoming slide on top */
+}
+
+.slide-left-leave-to {
+  transform: translateX(-100%);
+  z-index: 0;
+}
+
+.slide-left-enter-to,
+.slide-left-leave-from {
+  transform: translateX(0);
 }
 
 .animate-fade-in {
