@@ -29,7 +29,7 @@ const routes = [
         component: Especialidades,
         /*
         beforeEnter: (to, from, next) => {
-            if (isAuthenticated()) {
+            /*if (isAuthenticated()) {
                 next();
             } else {
                 next({ name: 'login' });
