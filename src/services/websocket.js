@@ -48,26 +48,3 @@ export const connectWebSocket = () => {
     // ACTIVAR LA CONEXIÓN
     client.activate();
 };
-
-export const sendMessage = (recipientId, content, myNif) => {
-    // Verificación de seguridad básica
-    if (!client || !client.active) {
-        console.error('No hay conexión');
-        return;
-    }
-
-    // Preparamos el paquete de datos (PayLoad) coincidiendo con tu clase ChatMessage.java
-    const chatMessage = {
-        senderId: myNif, // Quén envía
-        recipientId: recipientId, // Quién recibe
-        content: content, // El texto
-        timestamp: new Date().toISOString() // La hora actual
-    };
-
-    // PUBLICAR (HABLAR)
-    // Enviamos el paquete a la dirección que escucha el ChatController.java
-    client.publish({
-        destination: '/app/chat', // La dirección que escucha el ChatController.java
-        body: JSON.stringify(chatMessage) // Convertir Objeto JS a Texto para viajar por la red
-    });
-}
