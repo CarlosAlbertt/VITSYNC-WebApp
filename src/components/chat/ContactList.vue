@@ -9,7 +9,7 @@ const loading = ref(true);
 
 onMounted(async () => {
     try {
-        if (currentUser.value.role === 'PATIENT') {
+        if (currentUser.value.role === 'PACIENTE') {
             contacts.value = await getMyMedicos(currentUser.value.id);
         } else if (currentUser.value.role === 'MEDICO') {
             contacts.value = await getMyPacientes(currentUser.value.id);
@@ -51,13 +51,13 @@ const selectContact = (contact) => {
 </template>
 
 <style scoped>
-.contact-list { display: flex; flex-direction: column; height: 100%; }
-.header { padding: 15px; background: #007bff; color: white; font-weight: bold; }
+.contact-list { display: flex; flex-direction: column; height: 100%; background: white; }
+.header { padding: 15px; background: #0d9488; color: white; font-weight: bold; font-size: 1.05em }
 .list { flex: 1; overflow-y: auto; }
-.contact-item { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; }
-.contact-item:hover { background: #f9f9f9; }
-.avatar { width: 35px; height: 35px; background: #e0e0e0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #555; }
-.name { font-weight: 500; }
-.role { font-size: 0.8em; color: #888; }
-.empty, .loading { padding: 20px; text-align: center; color: #888; }
+.contact-item { display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; }
+.contact-item:hover { background: #f0fdfa; }
+.avatar { width: 38px; height:38px; background: #ccfbf1; color: #0d9488; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.95em; }
+.name { font-weight: 500; color: #1f2937; }
+.role { font-size: 0.8em; color: #6b7280; }
+.empty, .loading { padding: 20px; text-align: center; color: #888; } 
 </style>

@@ -1,16 +1,17 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
+    baseURL: import.meta.env.VITE_API_URL || 'https://vitsync-api-testing.onrender.com',
     headers: {
         'Content-Type': 'application/json'
     }
 });
 
-// Interceptor para debugging (opcional)
 api.interceptors.request.use(request => {
-    // console.log('Starting Request', request)
-    return request
+    const token = localStorage.getItem('token');
+    if (token) {
+        request.headers.Authorization = `Bearer ${token}`;
+    }
+    return request;
 })
-
 export default api;
