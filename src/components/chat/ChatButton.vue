@@ -16,21 +16,21 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background-color: #f97316; /* Orange 500 */
+  background-color: #1a2e44;
   color: white;
-  border: none;
+  border: white;
   font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(26, 46, 68, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  transition: transform 0.2s;
+  transition: transform 0.2s, background-color 0.2s;
 }
 
 .chat-toggle-btn:hover {
   transform: scale(1.1);
-  background-color: bg-teal-600;
+  background-color: #0f1f30;
 }
 </style>

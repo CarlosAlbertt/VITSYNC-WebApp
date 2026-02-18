@@ -8,6 +8,6 @@ export const getMyMedicos = async (patientId) => {
 
 export const getMyPacientes = async (medicoId) => {
 
-    const response = await api.get(`api/relationships/medico/${medicoId}/pacientes`);
+    const response = await api.get(`/api/relationships/medico/${medicoId}/pacientes`);
     return response.data;
 };
