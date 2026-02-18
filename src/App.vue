@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import ChatWindow from './components/chat/ChatWindow.vue';
+import ChatWidget from './components/chat/ChatWidget.vue'; // Cambiar ChatWindow por ChatWidget
 import ChatButton from './components/chat/ChatButton.vue';
 
 const isChatOpen = ref(false);
@@ -18,7 +18,8 @@ const toggleChat = () => {
     <!-- Chat Overlay -->
     <div class="chat-container">
       <Transition name="slide-fade">
-        <ChatWindow v-if="isChatOpen" @close="toggleChat" />
+        <!-- USAR ChatWidget AQUI -->
+        <ChatWidget v-if="isChatOpen" @close="toggleChat" />
       </Transition>
 
       <Transition name="scale">
