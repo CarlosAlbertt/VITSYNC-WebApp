@@ -5,7 +5,18 @@ import SockJS from 'sockjs-client';
 // Importamos el store (memoria) para guardar los mensajes que lleguen
 import { addMessage } from '../store/chat';
 // URL del servidor backend en Spring Boot;
-const SOCKET_URL = 'http://localhost:8080/ws';
+// URL del servidor backend en Spring Boot;
+const getSocketUrl = () => {
+    const hostname = window.location.hostname;
+    // Si estamos en local, usamos localhost:8080
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:8080/ws';
+    }
+    // Si estamos en producción (o cualquier otro sitio), usamos Render
+    return 'https://vitsync-api-testing.onrender.com/ws';
+};
+
+const SOCKET_URL = getSocketUrl();
 //Variable para guardar la conexióna activa.
 let client = null;
 

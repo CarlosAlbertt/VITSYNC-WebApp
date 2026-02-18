@@ -19,36 +19,38 @@ const clearSelection = () => {
     <div class="chat-widget">
         <!-- Si HAY contacto seleccionado, mostramos el Chat -->
         <ChatWindow 
-            v-if="selectedContact" 
-            :recipient="selectedContact" 
-            @back="clearSelection" 
-        />
+            v-if="selectedContact"
+            :isOpen="true"
+            :recipientId="selectedContact.id"
+            :recipientName="selectedContact.name || selectedContact.nombre"
+            :recipientRole="selectedContact.role || ''"
+            :recipientPhoto="selectedContact.photo || ''"
+            @close="$emit('close')"
+            @back="clearSelection"
+            />
         
         <!-- Si NO hay contacto, mostramos la Lista -->
         <ContactList 
             v-else 
             @select="selectContact" 
         />
-        
-        <button class="close-btn" @click="$emit('close')">X</button>
     </div>
 </template>
 
 <style scoped>
 .chat-widget {
-    width: 300px; 
-    height: 400px; 
-    border: 1px solid #ccc; 
-    background: white; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-    border-radius: 8px; 
+    width: 360px;
+    height: 480px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border-radius: 12px;
     overflow: hidden;
     position: relative;
     display: flex;
     flex-direction: column;
 }
 /* Forzamos que los hijos llenen el espacio */
-.chat-widget > * { flex: 1; }
+.chat-widget > :first-child { flex: 1; min-height: 0; }
 .close-btn {
     position: absolute;
     top: 10px;
