@@ -98,3 +98,35 @@ export const deleteEspecialidad = async (id) => {
         throw err;
     }
 };
+
+// Cargar TODAS las especialidades (incluidas inactivas, para admin)
+export const fetchAllEspecialidades = async () => {
+    try {
+        isLoading.value = true;
+        error.value = null;
+        const response = await api.get('/api/especialidades/all');
+        especialidades.value = response.data;
+        return response.data;
+    } catch (err) {
+        console.error('Error cargando todas las especialidades:', err);
+        error.value = err.message;
+        throw err;
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+// Toggle activo/inactivo
+export const toggleActivo = async (id) => {
+    try {
+        const response = await api.patch(`/api/especialidades/${id}/toggle-activo`);
+        const index = especialidades.value.findIndex(e => e.id === id);
+        if (index !== -1) {
+            especialidades.value[index] = response.data;
+        }
+        return response.data;
+    } catch (err) {
+        console.error('Error toggling activo:', err);
+        throw err;
+    }
+};
