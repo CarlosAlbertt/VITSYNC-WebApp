@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue';
+import { isAuthenticated } from './store/auth';
 import ChatWidget from './components/chat/ChatWidget.vue'; // Cambiar ChatWindow por ChatWidget
 import ChatButton from './components/chat/ChatButton.vue';
 
@@ -16,7 +17,7 @@ const toggleChat = () => {
     <router-view />
     
     <!-- Chat Overlay -->
-    <div class="chat-container">
+    <div v-if="isAuthenticated" class="chat-container">
       <Transition name="slide-fade">
         <!-- USAR ChatWidget AQUI -->
         <ChatWidget v-if="isChatOpen" @close="toggleChat" />

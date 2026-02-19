@@ -33,6 +33,7 @@ const clearSelection = () => {
         <ContactList 
             v-else 
             @select="selectContact" 
+            @close="$emit('close')"
         />
     </div>
 </template>
