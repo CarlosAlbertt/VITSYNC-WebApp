@@ -135,6 +135,7 @@ const isDark = useDark({
   attribute: 'class',
   valueDark: 'dark',
   valueLight: '',
+  initialState: 'light',
 })
 const toggleDark = useToggle(isDark)
 

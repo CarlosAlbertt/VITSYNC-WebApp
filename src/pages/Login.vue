@@ -31,7 +31,7 @@ const handleLogin = async () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+    <div class="min-h-screen bg-white flex flex-col items-center justify-center px-4 text-gray-900">
 
         <h2 class="text-teal-600 font-large m4-8">VITSYNC</h2>
         <h1 class="text-4xl font-semibold text-gray-800 mb-2">Mi VitSync</h1>
