@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import { currentUser } from '../../store/auth';
 import { getMyMedicos, getMyPacientes } from '../../services/relationships';
 
-const emit = defineEmits(['select']);
+const emit = defineEmits(['select', 'close']);
 const contacts = ref([]);
 const loading = ref(true);
 
@@ -29,7 +29,10 @@ const selectContact = (contact) => {
 
 <template>
     <div class="contact-list">
-        <div class="header">Contactos</div>
+        <div class="header">
+            <span>Contactos</span>
+            <button class="close-btn" @click="$emit('close')">✕</button>
+        </div>
         <div v-if="loading" class="loading">Cargando...</div>
         <div v-else-if="contacts.length === 0" class="empty">No hay contactos disponibles.</div>
         
@@ -52,7 +55,31 @@ const selectContact = (contact) => {
 
 <style scoped>
 .contact-list { display: flex; flex-direction: column; height: 100%; background: white; }
-.header { padding: 15px; background: #0d9488; color: white; font-weight: bold; font-size: 1.05em }
+.header { 
+    padding: 15px; 
+    background: #0d9488; 
+    color: white; 
+    font-weight: bold; 
+    font-size: 1.05em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.close-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.close-btn:hover { background: rgba(255,255,255,0.4); }
 .list { flex: 1; overflow-y: auto; }
 .contact-item { display: flex; align-items: center; gap: 10px; padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; }
 .contact-item:hover { background: #f0fdfa; }
