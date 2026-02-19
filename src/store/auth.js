@@ -18,7 +18,7 @@ export const login = async (nif, password) => {
 
         // Guardar datos en localStorage
         localStorage.setItem('token', data.token);
-        localStorage.setItem('username', data.nif);
+        localStorage.setItem('nif', data.nif);
         localStorage.setItem('email', data.email);
         localStorage.setItem('role', data.role);
         localStorage.setItem('id', data.id);
