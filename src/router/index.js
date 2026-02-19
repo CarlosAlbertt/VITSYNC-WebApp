@@ -51,6 +51,43 @@ const routes = [
         name: 'verify',
         component: () => import('../pages/VerifyAccount.vue')
     },
+    {
+        path: '/admin',
+        children: [
+            {
+                path: '',
+                name: 'admin-home',
+                component: () => import('../pages/admin/AdminHome.vue')
+            },
+            {
+                path: 'users',
+                name: 'admin-users',
+                component: () => import('../pages/admin/AdminUsuarios.vue')
+            },
+            {
+                path: 'medicos',
+                name: 'admin-medicos',
+                component: () => import('../pages/admin/AdminMedicos.vue')
+            },
+            {
+                path: 'especialidades',
+                name: 'admin-especialidades',
+                component: () => import('../pages/admin/AdminEspecialidades.vue')
+            }
+        ],
+        beforeEnter: (to, from, next) => {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('role');
+
+            if (!token) {
+                next({ name: 'login' });
+            } else if (role !== 'ADMIN') {
+                next({ name: 'home' });
+            } else {
+                next();
+            }
+        }
+    },
 ];
 
 const router = createRouter({

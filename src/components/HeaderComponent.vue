@@ -72,9 +72,10 @@
 
         <!-- Enlaces principales -->
         <div class="flex items-center space-x-6">
-          <a v-if="isAuthenticated" href="#"
-            class="text-teal-600 dark:text-teal-400 font-medium hover:text-teal-800 dark:hover:text-teal-200 transition-colors">Mi
-            Perfil</a>
+          <router-link v-if="isAuthenticated" to="/perfil"
+            class="text-teal-600 dark:text-teal-400 font-medium hover:text-teal-800 dark:hover:text-teal-200 transition-colors">
+            Mi Perfil
+          </router-link>
           <button class="lg:hidden text-gray-600 dark:text-gray-300 focus:outline-none" @click="toggleMobileMenu">
             <span v-if="!isMobileMenuOpen">☰</span>
             <span v-else>✕</span>
@@ -135,6 +136,7 @@ const isDark = useDark({
   attribute: 'class',
   valueDark: 'dark',
   valueLight: '',
+  initialState: 'light',
 })
 const toggleDark = useToggle(isDark)
 
