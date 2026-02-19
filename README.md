@@ -1,38 +1,37 @@
-# vitsync-webapp
+# VitSync WebApp
 
-This template should help get you started developing with Vue 3 in Vite.
+Frontend de la plataforma **VitSync** — aplicación web para la gestión de la relación paciente-médico.
 
-## Recommended IDE Setup
+Construido con **Vue 3** + **Vite** + **Tailwind CSS**.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Configuración del entorno
 
-## Recommended Browser Setup
+### Requisitos
+- Node.js ^20.19.0 o >=22.12.0
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
+### Instalación
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
-
+### Desarrollo local
+1. Copia `.env.development.example` a `.env.development`
+2. Rellena las variables con tus credenciales de desarrollo
+3. Ejecuta:
 ```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
-
+### Build de producción
 ```sh
 npm run build
 ```
+
+## Estructura de configuración
+
+| Archivo | Entorno | Commiteado |
+|---|---|---|
+| `.env` | Base (vacío) | ✅ Sí |
+| `.env.development` | Desarrollo local | ❌ No (gitignored) |
+| `.env.development.example` | Plantilla para devs | ✅ Sí |
+| `.env.production` | Producción (Vercel) | ✅ Sí |
