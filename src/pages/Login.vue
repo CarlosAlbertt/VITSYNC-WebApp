@@ -17,10 +17,10 @@ const handleLogin = async () => {
 
         // Llamar a la función de login del store (conecta con la API)
         await login(nif.value, password.value);
-        
+
         console.log('Login exitoso');
         router.push({ name: 'home' });
-        
+
     } catch (error) {
         console.error('Error en el login:', error);
         errorMessage.value = error.message || 'Error de conexión con el servidor';
@@ -31,7 +31,7 @@ const handleLogin = async () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+    <div class="min-h-screen bg-white flex flex-col items-center justify-center px-4 text-gray-900">
 
         <h2 class="text-teal-600 font-large m4-8">VITSYNC</h2>
         <h1 class="text-4xl font-semibold text-gray-800 mb-2">Mi VitSync</h1>
@@ -62,14 +62,12 @@ const handleLogin = async () => {
                         required :disabled="isLoading" />
                 </div>
 
-                <button type="submit"
-                    :disabled="isLoading"
-                    :class="[
-                        'w-full py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors',
-                        isLoading 
-                            ? 'bg-teal-400 cursor-not-allowed text-white' 
-                            : 'bg-teal-600 hover:bg-teal-700 text-white'
-                    ]">
+                <button type="submit" :disabled="isLoading" :class="[
+                    'w-full py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors',
+                    isLoading
+                        ? 'bg-teal-400 cursor-not-allowed text-white'
+                        : 'bg-teal-600 hover:bg-teal-700 text-white'
+                ]">
                     <span v-if="isLoading">Entrando...</span>
                     <span v-else>Entrar</span>
                 </button>
@@ -77,7 +75,8 @@ const handleLogin = async () => {
 
             <p class="mt-6 text-center text-sm text-gray-600">
                 ¿No tienes usuario?
-                <router-link to="/register" class="font-medium text-teal-600 hover:text-teal-800">Date de alta ahora</router-link>
+                <router-link to="/register" class="font-medium text-teal-600 hover:text-teal-800">Date de alta
+                    ahora</router-link>
             </p>
 
             <p class="mt-4 text-center text-xs text-gray-500">
