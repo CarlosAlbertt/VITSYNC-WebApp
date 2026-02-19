@@ -1,38 +1,67 @@
-# vitsync-webapp
+# VitSync WebApp
 
-This template should help get you started developing with Vue 3 in Vite.
+Frontend de la plataforma **VitSync** — aplicación web para la gestión de la relación paciente-médico.
 
-## Recommended IDE Setup
+Construido con **Vue 3** + **Vite** + **Tailwind CSS**.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 🚀 Guía Rápida para Desarrolladores (Setup Inicial)
 
-## Recommended Browser Setup
+Si acabas de clonar el repositorio o has hecho `git pull` y te da error, sigue estos pasos:
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+### 1. Backend (VITSYNC-API)
+Necesitas crear tu configuración local (ya que los secretos no se suben a git).
+1. Copia el archivo de ejemplo:
+   ```bash
+   cp src/main/resources/application-dev.properties.example src/main/resources/application-dev.properties
+   ```
+2. (Opcional) Edita `application-dev.properties` si necesitas cambiar la BD o credenciales.
+3. Ejecuta la app con el perfil `dev`:
+   ```bash
+   ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+   ```
 
-## Customize configuration
+### 2. Frontend (VITSYNC-WebApp)
+Lo mismo para las variables de entorno del front.
+1. Copia el archivo de ejemplo:
+   ```bash
+   cp .env.development.example .env.development
+   ```
+2. Instala y corre:
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+---
 
-## Project Setup
+## 🛠 Configuración del Proyectorno
 
+### Requisitos
+- Node.js ^20.19.0 o >=22.12.0
+
+### Instalación
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
-
+### Desarrollo local
+1. Copia `.env.development.example` a `.env.development`
+2. Rellena las variables con tus credenciales de desarrollo
+3. Ejecuta:
 ```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
-
+### Build de producción
 ```sh
 npm run build
 ```
+
+## Estructura de configuración
+
+| Archivo | Entorno | Commiteado |
+|---|---|---|
+| `.env` | Base (vacío) | ✅ Sí |
+| `.env.development` | Desarrollo local | ❌ No (gitignored) |
+| `.env.development.example` | Plantilla para devs | ✅ Sí |
+| `.env.production` | Producción (Vercel) | ✅ Sí |
