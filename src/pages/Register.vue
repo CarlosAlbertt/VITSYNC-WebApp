@@ -69,7 +69,7 @@ const handleRegister = async () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-8">
+    <div class="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-8 text-gray-900">
 
         <h2 class="text-teal-600 font-large mb-2">VITSYNC</h2>
         <h1 class="text-3xl font-semibold text-gray-800 mb-4">Crear cuenta</h1>
