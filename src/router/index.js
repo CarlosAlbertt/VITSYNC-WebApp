@@ -75,16 +75,18 @@ const routes = [
                 component: () => import('../pages/admin/AdminEspecialidades.vue')
             }
         ],
-        /*
         beforeEnter: (to, from, next) => {
-            // TODO: Implement actual Admin Role check
-            if (isAuthenticated()) {
-                next();
-            } else {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('role');
+
+            if (!token) {
                 next({ name: 'login' });
+            } else if (role !== 'ADMIN') {
+                next({ name: 'home' });
+            } else {
+                next();
             }
         }
-        */
     },
 ];
 

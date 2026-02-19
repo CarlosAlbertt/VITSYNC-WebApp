@@ -104,7 +104,7 @@ export const fetchAllEspecialidades = async () => {
     try {
         isLoading.value = true;
         error.value = null;
-        const response = await api.get('/api/especialidades/all');
+        const response = await api.get('/api/especialidades/admin');
         especialidades.value = response.data;
         return response.data;
     } catch (err) {

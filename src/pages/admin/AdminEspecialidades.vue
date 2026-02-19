@@ -73,7 +73,7 @@
                                     d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
                         </button>
-                        <button @click="confirmDelete(specialty)"
+                        <button @click="openDeleteModal(specialty)"
                             class="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors"
                             title="Eliminar">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -136,18 +136,14 @@
             </div>
         </div>
 
-        <!-- Modal Form -->
-        <div v-if="isModalOpen" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
-            aria-modal="true">
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <!-- Backdrop -->
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
-                    @click="closeModal"></div>
+        <!-- ===== FORM MODAL (Crear / Editar) ===== -->
+        <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog"
+            aria-labelledby="modal-title" aria-modal="true">
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-gray-500/75" aria-hidden="true" @click="closeModal"></div>
 
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                <div
-                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <!-- Dialog panel -->
+            <div class="relative z-10 bg-white rounded-lg text-left overflow-hidden shadow-xl w-full max-w-lg">
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
                             {{ isEditing ? 'Editar Especialidad' : 'Añadir Especialidad' }}
@@ -245,14 +241,82 @@
                             Cancelar
                         </button>
                     </div>
-                </div>
             </div>
         </div>
+
+        <!-- ===== DELETE CONFIRMATION MODAL ===== -->
+        <div v-if="isDeleteModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog"
+            aria-modal="true">
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-gray-500/75" aria-hidden="true" @click="closeDeleteModal"></div>
+
+            <!-- Dialog panel -->
+            <div class="relative z-10 bg-white rounded-lg text-left overflow-hidden shadow-xl w-full max-w-sm">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="flex-shrink-0 p-2 bg-red-100 rounded-full">
+                                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">Eliminar especialidad</h3>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    ¿Estás seguro de que quieres eliminar
+                                    <strong>{{ specialtyToDelete?.nombre }}</strong>?
+                                    Esta acción es irreversible.
+                                </p>
+                                <p class="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+                                    Si la especialidad tiene médicos asociados, considera desactivarla en lugar de eliminarla.
+                                </p>
+
+                                <!-- Delete error -->
+                                <div v-if="deleteError" class="mt-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1">
+                                    {{ deleteError }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                        <button @click="confirmDelete" :disabled="isDeleting"
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg v-if="isDeleting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                            {{ isDeleting ? 'Eliminando...' : 'Eliminar' }}
+                        </button>
+                        <button @click="closeDeleteModal" type="button"
+                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:text-sm">
+                            Cancelar
+                        </button>
+                    </div>
+            </div>
+        </div>
+
+        <!-- ===== TOAST NOTIFICATION ===== -->
+        <transition name="toast">
+            <div v-if="toast.show"
+                :class="toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'"
+                class="fixed bottom-6 right-6 z-[60] text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center space-x-2">
+                <svg v-if="toast.type === 'error'" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <svg v-else class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>{{ toast.message }}</span>
+            </div>
+        </transition>
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import {
     especialidades,
     isLoading,
@@ -264,11 +328,22 @@ import {
     toggleActivo
 } from '@/store/especialidades';
 
+const router = useRouter();
+
 const searchQuery = ref('');
 const isModalOpen = ref(false);
 const isEditing = ref(false);
 const isSaving = ref(false);
 const formError = ref(null);
+
+// Delete modal state
+const isDeleteModalOpen = ref(false);
+const specialtyToDelete = ref(null);
+const isDeleting = ref(false);
+const deleteError = ref(null);
+
+// Toast notification
+const toast = ref({ show: false, message: '', type: 'success' });
 
 const tiposDisponibles = ['MEDICA', 'QUIRURGICA', 'DIAGNOSTICO', 'GENERAL', 'UNIDAD'];
 
@@ -285,17 +360,34 @@ const emptyForm = () => ({
 
 const form = ref(emptyForm());
 
-// Load all specialties (including inactive) for admin view
+// ─── Helpers ────────────────────────────────────────────────
+const showToast = (message, type = 'success') => {
+    toast.value = { show: true, message, type };
+    setTimeout(() => { toast.value.show = false; }, 3500);
+};
+
+const extractApiError = (err) => {
+    if (err.response?.status === 401 || err.response?.status === 403) {
+        return 'Sin permisos de administrador. Por favor inicia sesión con una cuenta ADMIN.';
+    }
+    return err.response?.data?.error || err.response?.data?.message || err.message || 'Error desconocido.';
+};
+
+// ─── Data loading ────────────────────────────────────────────
 const loadData = async () => {
     try {
         await fetchAllEspecialidades();
     } catch (err) {
-        // Error handled in store
+        if (err.response?.status === 401 || err.response?.status === 403) {
+            router.push({ name: 'login' });
+        }
+        // Other errors are reflected in the `error` reactive ref from the store
     }
 };
 
 onMounted(loadData);
 
+// ─── Filtering ───────────────────────────────────────────────
 const filteredSpecialties = computed(() => {
     const q = searchQuery.value.toLowerCase();
     return especialidades.value.filter(item =>
@@ -305,18 +397,20 @@ const filteredSpecialties = computed(() => {
     );
 });
 
+// ─── Form modal ──────────────────────────────────────────────
 const openModal = (item = null) => {
     formError.value = null;
     if (item) {
         isEditing.value = true;
+        // Pre-fill form as described in guide section 8.3
         form.value = {
             id: item.id,
             nombre: item.nombre || '',
             codigo: item.codigo || '',
-            descripcion: item.descripcion || '',
+            descripcion: item.descripcion ?? '',
             tipo: item.tipo || 'MEDICA',
             slug: item.slug || '',
-            icono: item.icono || '',
+            icono: item.icono ?? '',
             activo: item.activo !== undefined ? item.activo : true
         };
     } else {
@@ -335,19 +429,10 @@ const closeModal = () => {
 const saveSpecialty = async () => {
     formError.value = null;
 
-    // Basic client-side validation
-    if (!form.value.nombre.trim()) {
-        formError.value = 'El nombre es obligatorio.';
-        return;
-    }
-    if (!form.value.codigo.trim()) {
-        formError.value = 'El código es obligatorio.';
-        return;
-    }
-    if (!form.value.tipo) {
-        formError.value = 'El tipo es obligatorio.';
-        return;
-    }
+    // Client-side validation
+    if (!form.value.nombre.trim()) { formError.value = 'El nombre es obligatorio.'; return; }
+    if (!form.value.codigo.trim()) { formError.value = 'El código es obligatorio.'; return; }
+    if (!form.value.tipo) { formError.value = 'El tipo es obligatorio.'; return; }
 
     const payload = {
         nombre: form.value.nombre.trim(),
@@ -363,38 +448,81 @@ const saveSpecialty = async () => {
         isSaving.value = true;
         if (isEditing.value) {
             await updateEspecialidad(form.value.id, payload);
+            showToast('Especialidad actualizada correctamente.');
         } else {
             await createEspecialidad(payload);
+            showToast('Especialidad creada correctamente.');
         }
         closeModal();
-        // Reload to get fresh data from server
+        // Refresh admin table after mutation (guide section 8.2 step 6)
         await loadData();
     } catch (err) {
-        // Try to extract the API error message
-        const apiError = err.response?.data?.error || err.response?.data?.message || err.message;
-        formError.value = apiError || 'Error al guardar la especialidad.';
+        const msg = extractApiError(err);
+        if (err.response?.status === 401 || err.response?.status === 403) {
+            formError.value = msg;
+        } else {
+            formError.value = msg || 'Error al guardar la especialidad.';
+        }
     } finally {
         isSaving.value = false;
     }
 };
 
+// ─── Toggle activo ──────────────────────────────────────────
 const handleToggle = async (id) => {
     try {
         await toggleActivo(id);
     } catch (err) {
-        const apiError = err.response?.data?.error || err.response?.data?.message || err.message;
-        alert('Error al cambiar el estado: ' + apiError);
-    }
-};
-
-const confirmDelete = async (item) => {
-    if (confirm(`¿Estás seguro de que quieres eliminar la especialidad "${item.nombre}"?`)) {
-        try {
-            await deleteEspecialidad(item.id);
-        } catch (err) {
-            const apiError = err.response?.data?.error || err.response?.data?.message || err.message;
-            alert('Error al eliminar la especialidad: ' + apiError);
+        const msg = extractApiError(err);
+        showToast(msg, 'error');
+        if (err.response?.status === 401 || err.response?.status === 403) {
+            router.push({ name: 'login' });
         }
     }
 };
+
+// ─── Delete modal ────────────────────────────────────────────
+const openDeleteModal = (item) => {
+    specialtyToDelete.value = item;
+    deleteError.value = null;
+    isDeleteModalOpen.value = true;
+};
+
+const closeDeleteModal = () => {
+    isDeleteModalOpen.value = false;
+    specialtyToDelete.value = null;
+    deleteError.value = null;
+};
+
+const confirmDelete = async () => {
+    if (!specialtyToDelete.value) return;
+    deleteError.value = null;
+    try {
+        isDeleting.value = true;
+        await deleteEspecialidad(specialtyToDelete.value.id);
+        showToast(`"${specialtyToDelete.value.nombre}" eliminada correctamente.`);
+        closeDeleteModal();
+        await loadData();
+    } catch (err) {
+        const msg = extractApiError(err);
+        deleteError.value = msg;
+        if (err.response?.status === 401 || err.response?.status === 403) {
+            router.push({ name: 'login' });
+        }
+    } finally {
+        isDeleting.value = false;
+    }
+};
 </script>
+
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+    transition: all 0.35s ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+    opacity: 0;
+    transform: translateY(12px);
+}
+</style>
