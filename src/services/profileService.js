@@ -37,13 +37,24 @@ export const updateProfile = async (data) => {
  * Subir avatar. PENDIENTE de endpoint backend (POST /api/user/avatar).
  */
 export const uploadAvatar = async (file) => {
-    // TODO: descomentar cuando el backend lo implemente:
-    // const formData = new FormData();
-    // formData.append('avatar', file);
-    // const response = await api.post('/api/user/avatar', formData, {
-    //   headers: { ...getAuthHeader(), 'Content-Type': 'multipart/form-data' }
-    // });
-    // return response.data;
+    // TODO: Descomentar e integrar la versión final cuando Backend esté desplegado:
+    /*
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/api/upload/avatar', formData, {
+      headers: { ...getAuthHeader(), 'Content-Type': 'multipart/form-data' }
+    });
+    const baseUrl = api.defaults.baseURL || 'https://vitsync-api-testing.onrender.com';
+    const avatarUrl = `${baseUrl}${response.data.url}`;
+    const id = localStorage.getItem('id');
+    if (id) {
+        await api.patch(`/VitSync-app/api/users/${id}/avatar`, { avatarUrl }, { headers: getAuthHeader() });
+        localStorage.setItem('avatarUrl', avatarUrl);
+    }
+    return { avatarUrl };
+    */
+    
+    // Mock provisional para Producción:
     await delay(800);
     const previewUrl = URL.createObjectURL(file);
     return { avatarUrl: previewUrl };
@@ -184,6 +195,30 @@ export const cancelAppointment = async (id, reason = '') => {
     const appt = MOCK_APPOINTMENTS.find(a => a.id === id);
     if (appt) appt.status = 'Cancelada';
     return { success: true };
+};
+
+export const uploadAppointmentDoc = async (appointmentId, file) => {
+    // TODO: Descomentar cuando Backend esté desplegado
+    /*
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post('/api/upload/avatar', formData, {
+      headers: { ...getAuthHeader(), 'Content-Type': 'multipart/form-data' }
+    });
+    const baseUrl = api.defaults.baseURL || 'https://vitsync-api-testing.onrender.com';
+    const docUrl = `${baseUrl}${response.data.url}`;
+    */
+
+    // Mock provisional para Producción:
+    await delay(500);
+    const docUrl = URL.createObjectURL(file);
+    
+    const appt = MOCK_APPOINTMENTS.find(a => a.id === appointmentId);
+    if (appt) {
+        if (!appt.documents) appt.documents = [];
+        appt.documents.push({ name: file.name, url: docUrl });
+    }
+    return { success: true, url: docUrl };
 };
 
 // ─── CONFIGURACIÓN (MOCK) ─────────────────────────────────────────────────────

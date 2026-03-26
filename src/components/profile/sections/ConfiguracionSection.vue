@@ -41,6 +41,23 @@
           </div>
         </InfoCard>
 
+        <!-- Autenticación y Recuperación -->
+        <InfoCard title="Autenticación y Recuperación">
+          <SettingsToggle label="Autenticación de dos factores (2FA)" description="Protege tu cuenta pidiendo un código extra al iniciar sesión" v-model="settings.security.twoFactor" @update:modelValue="saveSettings" />
+          
+          <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-800 dark:text-gray-200">Preguntas de seguridad</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Añade o modifica tus preguntas de recuperación</p>
+              </div>
+              <button @click="showSecurityQuestions" class="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium">
+                Configurar
+              </button>
+            </div>
+          </div>
+        </InfoCard>
+
         <InfoCard title="Sesiones Activas">
           <LoadingSpinner v-if="loadingSessions" size="sm" class="my-4" />
           <div v-else class="space-y-3">
@@ -140,6 +157,23 @@
           <SettingsToggle label="Compartir datos con especialistas" description="Permite el acceso anónimo a datos para investigación" v-model="settings.privacy.shareData" @update:modelValue="saveSettings" />
         </InfoCard>
 
+        <InfoCard title="Historial de accesos">
+          <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Último acceso a tus informes y datos de salud</p>
+          <div class="space-y-2 border border-gray-100 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-800/50">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-700 dark:text-gray-300">Dr. Martínez (Cardiología)</span>
+              <span class="text-gray-500 dark:text-gray-400">Hoy, 10:45</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-700 dark:text-gray-300">Dra. Gómez (Medicina General)</span>
+              <span class="text-gray-500 dark:text-gray-400">Ayer, 16:30</span>
+            </div>
+            <button @click="viewFullAccessHistory" class="text-xs text-teal-600 dark:text-teal-400 font-medium hover:underline mt-2">
+              Ver reporte completo
+            </button>
+          </div>
+        </InfoCard>
+
         <InfoCard title="Gestión de datos">
           <div class="space-y-3 pt-1">
             <div class="flex items-center justify-between">
@@ -149,6 +183,15 @@
               </div>
               <button @click="exportData" class="px-4 py-2 text-sm border border-teal-600 text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-lg transition-colors font-medium">
                 Exportar
+              </button>
+            </div>
+            <div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-3">
+              <div>
+                <p class="text-sm font-medium text-yellow-600 dark:text-yellow-500">Desactivar cuenta temporalmente</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Ocultará tu perfil pero no borrará tus datos</p>
+              </div>
+              <button @click="showSuspendModal = true" class="px-4 py-2 text-sm border border-yellow-300 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 rounded-lg transition-colors font-medium">
+                Desactivar
               </button>
             </div>
             <div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-3">
@@ -171,6 +214,15 @@
           variant="danger"
           @confirm="requestDataDeletion"
         />
+
+        <ConfirmModal
+          v-model="showSuspendModal"
+          title="Desactivar cuenta temporalmente"
+          message="Tu perfil dejará de ser visible para otros usuarios y médicos, pero conservarás todo tu historial para cuando decidas reactivar la cuenta. ¿Deseas desactivarla ahora?"
+          confirm-text="Sí, desactivar"
+          variant="danger"
+          @confirm="requestAccountSuspension"
+        />
       </template>
 
     </div>
@@ -192,6 +244,7 @@ const loadingSessions = ref(false);
 const activeTab = ref('security');
 const changingPw = ref(false);
 const showDeleteModal = ref(false);
+const showSuspendModal = ref(false);
 const sessions = ref([]);
 
 const tabs = [
@@ -210,6 +263,7 @@ const pwForm = reactive({ current: '', newPw: '', confirm: '' });
 const pwErrors = reactive({});
 
 const settings = reactive({
+  security: { twoFactor: false },
   notifications: { emailAppointments: true, emailReports: true, emailMessages: false, pushReminders: true, pushAlerts: true, reminderTime: '24h' },
   preferences: { language: 'es', dateFormat: 'DD/MM/YYYY', timeFormat: '24h', theme: 'auto', highContrast: false },
   privacy: { profileVisible: true, shareData: false }
@@ -291,6 +345,19 @@ const exportData = () => {
 const requestDataDeletion = () => {
   showDeleteModal.value = false;
   showToast('Solicitud de eliminación enviada. Te contactaremos en 30 días.', 'info');
+};
+
+const requestAccountSuspension = () => {
+  showSuspendModal.value = false;
+  showToast('Cuenta desactivada temporalmente. Cerrando sesión...', 'info');
+};
+
+const showSecurityQuestions = () => {
+  showToast('Abre configuración de preguntas de seguridad', 'info');
+};
+
+const viewFullAccessHistory = () => {
+  showToast('Descargando reporte de historial de accesos...', 'info');
 };
 
 const formatDate = (d) => d ? new Date(d).toLocaleString('es-ES') : '';
