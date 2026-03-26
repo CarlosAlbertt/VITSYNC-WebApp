@@ -43,10 +43,10 @@ const selectContact = (contact) => {
                 class="contact-item"
                 @click="selectContact(contact)"
             >
-                <div class="avatar">{{ contact.name?.charAt(0) || 'U' }}</div>
+                <div class="avatar">{{ contact.name?.charAt(0) || contact.nombre?.charAt(0) || 'U' }}</div>
                 <div class="info">
-                    <div class="name">{{ contact.name }} {{ contact.lastName }}</div>
-                    <div class="role">{{ contact.specialty || 'Paciente' }}</div>
+                    <div class="name">{{ contact.name || contact.nombre }} {{ contact.firstName }} {{ contact.secondName }}</div>
+                    <div class="role">{{ contact.specialty || contact.especialidad?.nombre || 'Paciente' }}</div>
                 </div>
             </div>
         </div>
