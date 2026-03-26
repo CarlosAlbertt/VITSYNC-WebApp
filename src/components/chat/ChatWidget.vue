@@ -21,7 +21,7 @@ const clearSelection = () => {
         <ChatWindow 
             v-if="selectedContact"
             :isOpen="true"
-            :recipientId="selectedContact.id"
+            :recipientId="selectedContact.id || selectedContact.nif"
             :recipientName="selectedContact.name || selectedContact.nombre"
             :recipientRole="selectedContact.role || ''"
             :recipientPhoto="selectedContact.photo || ''"

@@ -4,7 +4,7 @@ import api from '../services/api';
 // Estado reactivo de autenticación
 export const isAuthenticated = ref(localStorage.getItem('token') !== null);
 export const currentUser = ref({
-    username: localStorage.getItem('username') || null,
+    nif: localStorage.getItem('nif') || null,
     email: localStorage.getItem('email') || null,
     role: localStorage.getItem('role') || null,
     id: localStorage.getItem('id') || null
