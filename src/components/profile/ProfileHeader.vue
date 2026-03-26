@@ -31,8 +31,8 @@
       <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">{{ fullName }}</h2>
       <p class="text-sm text-teal-600 dark:text-teal-400 font-medium mt-0.5">{{ roleLabel }}</p>
       <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ email }}</p>
-      <div v-if="isVerified" class="inline-flex items-center gap-1 mt-2 text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
-        ✓ Cuenta verificada
+      <div v-if="isVerified" class="mt-2 text-sm text-green-600 dark:text-green-400 font-medium">
+        Cuenta verificada
       </div>
     </div>
 
@@ -67,11 +67,12 @@ const initials = computed(() => {
   return parts.map(p => p[0].toUpperCase()).join('').slice(0, 2) || 'U';
 });
 
-const roleLabel = computed(() => ({
-  PATIENT: '🏥 Paciente',
-  DOCTOR: '👨‍⚕️ Médico',
-  ADMIN: '🔧 Administrador'
-}[props.role] || props.role || 'Paciente'));
+const roleLabels = {
+  PATIENT: 'Paciente',
+  DOCTOR: 'Médico',
+  ADMIN: 'Administrador'
+};
+const roleLabel = computed(() => roleLabels[props.role] || props.role || 'Paciente');
 
 const triggerFileInput = () => fileInput.value?.click();
 

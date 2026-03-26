@@ -25,7 +25,6 @@
         <span>{{ appointment.type }}</span>
       </div>
       <div v-if="appointment.location" class="flex items-center gap-1">
-        <span>📍</span>
         <span class="truncate">{{ appointment.location }}</span>
       </div>
     </div>
@@ -36,6 +35,19 @@
 
     <!-- Acciones (solo para citas futuras activas) -->
     <div v-if="showActions" class="flex gap-2 flex-wrap">
+      <button
+        v-if="appointment.type === 'Telemedicina'"
+        @click="$emit('start-video', appointment)"
+        class="px-3 py-1.5 text-xs font-medium rounded-lg bg-teal-600 text-white hover:bg-teal-700 transition-colors shadow-sm"
+      >
+        Iniciar videoconsulta
+      </button>
+      <button
+        @click="$emit('upload-docs', appointment)"
+        class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+      >
+        Subir docs
+      </button>
       <button
         @click="$emit('cancel', appointment)"
         class="px-3 py-1.5 text-xs font-medium rounded-lg border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors"
@@ -58,11 +70,11 @@ import { computed } from 'vue';
 const props = defineProps({
   appointment: { type: Object, required: true }
 });
-defineEmits(['cancel']);
+defineEmits(['cancel', 'start-video', 'upload-docs']);
 
 const showActions = computed(() => ['Programada', 'Confirmada'].includes(props.appointment.status));
 
-const typeIcon = computed(() => props.appointment.type === 'Telemedicina' ? '💻' : '🏥');
+const typeIcon = computed(() => props.appointment.type === 'Telemedicina' ? 'Virtual' : 'Presencial');
 
 const statusClass = computed(() => ({
   'Programada':  'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',

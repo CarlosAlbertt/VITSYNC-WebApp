@@ -14,7 +14,7 @@
     </div>
 
     <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-4">
-      <span>📅 {{ formatDate(report.date) }}</span>
+      <span>{{ formatDate(report.date) }}</span>
       <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full">{{ report.type }}</span>
     </div>
 
@@ -24,13 +24,19 @@
         @click="$emit('view', report)"
         class="px-3 py-1.5 text-xs font-medium rounded-lg bg-teal-50 text-teal-700 hover:bg-teal-100 dark:bg-teal-900/30 dark:text-teal-400 dark:hover:bg-teal-900/50 transition-colors"
       >
-        👁 Ver detalle
+        Ver detalle
       </button>
       <button
         @click="$emit('download', report)"
         class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
       >
-        ⬇ Descargar PDF
+        Descargar PDF
+      </button>
+      <button
+        @click="$emit('share', report)"
+        class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+      >
+        Compartir
       </button>
       <button
         @click="$emit('toggle-favorite', report)"
@@ -39,7 +45,7 @@
           ? 'text-yellow-600 border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20'
           : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700'"
       >
-        {{ report.favorite ? '★' : '☆' }}
+        {{ report.favorite ? 'Favorito' : 'Añadir a fav' }}
       </button>
     </div>
   </div>
@@ -51,7 +57,7 @@ import { computed } from 'vue';
 const props = defineProps({
   report: { type: Object, required: true }
 });
-defineEmits(['view', 'download', 'toggle-favorite']);
+defineEmits(['view', 'download', 'share', 'toggle-favorite']);
 
 const statusClass = computed(() => ({
   'Disponible':         'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
