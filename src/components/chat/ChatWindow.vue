@@ -1,11 +1,11 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import Talk from 'talkjs';
 import { currentUser } from '../../store/auth';
 
 const props = defineProps({
   isOpen: Boolean,
-  recipientId: Number,
+  recipientId: [Number, String],
   recipientName: String,
   recipientRole: String,
   recipientPhoto: String
@@ -41,8 +41,14 @@ const initTalkJS = async () => {
   if (!user || !user.id) return;
 
   // 1. Crear usuario actual (Me)
+  const myId = user.id || user.nif;
+  if (!myId) {
+      console.error("El usuario actual no tiene ID válido asignado.");
+      return;
+  }
+
   const me = new Talk.User({
-    id: user.id.toString(),
+    id: String(myId),
     name: user.nif || 'Usuario',
     email: user.email || 'user@vitsync.es',
     photoUrl: 'https://ui-avatars.com/api/?name=' + (user.nif || 'U'),
@@ -58,8 +64,13 @@ const initTalkJS = async () => {
   }
 
   // 3. Crear el otro usuario
+  const otherId = props.recipientId;
+  if (!otherId) {
+      console.error("El contacto remoto no tiene ID válido.");
+      return;
+  }
   const other = new Talk.User({
-    id: props.recipientId.toString(),
+    id: String(otherId),
     name: props.recipientName || 'Usuario',
     email: 'other@vitsync.es',
     photoUrl: props.recipientPhoto || 'https://ui-avatars.com/api/?name=' + (props.recipientName || 'U'),
@@ -82,6 +93,17 @@ const initTalkJS = async () => {
       chatbox.mount(chatContainer.value);
   }
 };
+
+onUnmounted(() => {
+  if (chatbox) {
+    chatbox.destroy();
+    chatbox = null;
+  }
+  if (session) {
+    session.destroy();
+    session = null;
+  }
+});
 </script>
 
 <template>
