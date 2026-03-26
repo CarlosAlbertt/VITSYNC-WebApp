@@ -1,10 +1,12 @@
 import { ref } from 'vue';
 import api from '../services/api';
 
-// Estado reactivo de usuarios
+// ── Estado reactivo ──────────────────────────────────────────────────────────
 export const usuarios = ref([]);
 export const isLoading = ref(false);
 export const error = ref(null);
+
+// ── Lectura ──────────────────────────────────────────────────────────────────
 
 // Cargar todos los usuarios
 export const fetchUsuarios = async () => {
@@ -23,26 +25,15 @@ export const fetchUsuarios = async () => {
     }
 };
 
-// Crear usuario
-export const createUsuario = async (userData) => {
-    try {
-        const response = await api.post('/api/usuarios', userData);
-        usuarios.value.push(response.data);
-        return response.data;
-    } catch (err) {
-        console.error('Error creando usuario:', err);
-        throw err;
-    }
-};
+// ── Escritura ─────────────────────────────────────────────────────────────────
 
 // Actualizar usuario
+// Nota: los usuarios se crean mediante POST /api/auth/register, no desde este panel
 export const updateUsuario = async (id, userData) => {
     try {
         const response = await api.put(`/api/usuarios/${id}`, userData);
         const index = usuarios.value.findIndex(u => u.id === id);
-        if (index !== -1) {
-            usuarios.value[index] = response.data;
-        }
+        if (index !== -1) usuarios.value[index] = response.data;
         return response.data;
     } catch (err) {
         console.error('Error actualizando usuario:', err);
@@ -57,6 +48,21 @@ export const deleteUsuario = async (id) => {
         usuarios.value = usuarios.value.filter(u => u.id !== id);
     } catch (err) {
         console.error('Error eliminando usuario:', err);
+        throw err;
+    }
+};
+
+// Marcar usuario como verificado / no verificado
+export const setVerificado = async (id, verified) => {
+    try {
+        const response = await api.patch(`/api/usuarios/${id}/verificar`, null, {
+            params: { verified }
+        });
+        const index = usuarios.value.findIndex(u => u.id === id);
+        if (index !== -1) usuarios.value[index] = response.data;
+        return response.data;
+    } catch (err) {
+        console.error('Error verificando usuario:', err);
         throw err;
     }
 };

@@ -1,26 +1,22 @@
 <template>
     <div class="min-h-screen bg-gray-50 p-8">
         <div class="max-w-7xl mx-auto">
-            <!-- Breadcrumb / Header -->
+            <!-- Header -->
             <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Gestión de Usuarios</h1>
                     <p class="mt-2 text-gray-500">Administra los usuarios registrados en la plataforma.</p>
                 </div>
                 <div class="mt-4 sm:mt-0">
-                    <button @click="openModal()"
-                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                        <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Añadir Usuario
-                    </button>
+                    <p class="text-xs text-gray-400 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-blue-700">
+                        Los usuarios se crean desde <strong>/register</strong>
+                    </p>
                 </div>
             </div>
 
-            <!-- Filters & Search -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-                <div class="relative max-w-md">
+            <!-- Filters -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1 max-w-md">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -28,173 +24,535 @@
                         </svg>
                     </div>
                     <input v-model="searchQuery" type="text"
-                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        placeholder="Buscar por nombre o email..." />
+                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Buscar por nombre, email o NIF..." />
                 </div>
+                <select v-model="filterRole"
+                    class="border border-gray-300 rounded-lg text-sm px-3 py-2 bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="all">Todos los roles</option>
+                    <option value="ADMIN">ADMIN</option>
+                    <option value="MEDICO">MEDICO</option>
+                    <option value="PACIENTE">PACIENTE</option>
+                </select>
             </div>
 
-            <!-- Users Table -->
-            <div class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
-                <ul role="list" class="divide-y divide-gray-200">
-                    <li v-for="user in filteredUsers" :key="user.id" class="hover:bg-gray-50 transition-colors">
-                        <div class="px-6 py-4 flex items-center justify-between">
-                            <div class="flex items-center min-w-0">
-                                <div
-                                    class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
-                                    {{ user.name.charAt(0).toUpperCase() }}
+            <!-- Loading -->
+            <div v-if="isLoading" class="p-12 text-center text-gray-500 bg-white rounded-xl border border-gray-100">
+                <svg class="animate-spin h-8 w-8 text-blue-600 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg"
+                    fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Cargando usuarios...
+            </div>
+
+            <!-- Error -->
+            <div v-if="error && !isLoading"
+                class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center space-x-3">
+                <svg class="h-5 w-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-sm text-red-700">{{ error }}</span>
+                <button @click="loadData" class="ml-auto text-sm text-red-600 hover:text-red-800 font-medium">
+                    Reintentar
+                </button>
+            </div>
+
+            <!-- Table -->
+            <div v-if="!isLoading" class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuario</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">NIF</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Verificado</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr v-for="user in filteredUsers" :key="user.id" class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <div :class="roleColors(user.role)"
+                                        class="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center font-bold text-lg">
+                                        {{ user.name?.charAt(0)?.toUpperCase() || '?' }}
+                                    </div>
+                                    <div class="ml-4">
+                                        <p class="text-sm font-medium text-gray-900">{{ fullName(user) }}</p>
+                                        <p class="text-xs text-gray-500">{{ user.email }}</p>
+                                    </div>
                                 </div>
-                                <div class="ml-4 truncate">
-                                    <p class="text-sm font-medium text-gray-900 truncate">{{ user.name }}</p>
-                                    <p class="text-sm text-gray-500 truncate">{{ user.email }}</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                    :class="user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'">
+                            </td>
+                            <td class="px-6 py-4 hidden md:table-cell">
+                                <span class="text-sm text-gray-700 font-mono">{{ user.nif }}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span :class="roleBadgeClass(user.role)"
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
                                     {{ user.role }}
                                 </span>
-                                <div class="flex space-x-2">
+                            </td>
+                            <td class="px-6 py-4 hidden lg:table-cell">
+                                <button @click="handleToggleVerificado(user)"
+                                    :class="user.isVerified ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'"
+                                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity"
+                                    :title="user.isVerified ? 'Marcar como no verificado' : 'Verificar cuenta'">
+                                    <svg v-if="user.isVerified" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    {{ user.isVerified ? 'Verificado' : 'No verificado' }}
+                                </button>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex justify-end space-x-2">
                                     <button @click="openModal(user)"
-                                        class="text-gray-400 hover:text-blue-600 transition-colors" title="Editar">
+                                        class="p-1 text-gray-400 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors" title="Editar">
                                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                         </svg>
                                     </button>
-                                    <button @click="confirmDelete(user)"
-                                        class="text-gray-400 hover:text-red-600 transition-colors" title="Eliminar">
+                                    <button @click="openDeleteModal(user)"
+                                        class="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors" title="Eliminar">
                                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-                <div v-if="filteredUsers.length === 0" class="p-8 text-center text-gray-500">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div v-if="filteredUsers.length === 0" class="p-12 text-center text-gray-500">
                     No se encontraron usuarios.
                 </div>
             </div>
         </div>
 
-        <!-- Modal Form -->
-        <div v-if="isModalOpen" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
-            aria-modal="true">
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <!-- Backdrop -->
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"
-                    @click="closeModal"></div>
+        <!-- ===== FORM MODAL (Editar) ===== -->
+        <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-start justify-center p-4 overflow-y-auto"
+            role="dialog" aria-labelledby="modal-title" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-500/75" aria-hidden="true" @click="closeModal"></div>
+            <div class="relative z-10 bg-white rounded-lg text-left shadow-xl w-full max-w-2xl my-8">
+                <div class="bg-white px-6 pt-6 pb-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-1" id="modal-title">Editar Usuario</h3>
+                    <p class="text-sm text-gray-500 mb-4">Los campos marcados con <span class="text-red-500">*</span> son obligatorios.</p>
 
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div v-if="formError"
+                        class="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 flex items-start space-x-2">
+                        <svg class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-sm text-red-700">{{ formError }}</span>
+                    </div>
 
-                <div
-                    class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                            {{ isEditing ? 'Editar Usuario' : 'Añadir Usuario' }}
-                        </h3>
-                        <div class="mt-4 space-y-4">
+                    <div class="space-y-4">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Datos personales</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
-                                <input v-model="form.name" type="text" id="name"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
-                                    placeholder="Nombre completo">
+                                <label class="block text-sm font-medium text-gray-700">Nombre <span class="text-red-500">*</span></label>
+                                <input v-model="form.name" type="text"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border" />
                             </div>
                             <div>
-                                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                                <input v-model="form.email" type="email" id="email"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
-                                    placeholder="correo@ejemplo.com">
+                                <label class="block text-sm font-medium text-gray-700">Primer apellido <span class="text-red-500">*</span></label>
+                                <input v-model="form.firstName" type="text"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border" />
                             </div>
                             <div>
-                                <label for="role" class="block text-sm font-medium text-gray-700">Rol</label>
-                                <select v-model="form.role" id="role"
-                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md border">
-                                    <option value="USER">Usuario</option>
-                                    <option value="ADMIN">Administrador</option>
-                                    <option value="DOCTOR">Médico</option>
-                                </select>
+                                <label class="block text-sm font-medium text-gray-700">Segundo apellido <span class="text-red-500">*</span></label>
+                                <input v-model="form.secondName" type="text"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border" />
                             </div>
                         </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">NIF <span class="text-red-500">*</span></label>
+                                <input v-model="form.nif" type="text"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border font-mono" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
+                                <input v-model="form.email" type="email"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Género <span class="text-red-500">*</span></label>
+                                <select v-model="form.gender"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border bg-white">
+                                    <option value="MALE">Masculino</option>
+                                    <option value="FEMALE">Femenino</option>
+                                    <option value="OTHER">Otro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Rol <span class="text-red-500">*</span></label>
+                                <select v-model="form.role"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border bg-white">
+                                    <option value="ADMIN">ADMIN</option>
+                                    <option value="MEDICO">MEDICO</option>
+                                    <option value="PACIENTE">PACIENTE</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Fecha nacimiento <span class="text-red-500">*</span></label>
+                                <input v-model="form.birthDate" type="date"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Teléfono <span class="text-red-500">*</span></label>
+                                <input v-model="form.phone" type="tel"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Código postal <span class="text-red-500">*</span></label>
+                                <input v-model="form.postCode" type="text"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Dirección <span class="text-red-500">*</span></label>
+                                <input v-model="form.address" type="text"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">País <span class="text-red-500">*</span></label>
+                                <input v-model="form.country" type="text"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nueva contraseña <span class="text-xs text-gray-400">(dejar vacío para no cambiar)</span></label>
+                            <input v-model="form.password" type="password"
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border"
+                                placeholder="••••••••" />
+                        </div>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button @click="saveUser" type="button"
-                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
-                            Guardar
-                        </button>
-                        <button @click="closeModal" type="button"
-                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                            Cancelar
-                        </button>
-                    </div>
+                </div>
+
+                <div class="bg-gray-50 px-6 py-4 flex flex-row-reverse gap-3">
+                    <button @click="saveUser" type="button" :disabled="isSaving"
+                        class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg v-if="isSaving" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        {{ isSaving ? 'Guardando...' : 'Guardar cambios' }}
+                    </button>
+                    <button @click="closeModal" type="button"
+                        class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none">
+                        Cancelar
+                    </button>
                 </div>
             </div>
         </div>
+
+        <!-- ===== DELETE CONFIRMATION MODAL ===== -->
+        <div v-if="isDeleteModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+            role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-500/75" aria-hidden="true" @click="closeDeleteModal"></div>
+            <div class="relative z-10 bg-white rounded-lg text-left shadow-xl w-full max-w-sm">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="flex-shrink-0 p-2 bg-red-100 rounded-full">
+                            <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">Eliminar usuario</h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                ¿Estás seguro de que quieres eliminar a
+                                <strong>{{ userToDelete ? fullName(userToDelete) : '' }}</strong>?
+                                Esta acción es irreversible.
+                            </p>
+                            <div v-if="deleteError" class="mt-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1">
+                                {{ deleteError }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 flex flex-row-reverse gap-2">
+                    <button @click="confirmDelete" :disabled="isDeleting"
+                        class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-sm font-medium text-white hover:bg-red-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg v-if="isDeleting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        </svg>
+                        {{ isDeleting ? 'Eliminando...' : 'Eliminar' }}
+                    </button>
+                    <button @click="closeDeleteModal" type="button"
+                        class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TOAST ===== -->
+        <transition name="toast">
+            <div v-if="toast.show"
+                :class="toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'"
+                class="fixed bottom-6 right-6 z-[60] text-white px-5 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center space-x-2">
+                <svg v-if="toast.type === 'error'" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <svg v-else class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>{{ toast.message }}</span>
+            </div>
+        </transition>
     </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { usuarios, isLoading, error, fetchUsuarios, createUsuario, updateUsuario, deleteUsuario } from '@/store/usuarios';
+import { useRouter } from 'vue-router';
+import {
+    usuarios,
+    isLoading,
+    error,
+    fetchUsuarios,
+    updateUsuario,
+    deleteUsuario,
+    setVerificado
+} from '@/store/usuarios';
 
+const router = useRouter();
+
+// ── UI State ──────────────────────────────────────────────────────────────────
 const searchQuery = ref('');
+const filterRole = ref('all');
 const isModalOpen = ref(false);
-const isEditing = ref(false);
-const form = ref({ id: null, name: '', email: '', role: 'USER' });
+const isSaving = ref(false);
+const formError = ref(null);
+const isDeleteModalOpen = ref(false);
+const userToDelete = ref(null);
+const isDeleting = ref(false);
+const deleteError = ref(null);
+const toast = ref({ show: false, message: '', type: 'success' });
 
-onMounted(async () => {
+// ── Form ──────────────────────────────────────────────────────────────────────
+const emptyForm = () => ({
+    id: null,
+    name: '',
+    firstName: '',
+    secondName: '',
+    nif: '',
+    email: '',
+    password: '',
+    gender: 'MALE',
+    role: 'PACIENTE',
+    birthDate: '',
+    phone: '',
+    address: '',
+    postCode: '',
+    country: 'España'
+});
+
+const form = ref(emptyForm());
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const fullName = (u) => [u.name, u.firstName, u.secondName].filter(Boolean).join(' ');
+
+const roleBadgeClass = (role) => {
+    switch (role) {
+        case 'ADMIN': return 'bg-purple-100 text-purple-800';
+        case 'MEDICO': return 'bg-teal-100 text-teal-800';
+        case 'PACIENTE': return 'bg-blue-100 text-blue-800';
+        default: return 'bg-gray-100 text-gray-800';
+    }
+};
+
+const roleColors = (role) => {
+    switch (role) {
+        case 'ADMIN': return 'bg-purple-100 text-purple-700';
+        case 'MEDICO': return 'bg-teal-100 text-teal-700';
+        case 'PACIENTE': return 'bg-blue-100 text-blue-700';
+        default: return 'bg-gray-100 text-gray-700';
+    }
+};
+
+const showToast = (message, type = 'success') => {
+    toast.value = { show: true, message, type };
+    setTimeout(() => { toast.value.show = false; }, 3500);
+};
+
+const extractApiError = (err) => {
+    if (err.response?.status === 401 || err.response?.status === 403) {
+        return 'Sin permisos de administrador.';
+    }
+    return err.response?.data?.error || err.response?.data?.message || err.message || 'Error desconocido.';
+};
+
+// ── Data loading ──────────────────────────────────────────────────────────────
+const loadData = async () => {
     try {
         await fetchUsuarios();
     } catch (err) {
-        // Error handling is managed in the store but we could add local alerts here
+        if (err.response?.status === 401 || err.response?.status === 403) {
+            router.push({ name: 'login' });
+        }
     }
-});
+};
 
+onMounted(loadData);
+
+// ── Filtering ─────────────────────────────────────────────────────────────────
 const filteredUsers = computed(() => {
-    return usuarios.value.filter(user =>
-        user.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
+    const q = searchQuery.value.toLowerCase();
+    return usuarios.value.filter(u => {
+        const matchSearch =
+            fullName(u).toLowerCase().includes(q) ||
+            u.email?.toLowerCase().includes(q) ||
+            u.nif?.toLowerCase().includes(q);
+        const matchRole = filterRole.value === 'all' || u.role === filterRole.value;
+        return matchSearch && matchRole;
+    });
 });
 
-const openModal = (user = null) => {
-    if (user) {
-        isEditing.value = true;
-        form.value = { ...user };
-    } else {
-        isEditing.value = false;
-        form.value = { id: null, name: '', email: '', role: 'USER' };
-    }
+// ── Form modal ────────────────────────────────────────────────────────────────
+const openModal = (user) => {
+    formError.value = null;
+    form.value = {
+        id: user.id,
+        name: user.name || '',
+        firstName: user.firstName || '',
+        secondName: user.secondName || '',
+        nif: user.nif || '',
+        email: user.email || '',
+        password: '',
+        gender: user.gender || 'MALE',
+        role: user.role || 'PACIENTE',
+        birthDate: user.birthDate || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        postCode: user.postCode || '',
+        country: user.country || 'España'
+    };
     isModalOpen.value = true;
 };
 
 const closeModal = () => {
     isModalOpen.value = false;
-    form.value = { id: null, name: '', email: '', role: 'USER' };
+    formError.value = null;
+    form.value = emptyForm();
 };
 
 const saveUser = async () => {
+    formError.value = null;
+
+    if (!form.value.name.trim()) { formError.value = 'El nombre es obligatorio.'; return; }
+    if (!form.value.firstName.trim()) { formError.value = 'El primer apellido es obligatorio.'; return; }
+    if (!form.value.secondName.trim()) { formError.value = 'El segundo apellido es obligatorio.'; return; }
+    if (!form.value.nif.trim()) { formError.value = 'El NIF es obligatorio.'; return; }
+    if (!form.value.email.trim()) { formError.value = 'El email es obligatorio.'; return; }
+    if (!form.value.birthDate) { formError.value = 'La fecha de nacimiento es obligatoria.'; return; }
+    if (!form.value.phone.trim()) { formError.value = 'El teléfono es obligatorio.'; return; }
+    if (!form.value.address.trim()) { formError.value = 'La dirección es obligatoria.'; return; }
+    if (!form.value.postCode.trim()) { formError.value = 'El código postal es obligatorio.'; return; }
+    if (!form.value.country.trim()) { formError.value = 'El país es obligatorio.'; return; }
+
+    const payload = {
+        name: form.value.name.trim(),
+        firstName: form.value.firstName.trim(),
+        secondName: form.value.secondName.trim(),
+        nif: form.value.nif.trim(),
+        email: form.value.email.trim(),
+        gender: form.value.gender,
+        role: form.value.role,
+        birthDate: form.value.birthDate,
+        phone: form.value.phone.trim(),
+        address: form.value.address.trim(),
+        postCode: form.value.postCode.trim(),
+        country: form.value.country.trim()
+    };
+    if (form.value.password?.trim()) {
+        payload.password = form.value.password.trim();
+    }
+
     try {
-        if (isEditing.value) {
-            await updateUsuario(form.value.id, { ...form.value });
-        } else {
-            await createUsuario({ ...form.value });
-        }
+        isSaving.value = true;
+        await updateUsuario(form.value.id, payload);
+        showToast('Usuario actualizado correctamente.');
         closeModal();
+        await loadData();
     } catch (err) {
-        alert('Error al guardar el usuario: ' + err.message);
+        const msg = extractApiError(err);
+        formError.value = msg || 'Error al guardar el usuario.';
+    } finally {
+        isSaving.value = false;
     }
 };
 
-const confirmDelete = async (user) => {
-    if (confirm(`¿Estás seguro de que quieres eliminar a ${user.name}?`)) {
-        try {
-            await deleteUsuario(user.id);
-        } catch (err) {
-            alert('Error al eliminar el usuario: ' + err.message);
-        }
+// ── Toggle verificado ─────────────────────────────────────────────────────────
+const handleToggleVerificado = async (user) => {
+    try {
+        await setVerificado(user.id, !user.isVerified);
+        showToast(user.isVerified ? 'Usuario marcado como no verificado.' : 'Usuario verificado correctamente.');
+    } catch (err) {
+        showToast(extractApiError(err), 'error');
+    }
+};
+
+// ── Delete modal ──────────────────────────────────────────────────────────────
+const openDeleteModal = (user) => {
+    userToDelete.value = user;
+    deleteError.value = null;
+    isDeleteModalOpen.value = true;
+};
+
+const closeDeleteModal = () => {
+    isDeleteModalOpen.value = false;
+    userToDelete.value = null;
+    deleteError.value = null;
+};
+
+const confirmDelete = async () => {
+    if (!userToDelete.value) return;
+    deleteError.value = null;
+    try {
+        isDeleting.value = true;
+        await deleteUsuario(userToDelete.value.id);
+        showToast(`"${fullName(userToDelete.value)}" eliminado correctamente.`);
+        closeDeleteModal();
+        await loadData();
+    } catch (err) {
+        deleteError.value = extractApiError(err);
+    } finally {
+        isDeleting.value = false;
     }
 };
 </script>
+
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+    transition: all 0.35s ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+    opacity: 0;
+    transform: translateY(12px);
+}
+</style>
