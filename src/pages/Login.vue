@@ -10,9 +10,29 @@ const errorMessage = ref(null);
 const isLoading = ref(false);
 const router = useRouter();
 
+const validateLogin = () => {
+    const cleanNif = nif.value.trim();
+    if (!cleanNif) {
+        throw new Error('El campo NIF/CIF no puede estar vacío');
+    }
+    // Regex básica para NIF, NIE o CIF español
+    const nifRegex = /^[XYZ]?\d{5,8}[A-Z]$/i;
+    const cifRegex = /^[A-HJ-NP-SV-W]\d{7}[0-9A-J]$/i;
+    
+    if (!nifRegex.test(cleanNif) && !cifRegex.test(cleanNif)) {
+        throw new Error('El formato del documento introducido no es un NIF, NIE ni CIF válido');
+    }
+    if (!password.value || !password.value.trim()) {
+        throw new Error('La contraseña no puede estar vacía');
+    }
+};
+
 const handleLogin = async () => {
     try {
         errorMessage.value = null;
+        
+        validateLogin();
+        
         isLoading.value = true;
 
         // Llamar a la función de login del store (conecta con la API)
