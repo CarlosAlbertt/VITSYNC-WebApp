@@ -190,9 +190,9 @@
                                 <label class="block text-sm font-medium text-gray-700">Género <span class="text-red-500">*</span></label>
                                 <select v-model="form.gender"
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm p-2 border bg-white">
-                                    <option value="MALE">Masculino</option>
-                                    <option value="FEMALE">Femenino</option>
-                                    <option value="OTHER">Otro</option>
+                                    <option value="HOMBRE">Masculino</option>
+                                    <option value="MUJER">Femenino</option>
+                                    <option value="OTRO">Otro</option>
                                 </select>
                             </div>
                             <div>
@@ -361,7 +361,7 @@ const emptyForm = () => ({
     nif: '',
     email: '',
     password: '',
-    gender: 'MALE',
+    gender: 'HOMBRE',
     role: 'PACIENTE',
     birthDate: '',
     phone: '',
@@ -442,7 +442,7 @@ const openModal = (user) => {
         nif: user.nif || '',
         email: user.email || '',
         password: '',
-        gender: user.gender || 'MALE',
+        gender: user.gender || 'HOMBRE',
         role: user.role || 'PACIENTE',
         birthDate: user.birthDate || '',
         phone: user.phone || '',
