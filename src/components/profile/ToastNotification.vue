@@ -7,10 +7,8 @@
         :class="bgClass"
         role="alert"
       >
-        <!-- Icono -->
-        <span class="text-lg">{{ icon }}</span>
         <span>{{ toast.message }}</span>
-        <button @click="toast.visible = false" class="ml-auto opacity-70 hover:opacity-100 transition-opacity">✕</button>
+        <button @click="toast.visible = false" class="ml-auto opacity-70 hover:opacity-100 transition-opacity text-xs uppercase font-bold">Cerrar</button>
       </div>
     </Transition>
   </Teleport>
@@ -26,11 +24,6 @@ const bgClass = computed(() => ({
   'bg-blue-500': toast.type === 'info'
 }));
 
-const icon = computed(() => ({
-  success: '✓',
-  error: '✕',
-  info: 'ℹ'
-}[toast.type] || '✓'));
 </script>
 
 <style scoped>

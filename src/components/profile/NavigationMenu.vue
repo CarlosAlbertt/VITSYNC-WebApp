@@ -10,7 +10,7 @@
         ? 'bg-teal-600 text-white shadow-md shadow-teal-200 dark:shadow-teal-900'
         : 'text-gray-600 dark:text-gray-300 hover:bg-teal-50 dark:hover:bg-teal-900/30 hover:text-teal-700 dark:hover:text-teal-300'"
     >
-      <span class="text-lg">{{ item.icon }}</span>
+      <span v-if="item.icon" class="text-lg">{{ item.icon }}</span>
       <span>{{ item.label }}</span>
     </button>
   </nav>
@@ -27,7 +27,7 @@
           ? 'border-teal-600 text-teal-700 dark:text-teal-400'
           : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400'"
       >
-        <span>{{ item.icon }}</span>
+        <span v-if="item.icon">{{ item.icon }}</span>
         <span>{{ item.label }}</span>
       </button>
     </div>
@@ -38,9 +38,9 @@
 import { activeSection, setSection } from '../../store/profile';
 
 const sections = [
-  { id: 'general',       icon: '👤', label: 'General' },
-  { id: 'informes',      icon: '📋', label: 'Informes' },
-  { id: 'citas',         icon: '📅', label: 'Citas' },
-  { id: 'configuracion', icon: '⚙️',  label: 'Configuración' }
+  { id: 'general',       icon: '', label: 'General' },
+  { id: 'informes',      icon: '', label: 'Informes' },
+  { id: 'citas',         icon: '', label: 'Citas' },
+  { id: 'configuracion', icon: '',  label: 'Configuración' }
 ];
 </script>
