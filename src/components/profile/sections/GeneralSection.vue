@@ -79,6 +79,18 @@
         </div>
       </InfoCard>
 
+      <!-- Información Médica Básica -->
+      <InfoCard title="Información Médica Básica" v-if="form.role === 'PATIENT'">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <EditableField label="Grupo sanguíneo" v-model="form.bloodType" :editing="editing" />
+          <EditableField label="Alergias conocidas" v-model="form.allergies" :editing="editing" />
+          <div class="sm:col-span-2">
+            <EditableField label="Condiciones médicas preexistentes" v-model="form.medicalConditions" :editing="editing" />
+          </div>
+          <EditableField label="Contacto de emergencia" v-model="form.emergencyContact" :editing="editing" type="tel" />
+        </div>
+      </InfoCard>
+
       <!-- Rol / Cuenta -->
       <InfoCard title="Información de Cuenta">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -92,7 +104,7 @@
           <div>
             <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Estado de verificación</label>
             <span class="text-sm" :class="profileData.isVerified ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'">
-              {{ profileData.isVerified ? '✓ Verificado' : 'Pendiente de verificación' }}
+              {{ profileData.isVerified ? 'Verificado' : 'Pendiente de verificación' }}
             </span>
           </div>
         </div>
@@ -117,7 +129,8 @@ const form = reactive({
   name: '', firstName: '', secondName: '',
   nif: '', email: '', gender: 'MALE',
   role: 'PATIENT', birthDate: '', phone: '',
-  address: '', postCode: '', country: ''
+  address: '', postCode: '', country: '',
+  bloodType: '', allergies: '', medicalConditions: '', emergencyContact: ''
 });
 
 const originalForm = reactive({});
@@ -134,7 +147,7 @@ const roleOptions = [
 ];
 
 const syncForm = () => {
-  const fields = ['name','firstName','secondName','nif','email','gender','role','birthDate','phone','address','postCode','country'];
+  const fields = ['name','firstName','secondName','nif','email','gender','role','birthDate','phone','address','postCode','country','bloodType','allergies','medicalConditions','emergencyContact'];
   fields.forEach(f => { form[f] = profileData[f] || ''; });
 };
 
