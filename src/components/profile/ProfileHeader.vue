@@ -68,8 +68,8 @@ const initials = computed(() => {
 });
 
 const roleLabels = {
-  PATIENT: 'Paciente',
-  DOCTOR: 'Médico',
+  PACIENTE: 'Paciente',
+  MEDICO: 'Médico',
   ADMIN: 'Administrador'
 };
 const roleLabel = computed(() => roleLabels[props.role] || props.role || 'Paciente');
