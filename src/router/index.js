@@ -52,6 +52,18 @@ const routes = [
         component: () => import('../pages/VerifyAccount.vue')
     },
     {
+        path: '/perfil',
+        name: 'perfil',
+        component: () => import('../pages/Perfil.vue'),
+        beforeEnter: (to, from, next) => {
+            if (isAuthenticated()) {
+                next();
+            } else {
+                next({ name: 'login' });
+            }
+        }
+    },
+    {
         path: '/admin',
         children: [
             {
