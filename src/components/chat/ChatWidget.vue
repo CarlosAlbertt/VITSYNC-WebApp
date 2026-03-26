@@ -21,13 +21,18 @@ const clearSelection = () => {
         <ChatWindow 
             v-if="selectedContact"
             :isOpen="true"
-            :recipientId="selectedContact.id || selectedContact.nif"
-            :recipientName="selectedContact.name || selectedContact.nombre"
+            :recipientId="selectedContact.id || selectedContact.nif || selectedContact.email || selectedContact.idUsuario || selectedContact.codigo"
+            :recipientName="(selectedContact.name || selectedContact.nombre || '') + ' ' + (selectedContact.firstName || '')"
             :recipientRole="selectedContact.role || ''"
-            :recipientPhoto="selectedContact.photo || ''"
+            :recipientPhoto="selectedContact.photo || selectedContact.avatarUrl || ''"
             @close="$emit('close')"
             @back="clearSelection"
             />
+        
+        <!-- Script de debug (oculto en consola) -->
+        <div v-if="selectedContact" style="display:none">
+            {{ console.log('DEBUG [ChatWidget]: Seleccionado un contacto:', JSON.stringify(selectedContact, null, 2)) }}
+        </div>
         
         <!-- Si NO hay contacto, mostramos la Lista -->
         <ContactList 
