@@ -9,11 +9,22 @@ const loading = ref(true);
 
 onMounted(async () => {
     try {
+        let raw = [];
         if (currentUser.value.role === 'PACIENTE') {
-            contacts.value = await getMyMedicos(currentUser.value.id);
+            raw = await getMyMedicos(currentUser.value.id);
         } else if (currentUser.value.role === 'MEDICO') {
-            contacts.value = await getMyPacientes(currentUser.value.id);
+            raw = await getMyPacientes(currentUser.value.id);
         }
+        // Garantizar que es un array (el backend puede devolver objeto en error)
+        if (!Array.isArray(raw)) raw = [];
+        // Deduplicar por id para evitar contactos repetidos
+        const seen = new Set();
+        contacts.value = raw.filter(c => {
+            const key = c.id ?? c.nif ?? c.email;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
     } catch (error) {
         console.error('Error cargando contactos:', error);
     } finally {
@@ -22,7 +33,6 @@ onMounted(async () => {
 });
 
 const selectContact = (contact) => {
-    // If contact doesn't have an ID property, try 'id' or 'nif' depending on your backend
     emit('select', contact);
 };
 </script>
@@ -38,15 +48,15 @@ const selectContact = (contact) => {
         
         <div v-else class="list">
             <div 
-                v-for="contact in contacts" 
-                :key="contact.id" 
+                v-for="(contact, index) in contacts" 
+                :key="contact.id ?? contact.nif ?? index" 
                 class="contact-item"
                 @click="selectContact(contact)"
             >
                 <div class="avatar">{{ contact.name?.charAt(0) || contact.nombre?.charAt(0) || 'U' }}</div>
                 <div class="info">
                     <div class="name">{{ contact.name || contact.nombre }} {{ contact.firstName }} {{ contact.secondName }}</div>
-                    <div class="role">{{ contact.specialty || contact.especialidad?.nombre || 'Paciente' }}</div>
+                    <div class="role">{{ contact.especialidad?.nombre || contact.specialty || 'Paciente' }}</div>
                 </div>
             </div>
         </div>
