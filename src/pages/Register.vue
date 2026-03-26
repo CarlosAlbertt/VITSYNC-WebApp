@@ -26,19 +26,48 @@ const successMessage = ref(null);
 const isLoading = ref(false);
 const router = useRouter();
 
+const validateForm = () => {
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    if (!nameRegex.test(formData.value.name) || !nameRegex.test(formData.value.firstName) || !nameRegex.test(formData.value.secondName)) {
+        throw new Error('El nombre y apellidos solo pueden contener letras');
+    }
+    const birthDate = new Date(formData.value.birthDate);
+    if (birthDate > new Date()) {
+        throw new Error('La fecha de nacimiento no puede ser en el futuro');
+    }
+    const nifClean = formData.value.nif.trim();
+    const nifRegex = /^[XYZ]?\d{5,8}[A-Z]$/i;
+    const cifRegex = /^[A-HJ-NP-SV-W]\d{7}[0-9A-J]$/i;
+    if (!nifRegex.test(nifClean) && !cifRegex.test(nifClean)) {
+        throw new Error('El formato del documento no es un NIF, NIE ni CIF válido');
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.value.email.trim())) {
+        throw new Error('El formato de correo electrónico no es válido');
+    }
+    if (formData.value.password !== formData.value.confirmPassword) {
+        throw new Error('Las contraseñas no coinciden');
+    }
+    const passRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passRegex.test(formData.value.password)) {
+        throw new Error('La contraseña debe tener al menos 8 caracteres, conteniendo letras y números');
+    }
+    const phoneRegex = /^\+?[\d\s-]{9,15}$/;
+    if (!phoneRegex.test(formData.value.phone)) {
+        throw new Error('El formato del teléfono es inválido (debe tener entre 9 y 15 dígitos)');
+    }
+    const cpRegex = /^\d{5}$/;
+    if (!cpRegex.test(formData.value.postCode)) {
+        throw new Error('El código postal debe contener exactamente 5 dígitos');
+    }
+};
+
 const handleRegister = async () => {
     try {
         errorMessage.value = null;
         successMessage.value = null;
 
-        // Validar contraseñas
-        if (formData.value.password !== formData.value.confirmPassword) {
-            throw new Error('Las contraseñas no coinciden');
-        }
-
-        if (formData.value.password.length < 6) {
-            throw new Error('La contraseña debe tener al menos 6 caracteres');
-        }
+        validateForm();
 
         isLoading.value = true;
 

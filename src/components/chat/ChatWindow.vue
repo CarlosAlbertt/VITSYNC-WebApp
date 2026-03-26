@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import Talk from 'talkjs';
 import { currentUser } from '../../store/auth';
 
@@ -82,6 +82,13 @@ const initTalkJS = async () => {
       chatbox.mount(chatContainer.value);
   }
 };
+
+onUnmounted(() => {
+  if (chatbox) {
+    chatbox.destroy();
+    chatbox = null;
+  }
+});
 </script>
 
 <template>
