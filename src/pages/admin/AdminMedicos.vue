@@ -7,7 +7,7 @@
                     <h1 class="text-3xl font-bold text-gray-900">Gestión de Médicos</h1>
                     <p class="mt-2 text-gray-500">Administra el personal médico y sus especialidades.</p>
                 </div>
-                <div class="mt-4 sm:mt-0">
+                <!-- <div class="mt-4 sm:mt-0">
                     <button @click="openModal()"
                         class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors">
                         <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -15,7 +15,7 @@
                         </svg>
                         Añadir Médico
                     </button>
-                </div>
+                </div> -->
             </div>
 
             <!-- Filters -->
