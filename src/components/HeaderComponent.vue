@@ -55,7 +55,7 @@
     <nav class="max-w-7xl mx-auto px-4 py-4">
       <div class="flex flex-wrap items-center justify-between">
         <router-link to="/"
-          class="text-2xl font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors cursor-pointer">
+          class="text-2xl font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors cursor-pointer px-8">
           VitSync
         </router-link>
 
@@ -85,7 +85,7 @@
 
       <!-- Menú de navegación (oculto en móviles) -->
       <div class="hidden lg:flex pt-4 border-t border-gray-100 dark:border-gray-700 mt-4 transition-colors">
-        <nav class="flex space-x-8">
+        <nav class="flex justify-between w-full px-16">
           <template v-for="item in menuItems" :key="item.name">
             <router-link v-if="item.route" :to="item.route"
               class="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 text-sm font-medium transition-colors">
@@ -154,13 +154,9 @@ const toggleTopBarMenu = () => {
 }
 
 const menuItems = [
-  { name: 'Hospitales', route: null },
-  { name: 'Cuadro médico', route: null },
+  { name: 'Cuadro médico', route: '/cuadro-medico' },
   { name: 'Especialidades', route: '/especialidades' },
   { name: 'Enfermedades y tratamientos', route: null },
-  { name: 'Unidades médicas', route: null },
-  { name: 'Investigación', route: null },
-  { name: 'El grupo', route: null },
   { name: 'Comunicación', route: null },
   { name: 'Orientador de salud', route: null }
 ]
