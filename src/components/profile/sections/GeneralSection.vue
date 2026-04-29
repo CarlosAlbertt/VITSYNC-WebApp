@@ -80,7 +80,7 @@
       </InfoCard>
 
       <!-- Información Médica Básica -->
-      <InfoCard title="Información Médica Básica" v-if="form.role === 'PATIENT'">
+      <InfoCard title="Información Médica Básica" v-if="form.role === 'PACIENTE'">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <EditableField label="Grupo sanguíneo" v-model="form.bloodType" :editing="editing" />
           <EditableField label="Alergias conocidas" v-model="form.allergies" :editing="editing" />
@@ -127,8 +127,8 @@ const errors = reactive({});
 
 const form = reactive({
   name: '', firstName: '', secondName: '',
-  nif: '', email: '', gender: 'MALE',
-  role: 'PATIENT', birthDate: '', phone: '',
+  nif: '', email: '', gender: 'HOMBRE',
+  role: 'PACIENTE', birthDate: '', phone: '',
   address: '', postCode: '', country: '',
   bloodType: '', allergies: '', medicalConditions: '', emergencyContact: ''
 });
@@ -136,13 +136,13 @@ const form = reactive({
 const originalForm = reactive({});
 
 const genderOptions = [
-  { value: 'MALE', label: 'Masculino' },
-  { value: 'FEMALE', label: 'Femenino' },
-  { value: 'OTHER', label: 'Otro' }
+  { value: 'HOMBRE', label: 'Masculino' },
+  { value: 'MUJER', label: 'Femenino' },
+  { value: 'OTRO', label: 'Otro' }
 ];
 const roleOptions = [
-  { value: 'PATIENT', label: 'Paciente' },
-  { value: 'DOCTOR', label: 'Médico' },
+  { value: 'PACIENTE', label: 'Paciente' },
+  { value: 'MEDICO', label: 'Médico' },
   { value: 'ADMIN', label: 'Administrador' }
 ];
 

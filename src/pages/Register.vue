@@ -197,7 +197,7 @@ const handleRegister = async () => {
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
                         required :disabled="isLoading">
                         <option value="PACIENTE">Paciente</option>
-                        <option value="PROFESIONAL">Profesional de la salud</option>
+                        <option value="MEDICO">Profesional de la salud</option>
                     </select>
                 </div>
 
