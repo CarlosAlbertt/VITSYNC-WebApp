@@ -37,6 +37,11 @@ const routes = [
         }*/
     },
     {
+        path: '/cuadro-medico',
+        name: 'cuadro-medico',
+        component: () => import('../pages/CuadroMedico.vue')
+    },
+    {
         path: '/login',
         name: 'login',
         component: Login

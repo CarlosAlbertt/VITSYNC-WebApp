@@ -1,46 +1,49 @@
 <template>
   <div class="flex flex-col min-h-screen">
-    <Header />
+    <!-- Primera vista (100vh) que incluye Header, Hero y Estadísticas -->
+    <div class="min-h-screen flex flex-col">
+      <Header class="shrink-0" />
 
-    <!-- Hero Section with Background Image -->
-    <section class="hero-section relative h-[650px] flex items-center text-white overflow-hidden">
-      <!-- Image Carousel -->
-      <transition-group name="slide-left" tag="div" class="absolute inset-0 w-full h-full">
-        <div v-for="(image, index) in heroImages" :key="index" v-show="index === currentHeroIndex"
-          class="absolute inset-0 w-full h-full bg-cover bg-center" :style="{ backgroundImage: `url(${image})` }">
-          <!-- Gradient Overlay -->
-          <div
-            class="absolute inset-0 bg-gradient-to-r from-teal-900 opacity-70 via-teal-800 opacity-70 to-transparent">
+      <!-- Hero Section with Background Image -->
+      <section class="hero-section relative flex-1 flex items-center text-white overflow-hidden">
+        <!-- Image Carousel -->
+        <transition-group name="slide-left" tag="div" class="absolute inset-0 w-full h-full">
+          <div v-for="(image, index) in heroImages" :key="index" v-show="index === currentHeroIndex"
+            class="absolute inset-0 w-full h-full bg-cover bg-center" :style="{ backgroundImage: `url(${image})` }">
+            <!-- Gradient Overlay -->
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-teal-900 opacity-70 via-teal-800 opacity-70 to-transparent">
+            </div>
+          </div>
+        </transition-group>
+
+        <!-- Hero Content - Aligned Left -->
+        <div class="relative z-10 px-6 md:px-12 lg:px-20 max-w-2xl">
+          <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">Tu Salud, Nuestra Prioridad</h1>
+          <p class="text-lg md:text-xl mb-8 font-light leading-relaxed">
+            Somos una empresa líder en servicios médicos especializados, comprometidos con ofrecer
+            atención de calidad y profesionales altamente capacitados para cuidar de tu bienestar
+            y el de tu familia.
+          </p>
+          <button
+            class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-10 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+            Solicitar Cita
+          </button>
+        </div>
+      </section>
+
+      <!-- Statistics Section -->
+      <section class="bg-teal-600 text-white py-16 shrink-0">
+        <div class="max-w-7xl mx-auto px-6">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div v-for="stat in statistics" :key="stat.label" class="stat-item">
+              <div class="text-5xl md:text-6xl font-bold mb-2">{{ stat.value }}</div>
+              <div class="text-lg md:text-xl font-light opacity-90">{{ stat.label }}</div>
+            </div>
           </div>
         </div>
-      </transition-group>
-
-      <!-- Hero Content - Aligned Left -->
-      <div class="relative z-10 px-6 md:px-12 lg:px-20 max-w-2xl">
-        <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">Tu Salud, Nuestra Prioridad</h1>
-        <p class="text-lg md:text-xl mb-8 font-light leading-relaxed">
-          Somos una empresa líder en servicios médicos especializados, comprometidos con ofrecer
-          atención de calidad y profesionales altamente capacitados para cuidar de tu bienestar
-          y el de tu familia.
-        </p>
-        <button
-          class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-10 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
-          Solicitar Cita
-        </button>
-      </div>
-    </section>
-
-    <!-- Statistics Section -->
-    <section class="bg-teal-600 text-white py-16">
-      <div class="max-w-7xl mx-auto px-6">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          <div v-for="stat in statistics" :key="stat.label" class="stat-item">
-            <div class="text-5xl md:text-6xl font-bold mb-2">{{ stat.value }}</div>
-            <div class="text-lg md:text-xl font-light opacity-90">{{ stat.label }}</div>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
 
     <!-- Medical Professionals Section -->
     <section class="py-32 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
