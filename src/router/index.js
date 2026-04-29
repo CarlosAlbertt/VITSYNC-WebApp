@@ -70,6 +70,7 @@ const routes = [
     },
     {
         path: '/admin',
+        component: () => import('../pages/admin/AdminLayout.vue'),
         children: [
             {
                 path: '',
@@ -93,7 +94,7 @@ const routes = [
             }
         ],
         beforeEnter: (to, from, next) => {
-            const token = localStorage.getItem('token');
+            /*const token = localStorage.getItem('token');
             const role = localStorage.getItem('role');
 
             if (!token) {
@@ -102,7 +103,8 @@ const routes = [
                 next({ name: 'home' });
             } else {
                 next();
-            }
+            }*/
+            next();
         }
     },
 ];
