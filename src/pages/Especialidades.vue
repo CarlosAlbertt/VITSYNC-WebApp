@@ -64,12 +64,13 @@
                 :key="especialidad.id"
                 class="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
               >
-                <!-- Specialty Icon (Updated) -->
-                <div class="h-40 bg-white dark:bg-gray-800 flex items-center justify-center relative group border-b border-gray-100 overflow-hidden">
-                  <img 
-                    :src="getEspecialidadImage(especialidad.nombre, especialidad.tipo)" 
+                <!-- Specialty Image -->
+                <div class="aspect-[4/3] relative overflow-hidden border-b border-gray-100 dark:border-gray-700 group">
+                  <img
+                    :src="getEspecialidadImage(especialidad.nombre, especialidad.tipo)"
                     :alt="especialidad.nombre"
-                    class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    class="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                    @error="onImageError"
                   />
                 </div>
 
@@ -234,8 +235,15 @@ export default {
         }
       }
       
-      // Fallback: usar medicina_general por defecto si no hay imagen específica
-      //return specialtyImages['../assets/images/specialties/medicina_general.png'];
+      // Fallback cuando no hay imagen específica para la especialidad
+      return specialtyImages['../assets/images/specialties/medicina_general.png'];
+    },
+
+    onImageError(event) {
+      const fallback = specialtyImages['../assets/images/specialties/medicina_general.png'];
+      if (fallback && event.target.src !== fallback) {
+        event.target.src = fallback;
+      }
     },
 
     getTipoBadgeClass(tipo) {
