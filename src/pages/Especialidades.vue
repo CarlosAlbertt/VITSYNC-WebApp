@@ -3,7 +3,7 @@
     <Header />
 
     <!-- Page Header -->
-    <section class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 transition-colors duration-300">
+    <section class="bg-white dark:bg-gray-800 dark:border-gray-700 transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-6 py-8">
         <nav class="text-sm text-gray-600 dark:text-gray-400 mb-4">
           <span>Inicio</span> / <span class="text-teal-600 font-semibold">Especialidades</span>
@@ -33,7 +33,7 @@
     <template v-else>
       <!-- Alphabetical Index -->
       <section
-        class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 sticky top-0 z-10 shadow-sm transition-colors duration-300">
+        class="bg-white dark:bg-gray-800 dark:border-gray-700 sticky top-0 z-10 shadow-sm transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-6 py-4">
           <div class="flex flex-wrap gap-3 justify-center">
             <button v-for="letter in alphabet" :key="letter" @click="scrollToLetter(letter)" :class="[
