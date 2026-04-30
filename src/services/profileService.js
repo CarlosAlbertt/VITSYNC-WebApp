@@ -15,185 +15,105 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
  */
 export const getProfile = async () => {
     const id = localStorage.getItem('id');
-    const response = await api.get(`/VitSync-app/${id}`, {
-        headers: getAuthHeader()
-    });
-    return response.data;
+    try {
+        const response = await api.get(`/VitSync-app/${id}`, {
+            headers: getAuthHeader()
+        });
+        return response.data;
+    } catch (err) {
+        // Mejor manejo de error para 401/403
+        console.error('[getProfile] Error obteniendo perfil:', err.response?.status, err.response?.data);
+        throw err;
+    }
 };
 
 /**
- * Actualiza el perfil. PENDIENTE de endpoint backend (PUT /api/user/profile).
- * Por ahora simula éxito después de 600ms.
+ * Actualiza el perfil via PUT /VitSync-app/api/users/{id}/profile.
  */
 export const updateProfile = async (data) => {
-    // TODO: cuando el backend implemente PUT /api/user/me, reemplazar esto:
-    // const response = await api.put('/api/user/profile', data, { headers: getAuthHeader() });
-    // return response.data;
-    await delay(600);
-    return { success: true, message: 'Perfil actualizado correctamente (mock)' };
+    const id = localStorage.getItem('id');
+    try {
+        const response = await api.put(`/VitSync-app/api/users/${id}/profile`, data, {
+            headers: getAuthHeader()
+        });
+        return response.data;
+    } catch (err) {
+        console.error('[updateProfile] status:', err.response?.status, '| data:', err.response?.data);
+        throw err;
+    }
 };
 
 /**
- * Subir avatar. PENDIENTE de endpoint backend (POST /api/user/avatar).
+ * Sube el avatar a POST /api/upload/avatar y actualiza la URL en el perfil
+ * via PATCH /VitSync-app/api/users/{id}/avatar.
  */
 export const uploadAvatar = async (file) => {
-    // TODO: Descomentar e integrar la versión final cuando Backend esté desplegado:
-    /*
     const formData = new FormData();
     formData.append('file', file);
+    // Content-Type: undefined anula el default 'application/json' de la instancia
+    // para que axios asigne multipart/form-data con el boundary correcto
     const response = await api.post('/api/upload/avatar', formData, {
-      headers: { ...getAuthHeader(), 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': undefined }
     });
-    const baseUrl = api.defaults.baseURL || 'https://vitsync-api-testing.onrender.com';
-    const avatarUrl = `${baseUrl}${response.data.url}`;
+    const avatarUrl = response.data.url;
     const id = localStorage.getItem('id');
     if (id) {
         await api.patch(`/VitSync-app/api/users/${id}/avatar`, { avatarUrl }, { headers: getAuthHeader() });
-        localStorage.setItem('avatarUrl', avatarUrl);
     }
     return { avatarUrl };
-    */
-    
-    // Mock provisional para Producción:
-    await delay(800);
-    const previewUrl = URL.createObjectURL(file);
-    return { avatarUrl: previewUrl };
 };
 
-// ─── INFORMES (MOCK) ──────────────────────────────────────────────────────────
-
-const MOCK_REPORTS = [
-    {
-        id: 1,
-        title: 'Análisis de sangre completo',
-        date: '2025-11-15',
-        type: 'Laboratorio',
-        specialty: 'Medicina General',
-        doctor: 'Dr. Javier Crespo',
-        status: 'Disponible',
-        favorite: false
-    },
-    {
-        id: 2,
-        title: 'Electrocardiograma',
-        date: '2025-10-03',
-        type: 'Diagnóstico',
-        specialty: 'Cardiología',
-        doctor: 'Dr. Javier Crespo',
-        status: 'Revisado',
-        favorite: true
-    },
-    {
-        id: 3,
-        title: 'Radiografía de tórax',
-        date: '2025-08-22',
-        type: 'Imagen',
-        specialty: 'Traumatología',
-        doctor: 'Dr. Pablo Escolano',
-        status: 'Disponible',
-        favorite: false
-    },
-    {
-        id: 4,
-        title: 'Receta - Amoxicilina 500mg',
-        date: '2025-07-10',
-        type: 'Receta electrónica',
-        specialty: 'Pediatría',
-        doctor: 'Dr. Carlos Albert',
-        status: 'Archivado',
-        favorite: false
-    }
-];
+// ─── INFORMES ──────────────────────────────────────────────────────────
 
 export const getReports = async (filters = {}) => {
-    // TODO: reemplazar con llamada real cuando el backend implemente GET /api/user/reports
-    await delay(400);
-    let reports = [...MOCK_REPORTS];
+    // Usamos el nuevo endpoint /api/informes/me que ya devuelve los datos correctos del usuario autenticado
+    const response = await api.get('/api/informes/me', { headers: getAuthHeader() });
+    const raw = response.data;
+    let reports = Array.isArray(raw) ? raw : (raw?.content ?? raw?.data ?? raw?.informes ?? []);
+    
+    // Aplicamos filtros locales
     if (filters.type) reports = reports.filter(r => r.type === filters.type);
     if (filters.status) reports = reports.filter(r => r.status === filters.status);
     if (filters.search) {
         const q = filters.search.toLowerCase();
         reports = reports.filter(r =>
-            r.title.toLowerCase().includes(q) ||
-            r.doctor.toLowerCase().includes(q) ||
-            r.specialty.toLowerCase().includes(q)
+            r.title?.toLowerCase().includes(q) ||
+            r.doctor?.toLowerCase().includes(q) ||
+            r.specialty?.toLowerCase().includes(q)
         );
     }
     return reports;
 };
 
 export const getReportById = async (id) => {
-    await delay(300);
-    return MOCK_REPORTS.find(r => r.id === id) || null;
+    const reports = await getReports();
+    return reports.find(r => r.id === id) || null;
 };
 
-// ─── CITAS (MOCK) ─────────────────────────────────────────────────────────────
+export const downloadReportPdf = async (id) => {
+    const response = await api.get(`/api/informes/${id}/pdf`, {
+        headers: getAuthHeader(),
+        responseType: 'blob'
+    });
+    return response.data;
+};
 
-const MOCK_APPOINTMENTS = [
-    {
-        id: 1,
-        date: '2026-02-25',
-        time: '10:30',
-        doctor: 'Dr. Javier Crespo',
-        specialty: 'Cardiología',
-        type: 'Presencial',
-        location: 'Consulta 3, Planta 1',
-        status: 'Confirmada',
-        reason: 'Revisión anual',
-        notes: ''
-    },
-    {
-        id: 2,
-        date: '2026-03-10',
-        time: '16:00',
-        doctor: 'Dr. Carlos Albert',
-        specialty: 'Pediatría',
-        type: 'Telemedicina',
-        location: null,
-        status: 'Programada',
-        reason: 'Consulta seguimiento',
-        notes: 'Traer informes anteriores'
-    },
-    {
-        id: 3,
-        date: '2025-12-05',
-        time: '09:00',
-        doctor: 'Dr. Pablo Escolano',
-        specialty: 'Traumatología',
-        type: 'Presencial',
-        location: 'Consulta 7, Planta 2',
-        status: 'Completada',
-        reason: 'Dolor rodilla',
-        notes: 'Se recetó fisioterapia'
-    },
-    {
-        id: 4,
-        date: '2025-10-15',
-        time: '11:00',
-        doctor: 'Dr. Javier Crespo',
-        specialty: 'Cardiología',
-        type: 'Presencial',
-        location: 'Consulta 3, Planta 1',
-        status: 'Cancelada',
-        reason: 'Chequeo',
-        notes: ''
-    }
-];
+// ─── CITAS ─────────────────────────────────────────────────────────────
 
 export const getAppointments = async (filters = {}) => {
-    // TODO: reemplazar con GET /api/user/appointments cuando exista
-    await delay(400);
-    let appts = [...MOCK_APPOINTMENTS];
+    // Usamos el nuevo endpoint /api/citas/me que devuelve CitaResponse
+    const response = await api.get('/api/citas/me', { headers: getAuthHeader() });
+    const raw = response.data;
+    let appts = Array.isArray(raw) ? raw : (raw?.content ?? raw?.data ?? raw?.citas ?? []);
+    
     if (filters.status) appts = appts.filter(a => a.status === filters.status);
     if (filters.specialty) appts = appts.filter(a => a.specialty === filters.specialty);
+    
     return appts;
 };
 
 export const cancelAppointment = async (id, reason = '') => {
-    // TODO: reemplazar con DELETE /api/user/appointments/:id
-    await delay(500);
-    const appt = MOCK_APPOINTMENTS.find(a => a.id === id);
-    if (appt) appt.status = 'Cancelada';
+    await api.put(`/api/citas/${id}/cancel`, {}, { headers: getAuthHeader() });
     return { success: true };
 };
 
@@ -212,12 +132,6 @@ export const uploadAppointmentDoc = async (appointmentId, file) => {
     // Mock provisional para Producción:
     await delay(500);
     const docUrl = URL.createObjectURL(file);
-    
-    const appt = MOCK_APPOINTMENTS.find(a => a.id === appointmentId);
-    if (appt) {
-        if (!appt.documents) appt.documents = [];
-        appt.documents.push({ name: file.name, url: docUrl });
-    }
     return { success: true, url: docUrl };
 };
 
@@ -263,11 +177,12 @@ export const updateSettings = async (data) => {
 };
 
 export const changePassword = async (currentPassword, newPassword) => {
-    // TODO: reemplazar con POST /api/user/change-password
-    // Por ahora, simular validación básica
-    await delay(700);
-    if (!currentPassword || !newPassword) throw new Error('Faltan campos obligatorios');
-    return { success: true, message: 'Contraseña actualizada correctamente (mock)' };
+    const id = localStorage.getItem('id');
+    const response = await api.patch(`/VitSync-app/api/users/${id}/password`, {
+        currentPassword,
+        newPassword
+    }, { headers: getAuthHeader() });
+    return response.data;
 };
 
 export const getSessions = async () => {
@@ -282,5 +197,63 @@ export const getSessions = async () => {
 export const deleteSession = async (id) => {
     // TODO: reemplazar con DELETE /api/user/sessions/:id
     await delay(400);
+    return { success: true };
+};
+
+// ─── GESTIÓN DE DATOS (RGPD) ────────────────────────────────────────────────
+
+export const exportUserData = async () => {
+    const response = await api.get('/VitSync-app/api/users/me/export', { headers: getAuthHeader() });
+    return response.data;
+};
+
+export const suspendAccount = async () => {
+    await api.put('/VitSync-app/api/users/status', {}, { headers: getAuthHeader() });
+    return { success: true };
+};
+
+export const deleteAccount = async () => {
+    const id = localStorage.getItem('id');
+    await api.delete(`/VitSync-app/${id}`, { headers: getAuthHeader() });
+    return { success: true };
+};
+
+// ─── SALUD (INDICADORES) ─────────────────────────────────────────────────────
+
+export const getSaludResumen = async () => {
+    const response = await api.get('/api/salud/resumen', { headers: getAuthHeader() });
+    return response.data;
+};
+
+export const getSaludDetalle = async (categoria) => {
+    const response = await api.get(`/api/salud/${categoria}`, { headers: getAuthHeader() });
+    return response.data;
+};
+// ─── SEGURIDAD AVANZADA (REAL) ──────────────────────────────────────────────
+export const setup2FA = async (enabled) => {
+    const id = localStorage.getItem('id');
+    await api.put(`/VitSync-app/api/users/${id}/security/2fa`, { enabled }, { headers: getAuthHeader() });
+    return { success: true, qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VITSYNC-AUTH' };
+};
+
+export const getSecurityQuestions = async () => {
+    // Los datos de seguridad se cargan con el perfil
+    const profile = await getProfile();
+    if (!profile.securityQuestion1) return [];
+    return [
+        { question: profile.securityQuestion1, answer: profile.securityAnswer1 },
+        { question: profile.securityQuestion2, answer: profile.securityAnswer2 }
+    ];
+};
+
+export const saveSecurityQuestions = async (questions) => {
+    const id = localStorage.getItem('id');
+    const payload = {
+        q1: questions[0].question,
+        a1: questions[0].answer,
+        q2: questions[1].question,
+        a2: questions[1].answer
+    };
+    await api.post(`/VitSync-app/api/users/${id}/security/questions`, payload, { headers: getAuthHeader() });
     return { success: true };
 };

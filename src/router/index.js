@@ -13,7 +13,6 @@ const routes = [
         path: '/',
         name: 'home',
         component: Home,
-        /*
         beforeEnter: (to, from, next) => {
             if (isAuthenticated()) {
                 next();
@@ -21,20 +20,18 @@ const routes = [
                 next({ name: 'login' });
             }
         }
-        */
     },
     {
         path: '/especialidades',
         name: 'especialidades',
         component: Especialidades,
-        /*
         beforeEnter: (to, from, next) => {
-            /*if (isAuthenticated()) {
+            if (isAuthenticated()) {
                 next();
             } else {
                 next({ name: 'login' });
             }
-        }*/
+        }
     },
     {
         path: '/cuadro-medico',
@@ -69,6 +66,23 @@ const routes = [
         }
     },
     {
+        path: '/mi-salud/:categoria',
+        name: 'mi-salud-detalle',
+        component: () => import('../pages/MiSaludDetalle.vue'),
+        beforeEnter: (to, from, next) => {
+            if (isAuthenticated()) {
+                next();
+            } else {
+                next({ name: 'login' });
+            }
+        }
+    },
+    {
+        path: '/comunicacion',
+        name: 'comunicacion',
+        component: () => import('../pages/Comunicacion.vue')
+    },
+    {
         path: '/admin',
         component: () => import('../pages/admin/AdminLayout.vue'),
         children: [
@@ -94,7 +108,7 @@ const routes = [
             }
         ],
         beforeEnter: (to, from, next) => {
-            /*const token = localStorage.getItem('token');
+            const token = localStorage.getItem('token');
             const role = localStorage.getItem('role');
 
             if (!token) {
@@ -103,8 +117,7 @@ const routes = [
                 next({ name: 'home' });
             } else {
                 next();
-            }*/
-            next();
+            }
         }
     },
 ];
