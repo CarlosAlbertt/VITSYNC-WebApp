@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  webapp:
+    container_name: vitsync-webapp-prod
+    restart: always
+    build:
+      context: .
+      target: production
+      args:
+        # Estos argumentos se inyectan durante el build de la imagen.
+        # En tu servidor o CI/CD real, asegúrate de reemplazarlos o pasarlos por entorno.
+        - VITE_API_URL=${VITE_API_URL:-https://api.vitsync.com}
+        - VITE_TALKJS_APP_ID=${VITE_TALKJS_APP_ID:-tu-id}
+        - VITE_API_KEY=${VITE_API_KEY:-tu-api-key}
+    ports:
+      - "80:80"
+    # IMPORTANTE: En producción NO montamos volúmenes locales de código.
+    # El código estático ya va incrustado en la etapa 'production' con Nginx.

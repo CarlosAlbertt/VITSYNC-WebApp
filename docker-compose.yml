@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  webapp:
+    container_name: vitsync-webapp-dev
+    build:
+      context: .
+      target: dev
+    ports:
+      - "5173:5173"
+    volumes:
+      # Monta el código local dentro del contenedor para Hot-Reloading
+      - .:/app
+      # Protege el node_modules del contenedor para que no se sobreescriba con el host (Windows)
+      - /app/node_modules
+    env_file:
+      - .env
+    # El comando por defecto. Si quieres usar 'docker exec' puedes cambiarlo por 'tail -f /dev/null'
+    command: npm run dev -- --host
