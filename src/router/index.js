@@ -52,6 +52,11 @@ const routes = [
         component: () => import('../pages/VerifyAccount.vue')
     },
     {
+        path: '/agendar-cita',
+        name: 'agendar-cita',
+        component: () => import('../pages/AgendaCita.vue')
+    },
+    {
         path: '/perfil',
         name: 'perfil',
         component: () => import('../pages/Perfil.vue'),
