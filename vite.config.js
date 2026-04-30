@@ -17,4 +17,14 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  server: {
+    host: true,
+    port: 5173,
+    watch: {
+      // Necesario en Docker sobre Windows: inotify no funciona en el bridge
+      // de Docker Desktop, polling detecta cambios de forma fiable.
+      usePolling: true,
+      interval: 300,
+    },
+  },
 })

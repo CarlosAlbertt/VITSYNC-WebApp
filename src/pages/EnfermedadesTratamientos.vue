@@ -48,8 +48,17 @@
           </span>
         </div>
 
+        <!-- Loading State -->
+        <div v-if="isLoadingEnfermedades" class="text-center py-16">
+          <svg class="animate-spin h-10 w-10 text-teal-500 mx-auto" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p class="mt-4 text-gray-500 dark:text-gray-400">Cargando enfermedades...</p>
+        </div>
+
         <!-- Empty State -->
-        <div v-if="filteredEnfermedades.length === 0" 
+        <div v-else-if="filteredEnfermedades.length === 0"
              class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <div class="bg-gray-50 dark:bg-gray-700/50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg class="h-10 w-10 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,7 +75,7 @@
         </div>
 
         <!-- Accordion List -->
-        <div v-else class="space-y-4">
+        <div v-else-if="filteredEnfermedades.length > 0" class="space-y-4">
           <div 
             v-for="enfermedad in filteredEnfermedades" 
             :key="enfermedad.id"
@@ -164,65 +173,65 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Header from '../components/HeaderComponent.vue';
 import Footer from '../components/FooterComponent.vue';
-import { enfermedades } from '../data/enfermedades';
+import { fetchEnfermedades } from '../store/enfermedades';
 import { fetchEspecialidades } from '../store/especialidades';
 
 const router = useRouter();
 const searchQuery = ref('');
 const expandedAccordionId = ref(null);
+const enfermedadesList = ref([]);
+const isLoadingEnfermedades = ref(false);
 const especialidadesList = ref([]);
 const isLoadingEspecialidades = ref(false);
 const errorEspecialidadId = ref(null);
 
 onMounted(async () => {
   try {
+    isLoadingEnfermedades.value = true;
     isLoadingEspecialidades.value = true;
-    especialidadesList.value = await fetchEspecialidades();
+    [enfermedadesList.value, especialidadesList.value] = await Promise.all([
+      fetchEnfermedades(),
+      fetchEspecialidades(),
+    ]);
   } catch (error) {
-    console.error("Error al cargar especialidades:", error);
+    console.error("Error al cargar datos:", error);
   } finally {
+    isLoadingEnfermedades.value = false;
     isLoadingEspecialidades.value = false;
   }
 });
 
 const filteredEnfermedades = computed(() => {
   const query = searchQuery.value.toLowerCase().trim();
-  if (!query) return enfermedades;
-  
-  return enfermedades.filter(enf => {
+  if (!query) return enfermedadesList.value;
+
+  return enfermedadesList.value.filter(enf => {
     const matchNombre = enf.nombre.toLowerCase().includes(query);
-    const matchDesc = enf.descripcion.toLowerCase().includes(query);
+    const matchDesc = enf.descripcion?.toLowerCase().includes(query);
     const matchEsp = enf.especialidadRelacionada.toLowerCase().includes(query);
     const matchTratamiento = enf.tratamientos.some(t => t.toLowerCase().includes(query));
-    
+
     return matchNombre || matchDesc || matchEsp || matchTratamiento;
   });
 });
 
 const toggleAccordion = (id) => {
-  if (expandedAccordionId.value === id) {
-    expandedAccordionId.value = null; // Collapse if already open
-  } else {
-    expandedAccordionId.value = id; // Open new one
-  }
+  expandedAccordionId.value = expandedAccordionId.value === id ? null : id;
 };
 
 const isExpanded = (id) => expandedAccordionId.value === id;
 
 const verEspecialidad = (nombreEspecialidad) => {
   errorEspecialidadId.value = null;
-  // Buscamos el ID de la especialidad en la lista obtenida del backend
   const especialidad = especialidadesList.value.find(
     e => e.nombre.toLowerCase() === nombreEspecialidad.toLowerCase()
   );
-  
+
   if (especialidad) {
     router.push(`/especialidad/${especialidad.id}`);
   } else {
-    // Manejar caso donde la especialidad no existe en la BD
     console.warn(`La especialidad ${nombreEspecialidad} no se encontró en la base de datos.`);
-    // Buscar el ID de la enfermedad para mostrar el error en su tarjeta
-    const enf = enfermedades.find(e => e.especialidadRelacionada === nombreEspecialidad);
+    const enf = enfermedadesList.value.find(e => e.especialidadRelacionada === nombreEspecialidad);
     if (enf) errorEspecialidadId.value = enf.id;
   }
 };
