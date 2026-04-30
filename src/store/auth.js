@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import api from '../services/api';
+import { resetProfile } from './profile';
 
 // Estado reactivo de autenticación
 export const isAuthenticated = ref(localStorage.getItem('token') !== null);
@@ -59,12 +60,8 @@ export const logout = () => {
     localStorage.removeItem('id');
 
     isAuthenticated.value = false;
-    currentUser.value = {
-        nif: null,
-        email: null,
-        role: null,
-        id: null
-    };
+    currentUser.value = { nif: null, email: null, role: null, id: null };
+    resetProfile();
 };
 
 // Obtener token para peticiones autenticadas

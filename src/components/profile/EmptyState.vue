@@ -17,6 +17,7 @@
 
 <script setup>
 defineProps({
+  icon: { type: String, default: '📁' },
   title: { type: String, default: 'Sin datos' },
   description: { type: String, default: 'No hay elementos para mostrar.' },
   actionText: { type: String, default: null }

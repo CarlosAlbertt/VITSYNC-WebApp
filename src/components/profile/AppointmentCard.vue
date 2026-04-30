@@ -1,65 +1,75 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 transition-all hover:shadow-md">
-    <!-- Header -->
-    <div class="flex items-start justify-between mb-3">
+  <div class="bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-[2rem] border border-slate-100 dark:border-slate-700/50 shadow-sm p-7 transition-all duration-300 hover:shadow-xl group">
+    <!-- Header: Doctor & Status -->
+    <div class="flex items-start justify-between mb-8">
       <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2 mb-1">
-          <h4 class="font-semibold text-gray-800 dark:text-gray-100 text-sm truncate">{{ appointment.doctor }}</h4>
-        </div>
-        <p class="text-xs text-teal-600 dark:text-teal-400 font-medium">{{ appointment.specialty }}</p>
+        <h4 class="text-xl font-black text-slate-800 dark:text-white truncate group-hover:text-teal-600 transition-colors tracking-tight">
+          {{ appointment.doctor }}
+        </h4>
+        <p class="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-[0.2em] mt-2">
+          {{ appointment.specialty }}
+        </p>
       </div>
-      <span class="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold ml-2" :class="statusClass">
+      <span 
+        class="flex-shrink-0 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm border border-transparent"
+        :class="statusClass"
+      >
         {{ appointment.status }}
       </span>
     </div>
 
-    <!-- Detalles -->
-    <div class="grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-300 mb-4">
-      <div class="flex items-center gap-1">
-        <span>{{ formatDate(appointment.date) }}</span>
+    <!-- Details Grid (No icons) -->
+    <div class="grid grid-cols-2 gap-y-8 gap-x-4 mb-10">
+      <div class="flex flex-col">
+        <span class="text-[10px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-widest mb-1">Fecha</span>
+        <span class="text-base font-bold text-slate-700 dark:text-slate-200">{{ formatDate(appointment.date) }}</span>
       </div>
-      <div class="flex items-center gap-1">
-        <span>{{ appointment.time }}</span>
+      
+      <div class="flex flex-col">
+        <span class="text-[10px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-widest mb-1">Hora</span>
+        <span class="text-base font-bold text-slate-700 dark:text-slate-200">{{ appointment.time }}</span>
       </div>
-      <div class="flex items-center gap-1">
-        <span>{{ appointment.type }}</span>
+
+      <div class="flex flex-col">
+        <span class="text-[10px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-widest mb-1">Modalidad</span>
+        <span class="text-base font-bold text-slate-700 dark:text-slate-200">{{ appointment.type }}</span>
       </div>
-      <div v-if="appointment.location" class="flex items-center gap-1">
-        <span class="truncate">{{ appointment.location }}</span>
+
+      <div v-if="appointment.location" class="flex flex-col">
+        <span class="text-[10px] uppercase font-black text-slate-400 dark:text-slate-500 tracking-widest mb-1">Ubicación</span>
+        <span class="text-base font-bold text-slate-700 dark:text-slate-200 truncate">{{ appointment.location }}</span>
       </div>
     </div>
 
-    <p v-if="appointment.reason" class="text-xs text-gray-500 dark:text-gray-400 mb-4 italic">
-      "{{ appointment.reason }}"
-    </p>
+    <!-- Reason (if exists) -->
+    <div v-if="appointment.reason" class="mb-10 p-5 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border-l-4 border-teal-500/30">
+      <span class="block text-[10px] uppercase font-black text-slate-400 mb-2 tracking-widest">Motivo de consulta</span>
+      <p class="text-sm text-slate-600 dark:text-slate-300 italic leading-relaxed">
+        {{ appointment.reason }}
+      </p>
+    </div>
 
-    <!-- Acciones (solo para citas futuras activas) -->
-    <div v-if="showActions" class="flex gap-2 flex-wrap">
+    <!-- Actions -->
+    <div class="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-slate-800/50">
+      <div class="flex items-center gap-2">
+        <div v-if="appointment.status === 'Completada'" class="text-teal-600 dark:text-teal-400 font-black text-[11px] uppercase tracking-widest">
+          Cita Finalizada
+        </div>
+        <div v-else-if="appointment.status === 'Cancelada'" class="text-red-400 dark:text-red-500/60 font-black text-[11px] uppercase tracking-widest">
+          Cita Cancelada
+        </div>
+        <div v-else class="text-[11px] text-slate-400 font-bold uppercase tracking-widest">
+          Cita Pendiente
+        </div>
+      </div>
+
       <button
-        v-if="appointment.type === 'Telemedicina'"
-        @click="$emit('start-video', appointment)"
-        class="px-3 py-1.5 text-xs font-medium rounded-lg bg-teal-600 text-white hover:bg-teal-700 transition-colors shadow-sm"
-      >
-        Iniciar videoconsulta
-      </button>
-      <button
-        @click="$emit('upload-docs', appointment)"
-        class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
-      >
-        Subir docs
-      </button>
-      <button
+        v-if="showActions"
         @click="$emit('cancel', appointment)"
-        class="px-3 py-1.5 text-xs font-medium rounded-lg border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors"
+        class="px-8 py-3 text-[11px] font-black uppercase tracking-[0.15em] rounded-xl bg-slate-900 text-white hover:bg-red-600 transition-all duration-300 shadow-lg shadow-slate-200 dark:shadow-none"
       >
-        Cancelar
+        Anular Cita
       </button>
-    </div>
-    <div v-else-if="appointment.status === 'Completada'" class="text-xs text-gray-400 italic">
-      Cita completada
-    </div>
-    <div v-else-if="appointment.status === 'Cancelada'" class="text-xs text-red-400 italic">
-      Cita cancelada
     </div>
   </div>
 </template>
@@ -70,23 +80,21 @@ import { computed } from 'vue';
 const props = defineProps({
   appointment: { type: Object, required: true }
 });
-defineEmits(['cancel', 'start-video', 'upload-docs']);
+defineEmits(['cancel']);
 
 const showActions = computed(() => ['Programada', 'Confirmada'].includes(props.appointment.status));
 
-const typeIcon = computed(() => props.appointment.type === 'Telemedicina' ? 'Virtual' : 'Presencial');
-
 const statusClass = computed(() => ({
-  'Programada':  'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-  'Confirmada':  'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300',
-  'Completada':  'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
-  'Cancelada':   'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400',
-  'En curso':    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-}[props.appointment.status] || 'bg-gray-100 text-gray-600'));
+  'Programada':  'bg-blue-50 text-blue-600 dark:bg-blue-500/10 border-blue-100/50',
+  'Confirmada':  'bg-teal-50 text-teal-600 dark:bg-teal-500/10 border-teal-100',
+  'Completada':  'bg-slate-100 text-slate-500 dark:bg-slate-700',
+  'Cancelada':   'bg-red-50 text-red-500 dark:bg-red-500/10 border-red-100',
+  'En curso':    'bg-amber-50 text-amber-600 dark:bg-amber-500/10 border-amber-100'
+}[props.appointment.status] || 'bg-slate-100 text-slate-600'));
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
   const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
 };
 </script>

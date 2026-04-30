@@ -26,8 +26,7 @@
       >
         <option value="">Todos los estados</option>
         <option value="Disponible">Disponible</option>
-        <option value="Revisado">Revisado</option>
-        <option value="Archivado">Archivado</option>
+        <option value="Pendiente">Pendiente</option>
       </select>
     </div>
 
@@ -37,6 +36,7 @@
     <!-- Sin resultados -->
     <EmptyState
       v-else-if="!reports.length"
+      icon="📄"
       title="No hay informes"
       description="No se encontraron informes médicos con los filtros seleccionados."
     />
@@ -51,6 +51,7 @@
         @download="downloadReport"
         @share="shareReport"
         @toggle-favorite="toggleFavorite"
+        @filter-status="setQuickFilter"
       />
     </div>
 
@@ -120,7 +121,7 @@ import { ref, computed, onMounted } from 'vue';
 import LoadingSpinner from '../LoadingSpinner.vue';
 import EmptyState from '../EmptyState.vue';
 import ReportCard from '../ReportCard.vue';
-import { getReports } from '../../../services/profileService';
+import { getReports, downloadReportPdf } from '../../../services/profileService';
 import { showToast } from '../../../store/profile';
 
 const reports = ref([]);
@@ -149,6 +150,9 @@ const fetchReports = async () => {
       type: filterType.value,
       status: filterStatus.value
     });
+  } catch {
+    reports.value = [];
+    showToast('Error al cargar los informes. Inténtalo de nuevo.', 'error');
   } finally {
     loading.value = false;
   }
@@ -156,9 +160,18 @@ const fetchReports = async () => {
 
 const viewReport = (report) => { selectedReport.value = report; };
 
-const downloadReport = (report) => {
-  // TODO: reemplazar con descarga real del backend
-  showToast(`Descargando "${report.title}"...`, 'info');
+const downloadReport = async (report) => {
+  try {
+    const blob = await downloadReportPdf(report.id);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${report.title}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    showToast('Error al descargar el informe. Inténtalo de nuevo.', 'error');
+  }
 };
 
 const shareReport = (report) => {
@@ -173,6 +186,11 @@ const saveReportNotes = (report) => {
 const toggleFavorite = (report) => {
   report.favorite = !report.favorite;
   showToast(report.favorite ? 'Añadido a favoritos' : 'Eliminado de favoritos');
+};
+
+const setQuickFilter = (status) => {
+  filterStatus.value = status;
+  fetchReports();
 };
 
 onMounted(fetchReports);

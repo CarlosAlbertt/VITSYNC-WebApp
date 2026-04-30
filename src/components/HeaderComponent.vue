@@ -175,9 +175,10 @@ const menuItems = [
   { name: 'Cuadro médico', route: '/cuadro-medico' },
   { name: 'Especialidades', route: '/especialidades' },
   { name: 'Enfermedades y tratamientos', route: '/enfermedades-tratamientos' },
-  { name: 'Comunicación', route: null },
+  { name: 'Comunicación', route: '/comunicacion' },
   { name: 'Orientador de salud', route: null }
 ]
+
 </script>
 
 <style scoped>
