@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-[var(--bg-base)] p-8">
-        <div class="max-w-7xl mx-auto">
+        <div class="max-w-screen-2xl mx-auto">
             <header class="mb-12 text-center">
                 <h1 class="text-4xl font-extrabold text-[var(--text-primary)] tracking-tight sm:text-5xl mb-4">
                     Panel de Administración
@@ -10,7 +10,7 @@
                 </p>
             </header>
 
-            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
                 <!-- Card Usuarios -->
                 <router-link to="/admin/users"
                     class="block group relative bg-[var(--bg-surface)] p-6 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-[var(--border)] overflow-hidden">
@@ -61,6 +61,33 @@
                     <div
                         class="flex items-center text-teal-600 font-medium group-hover:translate-x-1 transition-transform">
                         Gestionar Médicos
+                        <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </div>
+                </router-link>
+
+                <!-- Card Enfermedades -->
+                <router-link to="/admin/enfermedades"
+                    class="block group relative bg-[var(--bg-surface)] p-6 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-[var(--border)] overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <svg class="w-24 h-24 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div class="flex items-center space-x-4 mb-4">
+                        <div class="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-lg group-hover:bg-orange-100 dark:group-hover:bg-orange-900/50 transition-colors">
+                            <svg class="w-8 h-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-[var(--text-primary)]">Enfermedades</h3>
+                    </div>
+                    <p class="text-[var(--text-secondary)] mb-4">Gestiona el catálogo de enfermedades y sus tratamientos asociados.</p>
+                    <div class="flex items-center text-orange-600 font-medium group-hover:translate-x-1 transition-transform">
+                        Gestionar Enfermedades
                         <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
