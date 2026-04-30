@@ -45,14 +45,20 @@
             </Transition>
             </button>
           </div>
-          <router-link v-if="!isAuthenticated" to="/login"
-            class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700 transition-colors">
-            Iniciar sesion
-          </router-link>
-          <button v-else @click="handleLogout"
-            class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700 transition-colors">
-            Cerrar sesion
-          </button>
+          <div class="flex items-center gap-6">
+            <router-link v-if="isAuthenticated && currentUser.role === 'ADMIN'" to="/admin"
+              class="bg-teal-800 dark:bg-teal-700 text-white px-3 py-1 rounded text-sm font-medium hover:bg-teal-900 dark:hover:bg-teal-600 transition-colors">
+              Panel Admin
+            </router-link>
+            <router-link v-if="!isAuthenticated" to="/login"
+              class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700 transition-colors">
+              Iniciar sesion
+            </router-link>
+            <button v-else @click="handleLogout"
+              class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700 transition-colors">
+              Cerrar sesion
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -135,7 +141,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router'
-import { isAuthenticated, logout } from '../store/auth'
+import { isAuthenticated, currentUser, logout } from '../store/auth'
 import { useDark, useToggle } from '@vueuse/core'
 import LogoutModal from './LogoutModal.vue';
 

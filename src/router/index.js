@@ -115,6 +115,11 @@ const routes = [
                 path: 'especialidades',
                 name: 'admin-especialidades',
                 component: () => import('../pages/admin/AdminEspecialidades.vue')
+            },
+            {
+                path: 'enfermedades',
+                name: 'admin-enfermedades',
+                component: () => import('../pages/admin/AdminEnfermedades.vue')
             }
         ],
         beforeEnter: (to, from, next) => {
