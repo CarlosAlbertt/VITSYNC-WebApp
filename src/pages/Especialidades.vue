@@ -75,7 +75,9 @@
 
                 <!-- Specialty Info -->
                 <div class="p-6 flex flex-col grow">
-                  <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">{{ especialidad.nombre }}</h3>
+                  <router-link :to="`/especialidad/${especialidad.id}`" class="hover:text-teal-600 transition-colors">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">{{ especialidad.nombre }}</h3>
+                  </router-link>
                   <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">{{ especialidad.descripcion }}</p>
 
                   <!-- Tipo badge -->
