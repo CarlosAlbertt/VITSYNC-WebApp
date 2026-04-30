@@ -1,6 +1,7 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { isAuthenticated } from './store/auth';
+import { loadProfile } from './store/profile';
 import ChatWidget from './components/chat/ChatWidget.vue'; // Cambiar ChatWindow por ChatWidget
 import ChatButton from './components/chat/ChatButton.vue';
 
@@ -9,6 +10,12 @@ const isChatOpen = ref(false);
 const toggleChat = () => {
   isChatOpen.value = !isChatOpen.value;
 };
+
+onMounted(() => {
+  if (isAuthenticated.value) {
+    loadProfile();
+  }
+});
 </script>
 
 <template>
