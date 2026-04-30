@@ -39,6 +39,16 @@ const routes = [
         component: () => import('../pages/CuadroMedico.vue')
     },
     {
+        path: '/enfermedades-tratamientos',
+        name: 'enfermedades',
+        component: () => import('../pages/EnfermedadesTratamientos.vue')
+    },
+    {
+        path: '/especialidad/:id',
+        name: 'especialidad-detalle',
+        component: () => import('../pages/EspecialidadDetalle.vue')
+    },
+    {
         path: '/login',
         name: 'login',
         component: Login
