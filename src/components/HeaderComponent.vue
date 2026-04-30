@@ -1,7 +1,7 @@
 <template>
   <header class="bg-[var(--bg-surface)] border-b border-[var(--border)] shadow-sm">
     <!-- Barra superior de contacto e idioma -->
-    <div class="bg-teal-700 dark:bg-teal-900/80 text-white text-sm px-4 py-2 relative z-50">
+    <div class="topbar text-white text-sm px-4 py-2 relative z-50">
       <div class="max-w-7xl mx-auto">
         <!-- Mobile Toggle (visible < 550px) -->
         <div class="flex justify-center min-[550px]:hidden">
@@ -46,11 +46,11 @@
             </button>
           </div>
           <router-link v-if="!isAuthenticated" to="/login"
-            class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700 transition-colors">
+            class="topbar-btn px-3 py-1 rounded text-sm font-medium transition-colors">
             Iniciar sesion
           </router-link>
           <button v-else @click="handleLogout"
-            class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700 transition-colors">
+            class="topbar-btn px-3 py-1 rounded text-sm font-medium transition-colors">
             Cerrar sesion
           </button>
         </div>
@@ -185,6 +185,33 @@ const menuItems = [
 </script>
 
 <style scoped>
+/* ─── Barra superior ─────────────────────────────── */
+.topbar {
+  background-color: #0D9488; /* teal-600 en claro */
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+html.dark .topbar {
+  background-color: var(--bg-surface); /* #141E2E */
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+/* ─── Botón topbar (Iniciar/Cerrar sesión) ─────── */
+.topbar-btn {
+  background-color: #fff;
+  color: #0D9488;
+}
+.topbar-btn:hover {
+  background-color: #f1f5f9;
+}
+html.dark .topbar-btn {
+  background-color: var(--bg-elevated); /* #1E2D42 */
+  color: var(--accent); /* #14B8A6 */
+}
+html.dark .topbar-btn:hover {
+  background-color: #273a52;
+}
+
 /* Botón toggle */
 .dark-toggle-btn {
   padding: 0.5rem;
