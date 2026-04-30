@@ -41,7 +41,7 @@
               v-model="searchQuery"
               type="text" 
               placeholder="Busca respuestas sobre citas, informes, dudas..."
-              class="flex-1 bg-transparent border-none focus:ring-0 text-slate-800 dark:text-white placeholder-slate-400 py-4 text-lg"
+              class="flex-1 bg-transparent border-none focus:outline-none text-slate-800 dark:text-white placeholder-slate-400 py-4 text-lg"
             />
             <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white px-8 py-4 rounded-[1.5rem] font-bold transition-all hover:shadow-lg hover:shadow-teal-500/30">
               Buscar
