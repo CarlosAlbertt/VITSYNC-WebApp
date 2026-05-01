@@ -95,8 +95,9 @@ const cancelTarget = ref(null);
 const cancelling = ref(false);
 
 const tabs = computed(() => [
-  { id: 'upcoming', label: 'Próximas', count: upcomingCount.value },
-  { id: 'past',     label: 'Pasadas',  count: pastCount.value }
+  { id: 'upcoming',  label: 'Próximas',   count: upcomingCount.value },
+  { id: 'past',      label: 'Historial',   count: pastCount.value },
+  { id: 'cancelled', label: 'Canceladas', count: cancelledCount.value }
 ]);
 
 const today = new Date().toISOString().split('T')[0];
@@ -106,7 +107,11 @@ const upcomingCount = computed(() =>
 );
 
 const pastCount = computed(() =>
-  appointments.value.filter(a => a.date < today || ['Completada','Cancelada'].includes(a.status)).length
+  appointments.value.filter(a => (a.date < today && a.status !== 'Cancelada') || a.status === 'Completada').length
+);
+
+const cancelledCount = computed(() =>
+  appointments.value.filter(a => a.status === 'Cancelada').length
 );
 
 const filteredAppointments = computed(() => {
