@@ -35,6 +35,7 @@
     <!-- Sin citas -->
     <EmptyState
       v-else-if="!filteredAppointments.length"
+      icon="📅"
       :title="activeTab === 'upcoming' ? 'No tienes citas programadas' : 'Sin citas pasadas'"
       :description="activeTab === 'upcoming' ? 'Solicita una cita con tu médico para empezar.' : 'Aquí aparecerán tus consultas anteriores.'"
     />
@@ -54,8 +55,6 @@
           :key="appt.id"
           :appointment="appt"
           @cancel="confirmCancel"
-          @start-video="startVideo"
-          @upload-docs="uploadDocs"
         />
       </div>
     </div>
@@ -74,9 +73,6 @@
       :loading="cancelling"
       @confirm="doCancel"
     />
-
-    <!-- Input file oculto para docs -->
-    <input type="file" ref="docUploadInput" class="hidden" @change="handleDocUpload" accept=".pdf,.png,.jpg,.jpeg" />
   </div>
 </template>
 
@@ -87,7 +83,7 @@ import EmptyState from '../EmptyState.vue';
 import AppointmentCard from '../AppointmentCard.vue';
 import ConfirmModal from '../ConfirmModal.vue';
 import Calendar from '../Calendar.vue';
-import { getAppointments, cancelAppointment, uploadAppointmentDoc } from '../../../services/profileService';
+import { getAppointments, cancelAppointment } from '../../../services/profileService';
 import { showToast } from '../../../store/profile';
 
 const appointments = ref([]);
@@ -100,7 +96,7 @@ const cancelling = ref(false);
 
 const tabs = computed(() => [
   { id: 'upcoming', label: 'Próximas', count: upcomingCount.value },
-  { id: 'past',     label: 'Pasadas',  count: 0 }
+  { id: 'past',     label: 'Pasadas',  count: pastCount.value }
 ]);
 
 const today = new Date().toISOString().split('T')[0];
@@ -109,15 +105,25 @@ const upcomingCount = computed(() =>
   appointments.value.filter(a => a.date >= today && ['Programada','Confirmada'].includes(a.status)).length
 );
 
+const pastCount = computed(() =>
+  appointments.value.filter(a => a.date < today || ['Completada','Cancelada'].includes(a.status)).length
+);
+
 const filteredAppointments = computed(() => {
   if (activeTab.value === 'upcoming') {
     return appointments.value
       .filter(a => a.date >= today && ['Programada','Confirmada'].includes(a.status))
       .sort((a, b) => a.date.localeCompare(b.date));
+  } else if (activeTab.value === 'cancelled') {
+    return appointments.value
+      .filter(a => a.status === 'Cancelada')
+      .sort((a, b) => b.date.localeCompare(a.date));
+  } else {
+    // past (Historial)
+    return appointments.value
+      .filter(a => (a.date < today && a.status !== 'Cancelada') || a.status === 'Completada')
+      .sort((a, b) => b.date.localeCompare(a.date));
   }
-  return appointments.value
-    .filter(a => a.date < today || ['Completada','Cancelada'].includes(a.status))
-    .sort((a, b) => b.date.localeCompare(a.date));
 });
 
 const formatDate = (d) => {
@@ -141,42 +147,15 @@ const handleSelectAppointment = (appt) => {
   showToast(`Cita con ${appt.doctor} el ${formatDate(appt.date)} a las ${appt.time}`, 'info');
 };
 
-const startVideo = (appt) => {
-  showToast(`Iniciando videoconsulta con ${appt.doctor}...`, 'info');
-};
-
-const docUploadInput = ref(null);
-const docTargetAppt = ref(null);
-
-const uploadDocs = (appt) => {
-  docTargetAppt.value = appt;
-  docUploadInput.value.click();
-};
-
-const handleDocUpload = async (event) => {
-  const file = event.target.files[0];
-  if (!file || !docTargetAppt.value) return;
-  
-  showToast(`Subiendo documento a la cita con ${docTargetAppt.value.doctor}...`, 'info');
-  try {
-    await uploadAppointmentDoc(docTargetAppt.value.id, file);
-    showToast('Documento subido y enlazado correctamente', 'success');
-  } catch (err) {
-    showToast('Error al subir documento', 'error');
-  } finally {
-    event.target.value = '';
-    docTargetAppt.value = null;
-  }
-};
-
 const doCancel = async (reason) => {
   if (!cancelTarget.value) return;
   cancelling.value = true;
   try {
     await cancelAppointment(cancelTarget.value.id, reason);
-    cancelTarget.value.status = 'Cancelada';
     showCancelModal.value = false;
     showToast('Cita cancelada correctamente');
+    // Forzamos refresco total para asegurar sincronización con el servidor
+    fetchAppointments();
   } catch {
     showToast('Error al cancelar la cita', 'error');
   } finally {
@@ -185,12 +164,16 @@ const doCancel = async (reason) => {
   }
 };
 
-onMounted(async () => {
+const fetchAppointments = async () => {
   loading.value = true;
   try {
     appointments.value = await getAppointments();
   } finally {
     loading.value = false;
   }
+};
+
+onMounted(() => {
+  fetchAppointments();
 });
 </script>

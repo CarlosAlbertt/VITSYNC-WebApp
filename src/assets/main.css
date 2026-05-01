@@ -1,12 +1,30 @@
+/* main.css */
+@import "./base.css";
 @import "tailwindcss";
+@config "../../tailwind.config.js";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
-  body {
-    @apply bg-gray-50 text-gray-900 transition-colors duration-300;
+
+  *,
+  *::before,
+  *::after {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease, box-shadow 0.25s ease;
   }
 
-  html.dark body {
-    @apply bg-gray-900 text-gray-100;
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    @apply font-sans;
+  }
+
+  /* Prevenir FOUC (Flash of Unstyled Content) */
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 }

@@ -1,10 +1,21 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import ContactList from './ContactList.vue';
 import ChatWindow from './ChatWindow.vue';
+import { globalSelectedContact } from '../../store/chat';
 
 const emit = defineEmits(['close']);
 const selectedContact = ref(null);
+
+onMounted(() => {
+    if (globalSelectedContact.value) {
+        selectedContact.value = globalSelectedContact.value;
+    }
+});
+
+onUnmounted(() => {
+    globalSelectedContact.value = null; // Limpiar al cerrar el widget
+});
 
 const selectContact = (contact) => {
     selectedContact.value = contact;
@@ -12,6 +23,7 @@ const selectContact = (contact) => {
 
 const clearSelection = () => {
     selectedContact.value = null;
+    globalSelectedContact.value = null;
 };
 </script>
 
@@ -47,14 +59,16 @@ const clearSelection = () => {
 .chat-widget {
     width: 360px;
     height: 480px;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
     border-radius: 12px;
     overflow: hidden;
     position: relative;
     display: flex;
     flex-direction: column;
+    background: var(--bg-surface);
 }
+
 /* Forzamos que los hijos llenen el espacio */
 .chat-widget > :first-child { flex: 1; min-height: 0; }
 .close-btn {

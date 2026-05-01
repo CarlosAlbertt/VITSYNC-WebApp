@@ -1,20 +1,36 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { isAuthenticated } from './store/auth';
+import { loadProfile } from './store/profile';
 import ChatWidget from './components/chat/ChatWidget.vue'; // Cambiar ChatWindow por ChatWidget
 import ChatButton from './components/chat/ChatButton.vue';
+import AgendaCita from './pages/AgendaCita.vue';
+import { isBookingOpen, closeBooking } from './store/bookingModal';
 
 const isChatOpen = ref(false);
 
 const toggleChat = () => {
   isChatOpen.value = !isChatOpen.value;
 };
+
+onMounted(() => {
+  if (isAuthenticated.value) {
+    loadProfile();
+  }
+});
 </script>
 
 <template>
   <main
-    class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
-    <router-view />
+    class="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]">
+    <RouterView v-slot="{ Component, route}">
+      <Transition :name="route.meta.transition || 'page'">
+        <component :is="Component" :key="route.path" />
+      </Transition>
+    </RouterView>
+
+    <!-- Modal de Reserva de Citas (global) -->
+    <AgendaCita :visible="isBookingOpen" @close="closeBooking" />
     
     <!-- Chat Overlay -->
     <div v-if="isAuthenticated" class="chat-container">
@@ -47,4 +63,19 @@ const toggleChat = () => {
 
 .scale-enter-active, .sclae-leave-active { transition: all 0.3s ease; }
 .scale-enter-from, .scale-leave-to { transform: scale(0); opacity: 0; }
+
+.page-enter-active{
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.page-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
 </style>
