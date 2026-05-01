@@ -64,6 +64,23 @@ const routes = [
         component: () => import('../pages/VerifyAccount.vue')
     },
     {
+        path: '/agendar-cita',
+        name: 'agendar-cita',
+        // Redirigir al home y abrir el modal de booking
+        beforeEnter: (to, from, next) => {
+            if (!isAuthenticated()) {
+                next({ name: 'login' });
+            } else {
+                // Importar dinámicamente para evitar dependencia circular
+                import('../store/bookingModal').then(({ openBooking }) => {
+                    openBooking();
+                });
+                next({ name: 'home' });
+            }
+        },
+        component: () => import('../pages/AgendaCita.vue')
+    },
+    {
         path: '/perfil',
         name: 'perfil',
         component: () => import('../pages/Perfil.vue'),

@@ -114,10 +114,16 @@ const filteredAppointments = computed(() => {
     return appointments.value
       .filter(a => a.date >= today && ['Programada','Confirmada'].includes(a.status))
       .sort((a, b) => a.date.localeCompare(b.date));
+  } else if (activeTab.value === 'cancelled') {
+    return appointments.value
+      .filter(a => a.status === 'Cancelada')
+      .sort((a, b) => b.date.localeCompare(a.date));
+  } else {
+    // past (Historial)
+    return appointments.value
+      .filter(a => (a.date < today && a.status !== 'Cancelada') || a.status === 'Completada')
+      .sort((a, b) => b.date.localeCompare(a.date));
   }
-  return appointments.value
-    .filter(a => a.date < today || ['Completada','Cancelada'].includes(a.status))
-    .sort((a, b) => b.date.localeCompare(a.date));
 });
 
 const formatDate = (d) => {

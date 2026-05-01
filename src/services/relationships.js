@@ -7,7 +7,11 @@ export const getMyMedicos = async (patientId) => {
 };
 
 export const getMyPacientes = async (medicoId) => {
-
     const response = await api.get(`/api/relationships/medico/${medicoId}/pacientes`);
+    return response.data;
+};
+
+export const assignPatientToProfessional = async (patientId, medicoId) => {
+    const response = await api.post(`/api/relationships/assign?patientId=${patientId}&medicoId=${medicoId}`);
     return response.data;
 };

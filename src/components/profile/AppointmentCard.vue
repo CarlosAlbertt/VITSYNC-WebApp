@@ -75,12 +75,57 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { openChatWith } from '../../store/chat';
+import { assignPatientToProfessional } from '../../services/relationships';
+import { currentUser } from '../../store/auth';
 
 const props = defineProps({
   appointment: { type: Object, required: true }
 });
 defineEmits(['cancel']);
+
+const isAssigning = ref(false);
+
+const consultarMedico = async () => {
+  if (!currentUser.value?.id) return;
+  const medicoId = props.appointment.medicoId;
+  
+  if (!medicoId) {
+    alert('No se pudo encontrar el ID del médico.');
+    return;
+  }
+
+  isAssigning.value = true;
+  try {
+    // Intentamos añadir la relación en backend.
+    await assignPatientToProfessional(currentUser.value.id, medicoId);
+  } catch (error) {
+    // Verificamos si el error es "Ya existe la relación". Si es así, lo ignoramos y abrimos el chat.
+    // Si es otro error (ej: ID falso de los datos de prueba), mostramos un alert.
+    const msg = error.response?.data || error.message;
+    if (typeof msg === 'string' && msg.includes('Ya existe')) {
+      console.log('El médico ya estaba en la lista de contactos.');
+    } else {
+      console.error('Error al añadir contacto:', error);
+      alert('No se pudo añadir a contactos: ' + msg);
+      isAssigning.value = false;
+      return; // Detenemos la ejecución y no abrimos el chat
+    }
+  } finally {
+    if (isAssigning.value) { // Solo si no ha hecho return en el catch
+      isAssigning.value = false;
+      
+      // Abrimos el chat
+      openChatWith({
+        id: medicoId,
+        name: props.appointment.doctor,
+        role: 'doctor',
+        photo: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(props.appointment.doctor || 'Dr')
+      });
+    }
+  }
+};
 
 const showActions = computed(() => ['Programada', 'Confirmada'].includes(props.appointment.status));
 
