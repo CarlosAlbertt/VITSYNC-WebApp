@@ -139,6 +139,7 @@
 import Header from '../components/HeaderComponent.vue';
 import Footer from '../components/FooterComponent.vue';
 import heroBackground from '/images/hero-background.png';
+import { openBooking } from '../store/bookingModal';
 
 export default {
   components: {
@@ -147,7 +148,7 @@ export default {
   },
   methods: {
     irAAgendarCita() {
-      this.$router.push('/agendar-cita');
+      openBooking();
     }
   },
   data() {

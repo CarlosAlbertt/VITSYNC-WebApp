@@ -3,12 +3,10 @@ import { ref } from 'vue';
 import { isAuthenticated } from './store/auth';
 import ChatWidget from './components/chat/ChatWidget.vue'; // Cambiar ChatWindow por ChatWidget
 import ChatButton from './components/chat/ChatButton.vue';
+import AgendaCita from './pages/AgendaCita.vue';
+import { isBookingOpen, closeBooking } from './store/bookingModal';
 
-const isChatOpen = ref(false);
-
-const toggleChat = () => {
-  isChatOpen.value = !isChatOpen.value;
-};
+import { isChatOpen, toggleChat } from './store/chat';
 </script>
 
 <template>
@@ -19,6 +17,9 @@ const toggleChat = () => {
         <component :is="Component" :key="route.path" />
       </Transition>
     </RouterView>
+
+    <!-- Modal de Reserva de Citas (global) -->
+    <AgendaCita :visible="isBookingOpen" @close="closeBooking" />
     
     <!-- Chat Overlay -->
     <div v-if="isAuthenticated" class="chat-container">
