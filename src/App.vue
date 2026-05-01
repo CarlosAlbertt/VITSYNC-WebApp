@@ -4,14 +4,9 @@ import { isAuthenticated } from './store/auth';
 import { loadProfile } from './store/profile';
 import ChatWidget from './components/chat/ChatWidget.vue'; // Cambiar ChatWindow por ChatWidget
 import ChatButton from './components/chat/ChatButton.vue';
+import { isChatOpen, toggleChat } from './store/chat';
 import AgendaCita from './pages/AgendaCita.vue';
 import { isBookingOpen, closeBooking } from './store/bookingModal';
-
-const isChatOpen = ref(false);
-
-const toggleChat = () => {
-  isChatOpen.value = !isChatOpen.value;
-};
 
 onMounted(() => {
   if (isAuthenticated.value) {
@@ -61,7 +56,7 @@ onMounted(() => {
 .slide-fade-enter-active, .slide-fade-leave-active { transition: all 0.3s ease-out; }
 .slide-fade-enter-from, .slide-fade-leave-to { transform: translateY(20px); opacity: 0; }
 
-.scale-enter-active, .sclae-leave-active { transition: all 0.3s ease; }
+.scale-enter-active, .scale-leave-active { transition: all 0.3s ease; }
 .scale-enter-from, .scale-leave-to { transform: scale(0); opacity: 0; }
 
 .page-enter-active{
