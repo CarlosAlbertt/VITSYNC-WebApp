@@ -45,14 +45,20 @@
             </Transition>
             </button>
           </div>
-          <router-link v-if="!isAuthenticated" to="/login"
-            class="topbar-btn px-3 py-1 rounded text-sm font-medium transition-colors">
-            Iniciar sesion
-          </router-link>
-          <button v-else @click="handleLogout"
-            class="topbar-btn px-3 py-1 rounded text-sm font-medium transition-colors">
-            Cerrar sesion
-          </button>
+          <div class="flex items-center gap-6">
+            <router-link v-if="isAuthenticated && currentUser.role === 'ADMIN'" to="/admin"
+              class="bg-teal-800 dark:bg-teal-700 text-white px-3 py-1 rounded text-sm font-medium hover:bg-teal-900 dark:hover:bg-teal-600 transition-colors">
+              Panel Admin
+            </router-link>
+            <router-link v-if="!isAuthenticated" to="/login"
+              class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700 transition-colors">
+              Iniciar sesion
+            </router-link>
+            <button v-else @click="handleLogout"
+              class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700 transition-colors">
+              Cerrar sesion
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -61,7 +67,7 @@
     <nav class="max-w-7xl mx-auto px-4 py-4">
       <div class="flex flex-wrap items-center justify-between">
         <router-link to="/"
-          class="text-2xl font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors cursor-pointer">
+          class="text-2xl font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors cursor-pointer px-8">
           VitSync
         </router-link>
 
@@ -91,7 +97,7 @@
 
       <!-- Menú de navegación (oculto en móviles) -->
       <div class="hidden lg:flex pt-4 border-t border-gray-100 dark:border-gray-700 mt-4 transition-colors">
-        <nav class="flex space-x-8">
+        <nav class="flex justify-between w-full px-16">
           <template v-for="item in menuItems" :key="item.name">
             <router-link v-if="item.route" :to="item.route"
               class="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 text-sm font-medium transition-colors">
@@ -135,7 +141,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router'
-import { isAuthenticated, logout } from '../store/auth'
+import { isAuthenticated, currentUser, logout } from '../store/auth'
 import { useDark, useToggle } from '@vueuse/core'
 import LogoutModal from './LogoutModal.vue';
 
@@ -172,16 +178,12 @@ const toggleTopBarMenu = () => {
 }
 
 const menuItems = [
-  { name: 'Hospitales', route: null },
-  { name: 'Cuadro médico', route: null },
+  { name: 'Cuadro médico', route: '/cuadro-medico' },
   { name: 'Especialidades', route: '/especialidades' },
-  { name: 'Enfermedades y tratamientos', route: null },
-  { name: 'Unidades médicas', route: null },
-  { name: 'Investigación', route: null },
-  { name: 'El grupo', route: null },
-  { name: 'Comunicación', route: null },
-  { name: 'Orientador de salud', route: null }
+  { name: 'Enfermedades y tratamientos', route: '/enfermedades-tratamientos' },
+  { name: 'Comunicación', route: '/comunicacion' },
 ]
+
 </script>
 
 <style scoped>
