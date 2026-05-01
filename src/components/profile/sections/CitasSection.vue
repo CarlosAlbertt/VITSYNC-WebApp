@@ -35,8 +35,8 @@
     <!-- Sin citas -->
     <EmptyState
       v-else-if="!filteredAppointments.length"
-      :title="activeTab === 'upcoming' ? 'No tienes citas programadas' : 'Sin citas pasadas'"
-      :description="activeTab === 'upcoming' ? 'Solicita una cita con tu médico para empezar.' : 'Aquí aparecerán tus consultas anteriores.'"
+      :title="activeTab === 'upcoming' ? 'No tienes citas programadas' : (activeTab === 'cancelled' ? 'Sin citas canceladas' : 'Sin citas pasadas')"
+      :description="activeTab === 'upcoming' ? 'Solicita una cita con tu médico para empezar.' : (activeTab === 'cancelled' ? 'No tienes ninguna cita cancelada en tu historial.' : 'Aquí aparecerán tus consultas anteriores.')"
     />
 
     <!-- Lista o Calendario de citas -->
@@ -99,8 +99,9 @@ const cancelTarget = ref(null);
 const cancelling = ref(false);
 
 const tabs = computed(() => [
-  { id: 'upcoming', label: 'Próximas', count: upcomingCount.value },
-  { id: 'past',     label: 'Pasadas',  count: 0 }
+  { id: 'upcoming',  label: 'Próximas',   count: upcomingCount.value },
+  { id: 'past',      label: 'Historial',  count: 0 },
+  { id: 'cancelled', label: 'Canceladas', count: 0 }
 ]);
 
 const today = new Date().toISOString().split('T')[0];
@@ -114,10 +115,16 @@ const filteredAppointments = computed(() => {
     return appointments.value
       .filter(a => a.date >= today && ['Programada','Confirmada'].includes(a.status))
       .sort((a, b) => a.date.localeCompare(b.date));
+  } else if (activeTab.value === 'cancelled') {
+    return appointments.value
+      .filter(a => a.status === 'Cancelada')
+      .sort((a, b) => b.date.localeCompare(a.date));
+  } else {
+    // past (Historial)
+    return appointments.value
+      .filter(a => (a.date < today && a.status !== 'Cancelada') || a.status === 'Completada')
+      .sort((a, b) => b.date.localeCompare(a.date));
   }
-  return appointments.value
-    .filter(a => a.date < today || ['Completada','Cancelada'].includes(a.status))
-    .sort((a, b) => b.date.localeCompare(a.date));
 });
 
 const formatDate = (d) => {

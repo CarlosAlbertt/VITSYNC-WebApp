@@ -1,10 +1,21 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import ContactList from './ContactList.vue';
 import ChatWindow from './ChatWindow.vue';
+import { globalSelectedContact } from '../../store/chat';
 
 const emit = defineEmits(['close']);
 const selectedContact = ref(null);
+
+onMounted(() => {
+    if (globalSelectedContact.value) {
+        selectedContact.value = globalSelectedContact.value;
+    }
+});
+
+onUnmounted(() => {
+    globalSelectedContact.value = null; // Limpiar al cerrar el widget
+});
 
 const selectContact = (contact) => {
     selectedContact.value = contact;
@@ -12,6 +23,7 @@ const selectContact = (contact) => {
 
 const clearSelection = () => {
     selectedContact.value = null;
+    globalSelectedContact.value = null;
 };
 </script>
 

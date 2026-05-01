@@ -127,72 +127,24 @@ export const getReportById = async (id) => {
     return MOCK_REPORTS.find(r => r.id === id) || null;
 };
 
-// ─── CITAS (MOCK) ─────────────────────────────────────────────────────────────
+// ─── CITAS (Store compartido) ─────────────────────────────────────────────────
+// Las citas ahora viven en store/citas.js (citasUsuario) para que el booking
+// y el perfil compartan la misma fuente de datos reactiva.
 
-const MOCK_APPOINTMENTS = [
-    {
-        id: 1,
-        date: '2026-02-25',
-        time: '10:30',
-        doctor: 'Dr. Javier Crespo',
-        specialty: 'Cardiología',
-        type: 'Presencial',
-        location: 'Consulta 3, Planta 1',
-        status: 'Confirmada',
-        reason: 'Revisión anual',
-        notes: ''
-    },
-    {
-        id: 2,
-        date: '2026-03-10',
-        time: '16:00',
-        doctor: 'Dr. Carlos Albert',
-        specialty: 'Pediatría',
-        type: 'Telemedicina',
-        location: null,
-        status: 'Programada',
-        reason: 'Consulta seguimiento',
-        notes: 'Traer informes anteriores'
-    },
-    {
-        id: 3,
-        date: '2025-12-05',
-        time: '09:00',
-        doctor: 'Dr. Pablo Escolano',
-        specialty: 'Traumatología',
-        type: 'Presencial',
-        location: 'Consulta 7, Planta 2',
-        status: 'Completada',
-        reason: 'Dolor rodilla',
-        notes: 'Se recetó fisioterapia'
-    },
-    {
-        id: 4,
-        date: '2025-10-15',
-        time: '11:00',
-        doctor: 'Dr. Javier Crespo',
-        specialty: 'Cardiología',
-        type: 'Presencial',
-        location: 'Consulta 3, Planta 1',
-        status: 'Cancelada',
-        reason: 'Chequeo',
-        notes: ''
-    }
-];
+import { citasUsuario } from '../store/citas';
 
 export const getAppointments = async (filters = {}) => {
-    // TODO: reemplazar con GET /api/user/appointments cuando exista
-    await delay(400);
-    let appts = [...MOCK_APPOINTMENTS];
+    await delay(200);
+    let appts = [...citasUsuario.value];
     if (filters.status) appts = appts.filter(a => a.status === filters.status);
     if (filters.specialty) appts = appts.filter(a => a.specialty === filters.specialty);
     return appts;
 };
 
 export const cancelAppointment = async (id, reason = '') => {
-    // TODO: reemplazar con DELETE /api/user/appointments/:id
+    // TODO: reemplazar con DELETE /api/user/appointments/:id cuando exista
     await delay(500);
-    const appt = MOCK_APPOINTMENTS.find(a => a.id === id);
+    const appt = citasUsuario.value.find(a => a.id === id);
     if (appt) appt.status = 'Cancelada';
     return { success: true };
 };
@@ -213,7 +165,7 @@ export const uploadAppointmentDoc = async (appointmentId, file) => {
     await delay(500);
     const docUrl = URL.createObjectURL(file);
     
-    const appt = MOCK_APPOINTMENTS.find(a => a.id === appointmentId);
+    const appt = citasUsuario.value.find(a => a.id === appointmentId);
     if (appt) {
         if (!appt.documents) appt.documents = [];
         appt.documents.push({ name: file.name, url: docUrl });

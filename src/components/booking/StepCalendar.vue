@@ -1,41 +1,51 @@
 <template>
-  <div class="step-container">
+  <div class="step-container flex flex-col h-full min-h-[300px]">
     <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6">Selecciona Fecha y Hora</h2>
     
-    <div class="flex flex-col md:flex-row gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 flex-1">
       <!-- Calendario -->
-      <div class="flex-1">
-        <h3 class="font-semibold text-slate-700 dark:text-slate-300 mb-3">Día de la cita</h3>
-        <!-- Integración del Vue Datepicker de forma en línea -->
+      <div>
+        <h3 class="font-semibold text-slate-700 dark:text-slate-300 mb-3">Fecha de la cita</h3>
         <DatePicker 
           v-model="selectedDate" 
           inline 
-          auto-apply 
-          :enable-time-picker="false" 
+          auto-apply
+          :enable-time-picker="false"
+          :min-date="new Date()"
           @update:model-value="loadSlots"
-          dark
+          class="custom-datepicker"
         />
       </div>
 
-      <!-- Horas -->
-      <div class="flex-1">
-        <h3 class="font-semibold text-slate-700 dark:text-slate-300 mb-3">Horario disponible</h3>
+      <!-- Horarios -->
+      <div>
+        <h3 class="font-semibold text-slate-700 dark:text-slate-300 mb-3">
+          Horarios disponibles
+          <span v-if="selectedDate" class="text-xs font-normal text-slate-500 ml-2">
+            para {{ formatDate(selectedDate) }}
+          </span>
+        </h3>
         
-        <div v-if="!selectedDate" class="text-sm text-slate-500 dark:text-slate-400 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg">
-          Por favor, selecciona un día en el calendario primero.
+        <div v-if="!selectedDate" class="p-6 bg-slate-50 dark:bg-slate-800 rounded-xl text-center text-slate-500 dark:text-slate-400 border border-dashed border-slate-300 dark:border-slate-700">
+          Selecciona una fecha en el calendario para ver los horarios disponibles.
         </div>
         
-        <div v-else-if="loadingSlots" class="text-sm text-slate-500 py-4">
-          Cargando horarios...
+        <div v-else-if="loadingSlots" class="text-center py-6">
+          <div class="inline-block animate-spin text-xl mb-2 text-accent">⟳</div>
+          <p class="text-sm text-slate-500">Cargando horarios...</p>
         </div>
         
-        <div v-else class="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-2">
+        <div v-else-if="slots.length === 0" class="p-6 bg-slate-50 dark:bg-slate-800 rounded-xl text-center text-slate-500 dark:text-slate-400">
+          No hay horarios disponibles para esta fecha.
+        </div>
+
+        <div v-else class="grid grid-cols-3 gap-2">
           <button 
             v-for="time in slots" 
             :key="time"
             @click="selectedTime = time"
             :class="[
-              'py-2 rounded-lg font-medium border transition-colors',
+              'py-2 px-1 rounded-lg border font-medium text-sm transition-colors',
               selectedTime === time 
                 ? 'bg-accent text-white border-accent' 
                 : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-accent'
@@ -47,7 +57,7 @@
       </div>
     </div>
 
-    <div class="mt-8 flex justify-between">
+    <div class="mt-8 flex justify-between mt-auto pt-4">
       <button @click="$emit('back')" class="text-slate-500 hover:text-slate-700 dark:text-slate-400 font-medium py-2 px-4 rounded-lg">Atrás</button>
       <button 
         @click="confirmSelection" 
@@ -87,6 +97,12 @@ const confirmSelection = () => {
   emit('next', { date: selectedDate.value, time: selectedTime.value });
 };
 
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+};
+
 // Si ya había fecha guardada de un paso anterior, carga sus slots
 if (selectedDate.value) {
   loadSlots();
@@ -94,11 +110,26 @@ if (selectedDate.value) {
 </script>
 
 <style>
-/* Ajustar estilos oscuros del datepicker para que coincidan con VitSync */
-.dp__theme_dark {
-   --dp-background-color: var(--bg-surface);
-   --dp-text-color: var(--text-primary);
-   --dp-hover-color: var(--bg-elevated);
-   --dp-primary-color: var(--accent);
+/* Forzar estilos del datepicker cuando VitSync está en modo oscuro */
+html.dark .custom-datepicker,
+html.dark .dp__theme_light,
+html.dark .dp__main {
+   --dp-background-color: var(--bg-surface) !important;
+   --dp-text-color: var(--text-primary) !important;
+   --dp-hover-color: var(--bg-elevated) !important;
+   --dp-hover-text-color: var(--text-primary) !important;
+   --dp-hover-icon-color: var(--text-primary) !important;
+   --dp-primary-color: var(--accent) !important;
+   --dp-primary-disabled-color: #61a8a8 !important;
+   --dp-primary-text-color: #ffffff !important;
+   --dp-secondary-color: var(--text-muted) !important;
+   --dp-border-color: var(--border) !important;
+   --dp-menu-border-color: var(--border) !important;
+   --dp-border-color-hover: var(--accent) !important;
+   --dp-disabled-color: var(--bg-elevated) !important;
+   --dp-scroll-bar-background: var(--bg-elevated) !important;
+   --dp-scroll-bar-color: var(--border) !important;
+   --dp-icon-color: var(--text-secondary) !important;
+   --dp-tooltip-color: var(--text-primary) !important;
 }
 </style>

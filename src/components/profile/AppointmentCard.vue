@@ -33,44 +33,104 @@
       "{{ appointment.reason }}"
     </p>
 
-    <!-- Acciones (solo para citas futuras activas) -->
-    <div v-if="showActions" class="flex gap-2 flex-wrap">
-      <button
-        v-if="appointment.type === 'Telemedicina'"
-        @click="$emit('start-video', appointment)"
-        class="px-3 py-1.5 text-xs font-medium rounded-lg bg-teal-600 text-white hover:bg-teal-700 transition-colors shadow-sm"
-      >
-        Iniciar videoconsulta
-      </button>
-      <button
-        @click="$emit('upload-docs', appointment)"
-        class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
-      >
-        Subir docs
-      </button>
-      <button
-        @click="$emit('cancel', appointment)"
-        class="px-3 py-1.5 text-xs font-medium rounded-lg border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors"
-      >
-        Cancelar
-      </button>
-    </div>
-    <div v-else-if="appointment.status === 'Completada'" class="text-xs text-gray-400 italic">
-      Cita completada
-    </div>
-    <div v-else-if="appointment.status === 'Cancelada'" class="text-xs text-red-400 italic">
-      Cita cancelada
+    <!-- Acciones y Estados -->
+    <div class="flex gap-2 flex-wrap items-center mt-2">
+      <template v-if="showActions">
+        <button
+          v-if="appointment.type === 'Telemedicina'"
+          @click="$emit('start-video', appointment)"
+          class="px-3 py-1.5 text-xs font-medium rounded-lg bg-teal-600 text-white hover:bg-teal-700 transition-colors shadow-sm"
+        >
+          Iniciar videoconsulta
+        </button>
+        <button
+          @click="$emit('upload-docs', appointment)"
+          class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors"
+        >
+          Subir docs
+        </button>
+        
+        <!-- Botón Consultar (Añadir a contactos) -->
+        <button
+          @click="consultarMedico"
+          :disabled="isAssigning"
+          class="px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-1 disabled:opacity-50"
+        >
+          <span v-if="isAssigning" class="animate-spin text-xs">⟳</span>
+          <svg v-else class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+          {{ isAssigning ? 'Añadiendo...' : 'Consultar' }}
+        </button>
+
+        <button
+          @click="$emit('cancel', appointment)"
+          class="px-3 py-1.5 text-xs font-medium rounded-lg border border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors"
+        >
+          Cancelar
+        </button>
+      </template>
+
+      <div v-else-if="appointment.status === 'Completada'" class="text-xs text-gray-400 italic">
+        Cita completada
+      </div>
+      <div v-else-if="appointment.status === 'Cancelada'" class="text-xs text-red-400 italic">
+        Cita cancelada
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { openChatWith } from '../../store/chat';
+import { assignPatientToProfessional } from '../../services/relationships';
+import { currentUser } from '../../store/auth';
 
 const props = defineProps({
   appointment: { type: Object, required: true }
 });
 defineEmits(['cancel', 'start-video', 'upload-docs']);
+
+const isAssigning = ref(false);
+
+const consultarMedico = async () => {
+  if (!currentUser.value?.id) return;
+  const medicoId = props.appointment.medicoId;
+  
+  if (!medicoId) {
+    alert('No se pudo encontrar el ID del médico.');
+    return;
+  }
+
+  isAssigning.value = true;
+  try {
+    // Intentamos añadir la relación en backend.
+    await assignPatientToProfessional(currentUser.value.id, medicoId);
+  } catch (error) {
+    // Verificamos si el error es "Ya existe la relación". Si es así, lo ignoramos y abrimos el chat.
+    // Si es otro error (ej: ID falso de los datos de prueba), mostramos un alert.
+    const msg = error.response?.data || error.message;
+    if (typeof msg === 'string' && msg.includes('Ya existe')) {
+      console.log('El médico ya estaba en la lista de contactos.');
+    } else {
+      console.error('Error al añadir contacto:', error);
+      alert('No se pudo añadir a contactos: ' + msg);
+      isAssigning.value = false;
+      return; // Detenemos la ejecución y no abrimos el chat
+    }
+  } finally {
+    if (isAssigning.value) { // Solo si no ha hecho return en el catch
+      isAssigning.value = false;
+      
+      // Abrimos el chat
+      openChatWith({
+        id: medicoId,
+        name: props.appointment.doctor,
+        role: 'doctor',
+        photo: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(props.appointment.doctor || 'Dr')
+      });
+    }
+  }
+};
 
 const showActions = computed(() => ['Programada', 'Confirmada'].includes(props.appointment.status));
 
