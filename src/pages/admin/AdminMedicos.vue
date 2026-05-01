@@ -1,13 +1,13 @@
 <template>
-    <div class="min-h-screen bg-gray-50 p-8">
+    <div class="min-h-screen bg-[var(--bg-base)] p-8">
         <div class="max-w-7xl mx-auto">
             <!-- Header -->
             <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Gestión de Médicos</h1>
-                    <p class="mt-2 text-gray-500">Administra el personal médico y sus especialidades.</p>
+                    <h1 class="text-3xl font-bold text-[var(--text-primary)]">Gestión de Médicos</h1>
+                    <p class="mt-2 text-[var(--text-secondary)]">Administra el personal médico y sus especialidades.</p>
                 </div>
-                <!-- <div class="mt-4 sm:mt-0">
+                <div class="mt-4 sm:mt-0">
                     <button @click="openModal()"
                         class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-colors">
                         <svg class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -15,24 +15,24 @@
                         </svg>
                         Añadir Médico
                     </button>
-                </div> -->
+                </div>
             </div>
 
             <!-- Filters -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6 flex flex-col sm:flex-row gap-3">
+            <div class="bg-[var(--bg-surface)] rounded-xl shadow-sm border border-[var(--border)] p-4 mb-6 flex flex-col sm:flex-row gap-3">
                 <div class="relative flex-1 max-w-md">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-5 w-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
                     <input v-model="searchQuery" type="text"
-                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm bg-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+                        class="block w-full pl-10 pr-3 py-2 border border-[var(--border)] rounded-lg text-sm bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
                         placeholder="Buscar por nombre, colegiado o especialidad..." />
                 </div>
                 <select v-model="filterActivo"
-                    class="border border-gray-300 rounded-lg text-sm px-3 py-2 bg-white focus:ring-1 focus:ring-teal-500 focus:border-teal-500">
+                    class="border border-[var(--border)] rounded-lg text-sm px-3 py-2 bg-[var(--bg-surface)] text-[var(--text-primary)] focus:ring-1 focus:ring-teal-500 focus:border-teal-500">
                     <option value="all">Todos</option>
                     <option value="true">Activos</option>
                     <option value="false">Inactivos</option>
@@ -40,7 +40,7 @@
             </div>
 
             <!-- Loading -->
-            <div v-if="isLoading" class="p-12 text-center text-gray-500 bg-white rounded-xl border border-gray-100">
+            <div v-if="isLoading" class="p-12 text-center text-[var(--text-secondary)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
                 <svg class="animate-spin h-8 w-8 text-teal-600 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg"
                     fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -63,88 +63,87 @@
                 </button>
             </div>
 
-            <!-- Table -->
-            <div v-if="!isLoading" class="bg-white shadow-sm rounded-xl border border-gray-100 overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Médico</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Colegiado</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Especialidad</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <tr v-for="doctor in filteredDoctors" :key="doctor.id" class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold">
-                                        {{ doctor.name?.charAt(0)?.toUpperCase() || '?' }}
-                                    </div>
-                                    <div class="ml-4">
-                                        <p class="text-sm font-medium text-gray-900">{{ fullName(doctor) }}</p>
-                                        <p class="text-xs text-gray-500">{{ doctor.email }}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 hidden md:table-cell">
-                                <span class="text-sm text-gray-700 font-mono">{{ doctor.numeroColegiado || '—' }}</span>
-                            </td>
-                            <td class="px-6 py-4 hidden lg:table-cell">
-                                <span v-if="doctor.especialidad"
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
-                                    {{ doctor.especialidad.nombre }}
-                                </span>
-                                <span v-else class="text-xs text-gray-400 italic">Sin asignar</span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <button @click="handleToggle(doctor.id)" :class="doctor.activo
-                                    ? 'bg-green-500 hover:bg-green-600'
-                                    : 'bg-gray-300 hover:bg-gray-400'"
-                                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
-                                    :title="doctor.activo ? 'Desactivar' : 'Activar'">
-                                    <span :class="doctor.activo ? 'translate-x-5' : 'translate-x-0'"
-                                        class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" />
-                                </button>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex justify-end space-x-2">
-                                    <button @click="openModal(doctor)"
-                                        class="p-1 text-gray-400 hover:text-teal-600 rounded-full hover:bg-teal-50 transition-colors" title="Editar">
-                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
-                                    </button>
-                                    <button @click="openDeleteModal(doctor)"
-                                        class="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors" title="Eliminar">
-                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div v-if="filteredDoctors.length === 0" class="p-12 text-center text-gray-500">
-                    No se encontraron médicos.
+            <!-- Cards Grid -->
+            <div v-if="!isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div v-for="doctor in filteredDoctors" :key="doctor.id"
+                    class="bg-[var(--bg-surface)] rounded-xl shadow-sm border border-[var(--border)] p-6 hover:shadow-md transition-shadow relative result-card group">
+
+                    <!-- Action buttons (hover) -->
+                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
+                        <button @click="openModal(doctor)"
+                            class="p-1 text-[var(--text-muted)] hover:text-teal-600 rounded-full hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors" title="Editar">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        </button>
+                        <button @click="openDeleteModal(doctor)"
+                            class="p-1 text-[var(--text-muted)] hover:text-red-600 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors" title="Eliminar">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Card content -->
+                    <div class="flex items-center space-x-4 mb-3">
+                        <div class="flex-shrink-0 h-12 w-12 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center text-teal-700 dark:text-teal-400 font-bold text-xl">
+                            {{ doctor.name?.charAt(0)?.toUpperCase() || '?' }}
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h3 class="text-lg font-bold text-[var(--text-primary)] truncate">{{ fullName(doctor) }}</h3>
+                            <p class="text-xs text-[var(--text-secondary)] truncate">{{ doctor.email }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Badges -->
+                    <div class="flex items-center space-x-2 mb-4">
+                        <span v-if="doctor.especialidad"
+                            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300 truncate max-w-[150px]">
+                            {{ doctor.especialidad.nombre }}
+                        </span>
+                        <span v-else class="text-xs text-[var(--text-muted)] italic">Sin especialidad</span>
+
+                        <span :class="doctor.activo ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300'"
+                            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">
+                            {{ doctor.activo ? 'Activo' : 'Inactivo' }}
+                        </span>
+                    </div>
+
+                    <!-- Toggle button & Colegiado -->
+                    <div class="flex items-center justify-between pt-3 border-t border-[var(--border)]">
+                        <span class="text-xs text-[var(--text-secondary)] font-mono" title="Número de colegiado">
+                            Col: {{ doctor.numeroColegiado || '—' }}
+                        </span>
+                        <button @click="handleToggle(doctor.id)" :class="doctor.activo
+                            ? 'bg-green-500 hover:bg-green-600'
+                            : 'bg-gray-300 hover:bg-gray-400'"
+                            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                            :title="doctor.activo ? 'Desactivar' : 'Activar'">
+                            <span :class="doctor.activo ? 'translate-x-5' : 'translate-x-0'"
+                                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" />
+                        </button>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Empty state -->
+            <div v-if="!isLoading && filteredDoctors.length === 0" class="p-12 text-center text-[var(--text-secondary)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] mt-6">
+                No se encontraron médicos.
             </div>
         </div>
 
         <!-- ===== FORM MODAL (Crear / Editar) ===== -->
         <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-start justify-center p-4 overflow-y-auto"
             role="dialog" aria-labelledby="modal-title" aria-modal="true">
-            <div class="fixed inset-0 bg-gray-500/75" aria-hidden="true" @click="closeModal"></div>
-            <div class="relative z-10 bg-white rounded-lg text-left shadow-xl w-full max-w-2xl my-8">
-                <div class="bg-white px-6 pt-6 pb-4">
-                    <h3 class="text-lg font-medium text-gray-900 mb-1" id="modal-title">
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" @click="closeModal"></div>
+            <div class="relative z-10 bg-[var(--bg-surface)] rounded-lg text-left shadow-xl w-full max-w-2xl my-8">
+                <div class="bg-[var(--bg-surface)] px-6 pt-6 pb-4 rounded-t-lg">
+                    <h3 class="text-lg font-medium text-[var(--text-primary)] mb-1" id="modal-title">
                         {{ isEditing ? 'Editar Médico' : 'Añadir Médico' }}
                     </h3>
-                    <p class="text-sm text-gray-500 mb-4">Los campos marcados con <span class="text-red-500">*</span> son obligatorios.</p>
+                    <p class="text-sm text-[var(--text-secondary)] mb-4">Los campos marcados con <span class="text-red-500">*</span> son obligatorios.</p>
 
                     <!-- Error modal -->
                     <div v-if="formError"
@@ -158,114 +157,114 @@
 
                     <div class="space-y-4">
                         <!-- Sección datos personales -->
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Datos personales</p>
+                        <p class="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Datos personales</p>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Nombre <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-[var(--text-secondary)]">Nombre <span class="text-red-500">*</span></label>
                                 <input v-model="form.name" type="text"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border"
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                     placeholder="Juan">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Primer apellido <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-[var(--text-secondary)]">Primer apellido <span class="text-red-500">*</span></label>
                                 <input v-model="form.firstName" type="text"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border"
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                     placeholder="García">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Segundo apellido <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-[var(--text-secondary)]">Segundo apellido <span class="text-red-500">*</span></label>
                                 <input v-model="form.secondName" type="text"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border"
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                     placeholder="López">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">NIF <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-[var(--text-secondary)]">NIF <span class="text-red-500">*</span></label>
                                 <input v-model="form.nif" type="text"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border"
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                     placeholder="12345678A">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Email <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-[var(--text-secondary)]">Email <span class="text-red-500">*</span></label>
                                 <input v-model="form.email" type="email"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border"
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                     placeholder="juan@vitsync.es">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Género <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-[var(--text-secondary)]">Género <span class="text-red-500">*</span></label>
                                 <select v-model="form.gender"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-white">
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]">
                                     <option value="HOMBRE">Masculino</option>
                                     <option value="MUJER">Femenino</option>
                                     <option value="OTRO">Otro</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Fecha nacimiento <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-[var(--text-secondary)]">Fecha nacimiento <span class="text-red-500">*</span></label>
                                 <input v-model="form.birthDate" type="date"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border">
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Teléfono <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-[var(--text-secondary)]">Teléfono <span class="text-red-500">*</span></label>
                                 <input v-model="form.phone" type="tel"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border"
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                     placeholder="600123456">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div class="sm:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Dirección <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-[var(--text-secondary)]">Dirección <span class="text-red-500">*</span></label>
                                 <input v-model="form.address" type="text"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border"
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                     placeholder="Calle Mayor 1">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Código postal <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-[var(--text-secondary)]">Código postal <span class="text-red-500">*</span></label>
                                 <input v-model="form.postCode" type="text"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border"
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                     placeholder="28001">
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">País <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-[var(--text-secondary)]">País <span class="text-red-500">*</span></label>
                             <input v-model="form.country" type="text"
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border"
+                                class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                 placeholder="España">
                         </div>
 
                         <!-- Contraseña -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">
+                            <label class="block text-sm font-medium text-[var(--text-secondary)]">
                                 Contraseña{{ isEditing ? ' (dejar vacío para no cambiar)' : '' }}
                                 <span v-if="!isEditing" class="text-red-500">*</span>
                             </label>
                             <input v-model="form.password" type="password"
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border"
+                                class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                 placeholder="••••••••">
                         </div>
 
                         <!-- Sección datos médicos -->
-                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider pt-2">Datos médicos</p>
+                        <p class="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider pt-2">Datos médicos</p>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Nº Colegiado <span class="text-red-500">*</span></label>
+                                <label class="block text-sm font-medium text-[var(--text-secondary)]">Nº Colegiado <span class="text-red-500">*</span></label>
                                 <input v-model="form.numeroColegiado" type="text"
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border font-mono"
                                     placeholder="28-12345">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Especialidad</label>
+                                <label class="block text-sm font-medium text-[var(--text-secondary)]">Especialidad</label>
                                 <select v-model="form.especialidadId"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-white">
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]">
                                     <option :value="null">— Sin asignar —</option>
                                     <option v-for="esp in especialidadesOptions" :key="esp.id" :value="esp.id">
                                         {{ esp.nombre }}
@@ -275,28 +274,28 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Foto URL</label>
+                            <label class="block text-sm font-medium text-[var(--text-secondary)]">Foto URL</label>
                             <input v-model="form.fotoUrl" type="url"
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border"
+                                class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                 placeholder="https://...">
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Biografía</label>
+                            <label class="block text-sm font-medium text-[var(--text-secondary)]">Biografía</label>
                             <textarea v-model="form.bio" rows="3"
-                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border"
+                                class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-teal-500 focus:border-teal-500 text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                 placeholder="Breve descripción del médico y su experiencia..."></textarea>
                         </div>
 
                         <div class="flex items-center space-x-3">
                             <input v-model="form.activo" type="checkbox" id="activo-medico"
                                 class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded">
-                            <label for="activo-medico" class="text-sm font-medium text-gray-700">Médico activo</label>
+                            <label for="activo-medico" class="text-sm font-medium text-[var(--text-secondary)]">Médico activo</label>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-gray-50 px-6 py-4 flex flex-row-reverse gap-3">
+                <div class="bg-[var(--bg-elevated)] px-6 py-4 flex flex-row-reverse gap-3 rounded-b-lg">
                     <button @click="saveMedico" type="button" :disabled="isSaving"
                         class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-teal-600 text-sm font-medium text-white hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed">
                         <svg v-if="isSaving" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
@@ -307,7 +306,7 @@
                         {{ isSaving ? 'Guardando...' : 'Guardar' }}
                     </button>
                     <button @click="closeModal" type="button"
-                        class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        class="inline-flex justify-center rounded-md border border-[var(--border)] shadow-sm px-4 py-2 bg-[var(--bg-surface)] text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
                         Cancelar
                     </button>
                 </div>
@@ -317,9 +316,9 @@
         <!-- ===== DELETE CONFIRMATION MODAL ===== -->
         <div v-if="isDeleteModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4"
             role="dialog" aria-modal="true">
-            <div class="fixed inset-0 bg-gray-500/75" aria-hidden="true" @click="closeDeleteModal"></div>
-            <div class="relative z-10 bg-white rounded-lg text-left shadow-xl w-full max-w-sm">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" @click="closeDeleteModal"></div>
+            <div class="relative z-10 bg-[var(--bg-surface)] rounded-lg text-left shadow-xl w-full max-w-sm">
+                <div class="bg-[var(--bg-surface)] px-4 pt-5 pb-4 sm:p-6 rounded-t-lg">
                     <div class="flex items-start space-x-4">
                         <div class="flex-shrink-0 p-2 bg-red-100 rounded-full">
                             <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -328,8 +327,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-lg font-medium text-gray-900">Eliminar médico</h3>
-                            <p class="mt-1 text-sm text-gray-500">
+                            <h3 class="text-lg font-medium text-[var(--text-primary)]">Eliminar médico</h3>
+                            <p class="mt-1 text-sm text-[var(--text-secondary)]">
                                 ¿Estás seguro de que quieres eliminar a
                                 <strong>{{ doctorToDelete ? fullName(doctorToDelete) : '' }}</strong>?
                                 Esta acción es irreversible.
@@ -343,7 +342,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-gray-50 px-4 py-3 flex flex-row-reverse gap-2">
+                <div class="bg-[var(--bg-elevated)] px-4 py-3 flex flex-row-reverse gap-2 rounded-b-lg">
                     <button @click="confirmDelete" :disabled="isDeleting"
                         class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-sm font-medium text-white hover:bg-red-700 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
                         <svg v-if="isDeleting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
@@ -354,7 +353,7 @@
                         {{ isDeleting ? 'Eliminando...' : 'Eliminar' }}
                     </button>
                     <button @click="closeDeleteModal" type="button"
-                        class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none">
+                        class="inline-flex justify-center rounded-md border border-[var(--border)] shadow-sm px-4 py-2 bg-[var(--bg-surface)] text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] focus:outline-none">
                         Cancelar
                     </button>
                 </div>

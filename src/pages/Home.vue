@@ -1,52 +1,49 @@
 <template>
-  <div class="flex flex-col min-h-screen font-sans">
-    <Header />
+  <div class="flex flex-col min-h-screen">
+    <!-- Primera vista (100vh) que incluye Header, Hero y Estadísticas -->
+    <div class="min-h-screen flex flex-col">
+      <Header class="shrink-0" />
 
-    <!-- Hero Section -->
-    <section class="hero-section relative min-h-[600px] flex items-center overflow-hidden">
-      <!-- Background Image -->
-      <div class="absolute inset-0 w-full h-full">
-        <img :src="heroBackground" class="w-full h-full object-cover object-center" alt="VitSync Hero" />
-      </div>
-      
-      <!-- Premium Overlay (Darker to make text pop, but transparent enough to see the image) -->
-      <div class="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-800/80 to-transparent dark:from-[#0B1120]/95 dark:via-[#0B1120]/80"></div>
+      <!-- Hero Section with Background Image -->
+      <section class="hero-section relative flex-1 flex items-center text-white overflow-hidden">
+        <!-- Image Carousel -->
+        <transition-group name="slide-left" tag="div" class="absolute inset-0 w-full h-full">
+          <div v-for="(image, index) in heroImages" :key="index" v-show="index === currentHeroIndex"
+            class="absolute inset-0 w-full h-full bg-cover bg-center" :style="{ backgroundImage: `url(${image})` }">
+            <!-- Gradient Overlay -->
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-teal-900 opacity-70 via-teal-800 opacity-70 to-transparent">
+            </div>
+          </div>
+        </transition-group>
 
-      <!-- Hero Content -->
-      <div class="relative z-10 px-6 md:px-12 lg:px-20 max-w-3xl">
-        <div class="inline-block px-4 py-1.5 rounded-full bg-accent/20 border border-accent/30 text-accent font-semibold text-sm mb-6 backdrop-blur-sm">
-          Innovación en Salud Digital
-        </div>
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight tracking-tight">
-          Tu Salud, <br/>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-teal-200">Nuestra Prioridad</span>
-        </h1>
-        <p class="text-lg md:text-xl text-slate-200 mb-10 font-light leading-relaxed max-w-2xl">
-          Conectamos a pacientes y especialistas en una plataforma única. 
-          Gestiona tus citas, accede a tu historial y recibe atención médica de primer nivel.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4">
-          <button @click="irAAgendarCita" class="bg-accent hover:bg-teal-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-accent/30 transform transition-all duration-300 hover:-translate-y-1">
+        <!-- Hero Content - Aligned Left -->
+        <div class="relative z-10 px-6 md:px-12 lg:px-20 max-w-2xl">
+          <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">Tu Salud, Nuestra Prioridad</h1>
+          <p class="text-lg md:text-xl mb-8 font-light leading-relaxed">
+            Somos una empresa líder en servicios médicos especializados, comprometidos con ofrecer
+            atención de calidad y profesionales altamente capacitados para cuidar de tu bienestar
+            y el de tu familia.
+          </p>
+          <button
+            class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-10 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
             Solicitar Cita
           </button>
-          <button class="bg-white/10 hover:bg-white/20 text-white border border-white/20 font-semibold px-8 py-4 rounded-xl backdrop-blur-sm transition-all duration-300">
-            Conoce Más
-          </button>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Stats Section (Floating overlapping the hero) -->
-    <section class="relative z-20 -mt-16 px-6 max-w-7xl mx-auto">
-      <div class="bg-white dark:bg-[var(--bg-surface)] rounded-2xl shadow-xl border border-slate-100 dark:border-[var(--border)] p-8">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-slate-100 dark:divide-[var(--border)]">
-          <div v-for="stat in statistics" :key="stat.label" class="flex flex-col items-center justify-center">
-            <div class="text-4xl font-bold text-slate-800 dark:text-white mb-1">{{ stat.value }}</div>
-            <div class="text-sm font-semibold text-accent uppercase tracking-widest">{{ stat.label }}</div>
+      <!-- Statistics Section -->
+      <section class="bg-teal-600 text-white py-16 shrink-0">
+        <div class="max-w-7xl mx-auto px-6">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div v-for="stat in statistics" :key="stat.label" class="stat-item">
+              <div class="text-5xl md:text-6xl font-bold mb-2">{{ stat.value }}</div>
+              <div class="text-lg md:text-xl font-light opacity-90">{{ stat.label }}</div>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
 
     <!-- Specialists Section -->
     <section class="py-24 bg-slate-50 dark:bg-[var(--bg-base)] transition-colors duration-300">

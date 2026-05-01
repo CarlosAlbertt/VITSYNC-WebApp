@@ -1,5 +1,6 @@
 import { ref, reactive } from 'vue';
 import { getProfile, updateProfile as apiUpdateProfile, uploadAvatar as apiUploadAvatar } from '../services/profileService';
+import api from '../services/api';
 
 // ─── Estado ────────────────────────────────────────────────────────────────────
 export const activeSection = ref('general'); // general | informes | citas | configuracion
@@ -25,15 +26,38 @@ export const setSection = (section) => {
     activeSection.value = section;
 };
 
+// ─── Resetear store al hacer logout ───────────────────────────────────────────
+export const resetProfile = () => {
+    Object.keys(profileData).forEach(k => delete profileData[k]);
+    avatarUrl.value = null;
+    activeSection.value = 'general';
+};
+
 // ─── Cargar perfil desde el backend ───────────────────────────────────────────
 export const loadProfile = async () => {
     isLoading.value = true;
     try {
         const data = await getProfile();
         Object.assign(profileData, data);
+        let avatar = data.avatarUrl || null;
+        if (avatar && avatar.startsWith('/')) {
+            const url = new URL(api.defaults.baseURL);
+            avatar = url.origin + avatar;
+        }
+        avatarUrl.value = avatar;
     } catch (err) {
         console.error('Error cargando perfil:', err);
-        showToast('Error al cargar el perfil', 'error');
+        if (err.response?.status === 401 || err.response?.status === 403) {
+            // Si el token es inválido o no hay permisos, hacer logout y redirigir
+            localStorage.removeItem('token');
+            localStorage.removeItem('nif');
+            localStorage.removeItem('email');
+            localStorage.removeItem('role');
+            localStorage.removeItem('id');
+            window.location.href = '/login';
+        } else {
+            showToast('Error al cargar el perfil', 'error');
+        }
     } finally {
         isLoading.value = false;
     }
@@ -58,7 +82,12 @@ export const saveProfile = async (updatedData) => {
 export const uploadAvatar = async (file) => {
     try {
         const result = await apiUploadAvatar(file);
-        avatarUrl.value = result.avatarUrl;
+        let avatar = result.avatarUrl;
+        if (avatar && avatar.startsWith('/')) {
+            const url = new URL(api.defaults.baseURL);
+            avatar = url.origin + avatar;
+        }
+        avatarUrl.value = avatar;
         showToast('Foto de perfil actualizada');
     } catch (err) {
         showToast('Error al subir la foto', 'error');

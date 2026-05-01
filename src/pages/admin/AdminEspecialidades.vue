@@ -1,11 +1,11 @@
 <template>
-    <div class="min-h-screen bg-gray-50 p-8">
+    <div class="min-h-screen bg-[var(--bg-base)] p-8">
         <div class="max-w-7xl mx-auto">
             <!-- Header -->
             <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900">Gestión de Especialidades</h1>
-                    <p class="mt-2 text-gray-500">Administra las especialidades médicas disponibles en la clínica.</p>
+                    <h1 class="text-3xl font-bold text-[var(--text-primary)]">Gestión de Especialidades</h1>
+                    <p class="mt-2 text-[var(--text-secondary)]">Administra las especialidades médicas disponibles en la clínica.</p>
                 </div>
                 <div class="mt-4 sm:mt-0">
                     <button @click="openModal()"
@@ -19,22 +19,22 @@
             </div>
 
             <!-- Search -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+            <div class="bg-[var(--bg-surface)] rounded-xl shadow-sm border border-[var(--border)] p-4 mb-6">
                 <div class="relative max-w-md">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg class="h-5 w-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </div>
                     <input v-model="searchQuery" type="text"
-                        class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                        class="block w-full pl-10 pr-3 py-2 border border-[var(--border)] rounded-lg leading-5 bg-[var(--bg-surface)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:placeholder-[var(--text-muted)] focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                         placeholder="Buscar por nombre, código o tipo..." />
                 </div>
             </div>
 
             <!-- Loading state -->
-            <div v-if="isLoading" class="p-12 text-center text-gray-500 bg-white rounded-xl border border-gray-100">
+            <div v-if="isLoading" class="p-12 text-center text-[var(--text-secondary)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)]">
                 <svg class="animate-spin h-8 w-8 text-purple-600 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg"
                     fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -60,13 +60,13 @@
             <!-- Specialty Cards Grid -->
             <div v-if="!isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div v-for="specialty in filteredSpecialties" :key="specialty.id"
-                    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow relative result-card group">
+                    class="bg-[var(--bg-surface)] rounded-xl shadow-sm border border-[var(--border)] p-6 hover:shadow-md transition-shadow relative result-card group">
 
                     <!-- Action buttons (hover) -->
                     <div
                         class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-2">
                         <button @click="openModal(specialty)"
-                            class="p-1 text-gray-400 hover:text-purple-600 rounded-full hover:bg-purple-50 transition-colors"
+                            class="p-1 text-[var(--text-muted)] hover:text-purple-600 rounded-full hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
                             title="Editar">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -74,7 +74,7 @@
                             </svg>
                         </button>
                         <button @click="openDeleteModal(specialty)"
-                            class="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 transition-colors"
+                            class="p-1 text-[var(--text-muted)] hover:text-red-600 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                             title="Eliminar">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -85,38 +85,38 @@
 
                     <!-- Card content -->
                     <div class="flex items-center space-x-4 mb-3">
-                        <div class="p-3 bg-purple-100 rounded-lg text-purple-600">
+                        <div class="p-3 bg-purple-100 dark:bg-purple-900/40 rounded-lg text-purple-600 dark:text-purple-400">
                             <span class="text-xl font-bold">{{ specialty.nombre?.charAt(0)?.toUpperCase() || '?'
                                 }}</span>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <h3 class="text-lg font-bold text-gray-900 truncate">{{ specialty.nombre }}</h3>
-                            <p class="text-xs text-gray-400 font-mono">{{ specialty.codigo }}</p>
+                            <h3 class="text-lg font-bold text-[var(--text-primary)] truncate">{{ specialty.nombre }}</h3>
+                            <p class="text-xs text-[var(--text-muted)] font-mono">{{ specialty.codigo }}</p>
                         </div>
                     </div>
 
                     <!-- Tipo badge -->
                     <div class="flex items-center space-x-2 mb-3">
                         <span
-                            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300">
                             {{ specialty.tipo }}
                         </span>
                         <!-- Activo badge -->
                         <span :class="specialty.activo
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'"
+                            ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300'
+                            : 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300'"
                             class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium">
                             {{ specialty.activo ? 'Activo' : 'Inactivo' }}
                         </span>
                     </div>
 
-                    <p class="text-gray-500 text-sm line-clamp-2 mb-4">
+                    <p class="text-[var(--text-secondary)] text-sm line-clamp-2 mb-4">
                         {{ specialty.descripcion || 'Sin descripción disponible.' }}
                     </p>
 
                     <!-- Toggle button -->
-                    <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                        <span class="text-xs text-gray-400">{{ specialty.slug }}</span>
+                    <div class="flex items-center justify-between pt-3 border-t border-[var(--border)]">
+                        <span class="text-xs text-[var(--text-muted)]">{{ specialty.slug }}</span>
                         <button @click="handleToggle(specialty.id)" :class="specialty.activo
                             ? 'bg-green-500 hover:bg-green-600'
                             : 'bg-gray-300 hover:bg-gray-400'"
@@ -131,7 +131,7 @@
 
             <!-- Empty state -->
             <div v-if="!isLoading && filteredSpecialties.length === 0"
-                class="p-12 text-center text-gray-500 bg-white rounded-xl border border-gray-100 mt-6">
+                class="p-12 text-center text-[var(--text-secondary)] bg-[var(--bg-surface)] rounded-xl border border-[var(--border)] mt-6">
                 No se encontraron especialidades.
             </div>
         </div>
@@ -140,12 +140,12 @@
         <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog"
             aria-labelledby="modal-title" aria-modal="true">
             <!-- Backdrop -->
-            <div class="fixed inset-0 bg-gray-500/75" aria-hidden="true" @click="closeModal"></div>
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" @click="closeModal"></div>
 
             <!-- Dialog panel -->
-            <div class="relative z-10 bg-white rounded-lg text-left overflow-hidden shadow-xl w-full max-w-lg">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+            <div class="relative z-10 bg-[var(--bg-surface)] rounded-lg text-left overflow-hidden shadow-xl w-full max-w-lg">
+                    <div class="bg-[var(--bg-surface)] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <h3 class="text-lg leading-6 font-medium text-[var(--text-primary)]" id="modal-title">
                             {{ isEditing ? 'Editar Especialidad' : 'Añadir Especialidad' }}
                         </h3>
 
@@ -163,27 +163,27 @@
                         <div class="mt-4 space-y-4">
                             <!-- Nombre -->
                             <div>
-                                <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre <span
+                                <label for="nombre" class="block text-sm font-medium text-[var(--text-secondary)]">Nombre <span
                                         class="text-red-500">*</span></label>
                                 <input v-model="form.nombre" type="text" id="nombre"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm p-2 border"
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                     placeholder="Cardiología">
                             </div>
 
                             <!-- Código + Tipo (row) -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label for="codigo" class="block text-sm font-medium text-gray-700">Código <span
+                                    <label for="codigo" class="block text-sm font-medium text-[var(--text-secondary)]">Código <span
                                             class="text-red-500">*</span></label>
                                     <input v-model="form.codigo" type="text" id="codigo"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm p-2 border uppercase"
                                         placeholder="CARD">
                                 </div>
                                 <div>
-                                    <label for="tipo" class="block text-sm font-medium text-gray-700">Tipo <span
+                                    <label for="tipo" class="block text-sm font-medium text-[var(--text-secondary)]">Tipo <span
                                             class="text-red-500">*</span></label>
                                     <select v-model="form.tipo" id="tipo"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm p-2 border bg-white">
+                                        class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]">
                                         <option v-for="tipo in tiposDisponibles" :key="tipo" :value="tipo">{{ tipo
                                             }}</option>
                                     </select>
@@ -193,24 +193,24 @@
                             <!-- Descripción -->
                             <div>
                                 <label for="descripcion"
-                                    class="block text-sm font-medium text-gray-700">Descripción</label>
+                                    class="block text-sm font-medium text-[var(--text-secondary)]">Descripción</label>
                                 <textarea v-model="form.descripcion" id="descripcion" rows="3"
-                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm p-2 border"
+                                    class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                     placeholder="Descripción breve de la especialidad..."></textarea>
                             </div>
 
                             <!-- Slug + Icono (row) -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label for="slug" class="block text-sm font-medium text-gray-700">Slug</label>
+                                    <label for="slug" class="block text-sm font-medium text-[var(--text-secondary)]">Slug</label>
                                     <input v-model="form.slug" type="text" id="slug"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm p-2 border"
+                                        class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                         placeholder="Se genera automáticamente">
                                 </div>
                                 <div>
-                                    <label for="icono" class="block text-sm font-medium text-gray-700">Icono</label>
+                                    <label for="icono" class="block text-sm font-medium text-[var(--text-secondary)]">Icono</label>
                                     <input v-model="form.icono" type="text" id="icono"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm p-2 border"
+                                        class="mt-1 block w-full border-[var(--border)] rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 sm:text-sm p-2 border bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                                         placeholder="heart">
                                 </div>
                             </div>
@@ -224,7 +224,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <div class="bg-[var(--bg-elevated)] px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                         <button @click="saveSpecialty" type="button" :disabled="isSaving"
                             class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg v-if="isSaving" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
@@ -237,7 +237,7 @@
                             {{ isSaving ? 'Guardando...' : 'Guardar' }}
                         </button>
                         <button @click="closeModal" type="button"
-                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            class="mt-3 w-full inline-flex justify-center rounded-md border border-[var(--border)] shadow-sm px-4 py-2 bg-[var(--bg-surface)] text-base font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                             Cancelar
                         </button>
                     </div>
@@ -248,11 +248,11 @@
         <div v-if="isDeleteModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog"
             aria-modal="true">
             <!-- Backdrop -->
-            <div class="fixed inset-0 bg-gray-500/75" aria-hidden="true" @click="closeDeleteModal"></div>
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" @click="closeDeleteModal"></div>
 
             <!-- Dialog panel -->
-            <div class="relative z-10 bg-white rounded-lg text-left overflow-hidden shadow-xl w-full max-w-sm">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6">
+            <div class="relative z-10 bg-[var(--bg-surface)] rounded-lg text-left overflow-hidden shadow-xl w-full max-w-sm">
+                    <div class="bg-[var(--bg-surface)] px-4 pt-5 pb-4 sm:p-6">
                         <div class="flex items-start space-x-4">
                             <div class="flex-shrink-0 p-2 bg-red-100 rounded-full">
                                 <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24"
@@ -262,8 +262,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-lg font-medium text-gray-900">Eliminar especialidad</h3>
-                                <p class="mt-1 text-sm text-gray-500">
+                                <h3 class="text-lg font-medium text-[var(--text-primary)]">Eliminar especialidad</h3>
+                                <p class="mt-1 text-sm text-[var(--text-secondary)]">
                                     ¿Estás seguro de que quieres eliminar
                                     <strong>{{ specialtyToDelete?.nombre }}</strong>?
                                     Esta acción es irreversible.
@@ -279,7 +279,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+                    <div class="bg-[var(--bg-elevated)] px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
                         <button @click="confirmDelete" :disabled="isDeleting"
                             class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg v-if="isDeleting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
@@ -290,7 +290,7 @@
                             {{ isDeleting ? 'Eliminando...' : 'Eliminar' }}
                         </button>
                         <button @click="closeDeleteModal" type="button"
-                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:w-auto sm:text-sm">
+                            class="mt-3 w-full inline-flex justify-center rounded-md border border-[var(--border)] shadow-sm px-4 py-2 bg-[var(--bg-surface)] text-base font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] sm:mt-0 sm:w-auto sm:text-sm">
                             Cancelar
                         </button>
                     </div>
