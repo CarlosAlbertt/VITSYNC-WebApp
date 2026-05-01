@@ -105,6 +105,7 @@
                   <!-- Action Buttons - Fixed at bottom -->
                   <div class="flex gap-3 mt-auto">
                     <button
+                      @click="pedirCita(especialidad)"
                       class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300">
                       Pedir cita
                     </button>
@@ -129,6 +130,7 @@
 import Header from '../components/HeaderComponent.vue';
 import Footer from '../components/FooterComponent.vue';
 import { fetchEspecialidades } from '../store/especialidades';
+import { openBooking } from '../store/bookingModal';
 
 // Import all specialty images
 const specialtyImages = import.meta.glob('../assets/images/specialties/*.png', { eager: true, query: '?url', import: 'default' });
@@ -153,6 +155,13 @@ export default {
     }
   },
   methods: {
+    pedirCita(especialidad) {
+      openBooking({
+        specialty: especialidad,
+        specialtyName: especialidad.nombre
+      });
+    },
+    
     async loadEspecialidades() {
       try {
         this.isLoading = true;

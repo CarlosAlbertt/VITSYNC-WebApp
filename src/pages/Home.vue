@@ -45,46 +45,45 @@
       </section>
     </div>
 
-    <!-- Medical Professionals Section -->
-    <section class="py-32 bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
+    <!-- Specialists Section -->
+    <section class="py-24 bg-slate-50 dark:bg-[var(--bg-base)] transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-6">
-        <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">Nuestros Especialistas</h2>
-          <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Profesionales médicos altamente calificados dedicados a tu bienestar
-          </p>
+        <div class="flex flex-col md:flex-row justify-between items-end mb-12">
+          <div class="max-w-2xl">
+            <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Nuestros Especialistas</h2>
+            <p class="text-lg text-slate-600 dark:text-slate-400 font-light">
+              Un equipo de profesionales altamente calificados, listos para brindarte la mejor atención médica.
+            </p>
+          </div>
+          <button class="hidden md:block text-accent font-semibold hover:text-teal-700 transition-colors">
+            Ver todo el cuadro médico &rarr;
+          </button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div v-for="medico in medicos" :key="medico.id"
-            class="bg-white dark:bg-gray-700 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
-            <!-- Doctor Image -->
-            <div class="h-64 overflow-hidden bg-gray-200">
-              <img :src="medico.image" :alt="medico.name" class="w-full h-full object-cover">
+          <div v-for="medico in medicos" :key="medico.id" class="group bg-white dark:bg-[var(--bg-surface)] rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 dark:border-[var(--border)] transition-all duration-300 overflow-hidden">
+            <div class="h-64 overflow-hidden relative bg-slate-100 dark:bg-[var(--bg-base)]">
+              <img :src="medico.image" :alt="medico.name" class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105">
             </div>
-
-            <!-- Doctor Info -->
-            <div class="p-6">
-              <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-3">Dr. {{ medico.name }}</h3>
-
-              <!-- Specialty Badge -->
-              <div class="inline-block bg-teal-100 text-teal-700 px-4 py-1 rounded-full text-sm font-semibold mb-4">
+            <div class="p-8 relative">
+              <!-- Specialty Floating Badge -->
+              <div class="absolute -top-5 right-6 bg-accent text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-md">
                 {{ medico.especialidad }}
               </div>
-
-              <!-- Contact and Schedule Info -->
-              <div class="space-y-2 text-gray-600 dark:text-gray-300 mb-4">
-                <p class="text-sm">
-                  <span class="font-semibold">Contacto:</span> {{ medico.telefono }}
-                </p>
-                <p class="text-sm">
-                  <span class="font-semibold">Horario:</span> {{ medico.horario }}
-                </p>
+              <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-4">Dr. {{ medico.name }}</h3>
+              
+              <div class="space-y-3 mb-8">
+                <div class="flex items-center text-slate-600 dark:text-slate-400 text-sm">
+                  <svg class="w-5 h-5 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                  {{ medico.telefono }}
+                </div>
+                <div class="flex items-center text-slate-600 dark:text-slate-400 text-sm">
+                  <svg class="w-5 h-5 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  {{ medico.horario }}
+                </div>
               </div>
 
-              <!-- Action Button -->
-              <button
-                class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300">
+              <button @click="irAAgendarCita" class="w-full bg-slate-50 hover:bg-accent hover:text-white dark:bg-slate-800 dark:hover:bg-accent text-accent font-semibold px-6 py-3 rounded-xl transition-colors duration-300">
                 Agendar Consulta
               </button>
             </div>
@@ -93,37 +92,38 @@
       </div>
     </section>
 
-    <!-- Company Values Section -->
-    <section class="py-24 bg-white dark:bg-gray-900 transition-colors duration-300">
+    <!-- Values Section -->
+    <section class="py-24 bg-white dark:bg-[var(--bg-surface)] transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-6">
-        <div class="text-center mb-12">
-          <h2 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">Nuestros Valores</h2>
-          <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Comprometidos con la excelencia en cada aspecto de nuestro servicio
+        <div class="text-center mb-16">
+          <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">El estándar VitSync</h2>
+          <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto font-light">
+            Innovación, empatía y profesionalismo en cada paso de tu cuidado médico.
           </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div v-for="value in values" :key="value.title"
-            class="text-center p-6 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-teal-500 transition-all duration-300 hover:shadow-md">
-            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3">{{ value.title }}</h3>
-            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">{{ value.description }}</p>
+          <div v-for="value in values" :key="value.title" class="p-6 rounded-2xl bg-slate-50 dark:bg-[var(--bg-base)] border border-slate-100 dark:border-[var(--border)] hover:border-accent transition-colors duration-300">
+            <div class="w-12 h-12 mb-6 bg-white dark:bg-[var(--bg-surface)] rounded-xl shadow-sm flex items-center justify-center text-accent">
+              <span v-html="value.icon"></span>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">{{ value.title }}</h3>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm">{{ value.description }}</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Call to Action Section -->
-    <section class="py-24 bg-teal-50 dark:bg-teal-900/20 transition-colors duration-300">
-      <div class="max-w-4xl mx-auto px-6 text-center">
-        <h2 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4">¿Listo para cuidar de tu salud?</h2>
-        <p class="text-xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-          Agenda tu cita con nuestros especialistas y da el primer paso hacia una vida más saludable.
-          Estamos aquí para acompañarte en cada momento.
+    <!-- Call to Action -->
+    <section class="py-20 relative overflow-hidden bg-accent dark:bg-[#0B1120]">
+      <div class="absolute inset-0 opacity-10 bg-[url('/images/hero-background.png')] bg-cover bg-center"></div>
+      <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6 tracking-tight">No dejes tu salud para mañana</h2>
+        <p class="text-lg text-white/90 mb-10 font-light max-w-2xl mx-auto">
+          Únete a los miles de pacientes que ya confían en VitSync para gestionar su bienestar médico de forma rápida, segura y profesional.
         </p>
-        <button
-          class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-10 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
-          Contactar Ahora
+        <button @click="irAAgendarCita" class="bg-white text-accent hover:bg-slate-50 font-bold px-10 py-4 rounded-xl shadow-xl transform transition-transform hover:-translate-y-1 text-lg">
+          Crear mi cuenta gratis
         </button>
       </div>
     </section>
@@ -136,31 +136,27 @@
 import Header from '../components/HeaderComponent.vue';
 import Footer from '../components/FooterComponent.vue';
 import heroBackground from '/images/hero-background.png';
+import { openBooking } from '../store/bookingModal';
 
 export default {
   components: {
     Header,
     Footer,
   },
+  methods: {
+    irAAgendarCita() {
+      openBooking();
+    }
+  },
   data() {
     return {
       heroBackground,
-      currentHeroIndex: 0,
-      // Array de imágenes para el carrusel (actualmente usando la misma imagen como placeholder)
-      heroImages: [
-        heroBackground,
-        '/images/monkey.jpg',
-        heroBackground
-      ],
-      heroInterval: null,
-
       statistics: [
-        { value: '15,000+', label: 'Pacientes Atendidos' },
-        { value: '25+', label: 'Años de Experiencia' },
+        { value: '15k+', label: 'Pacientes' },
+        { value: '25+', label: 'Años Exp.' },
         { value: '50+', label: 'Especialistas' },
         { value: '98%', label: 'Satisfacción' },
       ],
-
       medicos: [
         {
           id: 1,
@@ -187,93 +183,42 @@ export default {
           image: '/images/doctors/Usuario.png'
         },
       ],
-
       values: [
         {
-          title: 'Excelencia Profesional',
-          description: 'Médicos especializados con la más alta formación académica y experiencia comprobada.'
+          icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>',
+          title: 'Excelencia Médica',
+          description: 'Especialistas seleccionados rigurosamente por su trayectoria y formación académica.'
         },
         {
-          title: 'Atención Personalizada',
-          description: 'Cada paciente es único. Ofrecemos tratamientos adaptados a tus necesidades específicas.'
+          icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>',
+          title: 'Trato Personalizado',
+          description: 'Entendemos que cada caso es único. Nos enfocamos en escuchar y resolver tus necesidades.'
         },
         {
+          icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>',
           title: 'Tecnología Avanzada',
-          description: 'Equipamiento médico de última generación para diagnósticos precisos y tratamientos efectivos.'
+          description: 'Plataforma digital intuitiva y equipamiento clínico de última generación.'
         },
         {
-          title: 'Confianza y Experiencia',
-          description: 'Más de 25 años cuidando la salud de miles de familias con dedicación y compromiso.'
+          icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>',
+          title: 'Máxima Confianza',
+          description: 'Protección de datos rigurosa y años de experiencia avalando nuestros servicios.'
         },
       ],
     };
-  },
-  mounted() {
-    this.startCarousel();
-  },
-  beforeUnmount() {
-    if (this.heroInterval) {
-      clearInterval(this.heroInterval);
-    }
-  },
-  methods: {
-    startCarousel() {
-      this.heroInterval = setInterval(() => {
-        this.currentHeroIndex = (this.currentHeroIndex + 1) % this.heroImages.length;
-      }, 5000);
-    }
   }
 };
 </script>
 
 <style scoped>
-.hero-section {
-  position: relative;
+/* Estilos extra si es necesario. Tailwind hace el 99% del trabajo. */
+.bg-accent {
+  background-color: var(--accent);
 }
-
-/* Slide Left Transition */
-.slide-left-enter-active,
-.slide-left-leave-active {
-  transition: transform 1s ease-in-out;
+.text-accent {
+  color: var(--accent);
 }
-
-.slide-left-enter-from {
-  transform: translateX(100%);
-  z-index: 1;
-  /* Incoming slide on top */
-}
-
-.slide-left-leave-to {
-  transform: translateX(-100%);
-  z-index: 0;
-}
-
-.slide-left-enter-to,
-.slide-left-leave-from {
-  transform: translateX(0);
-}
-
-.animate-fade-in {
-  animation: fadeIn 1s ease-in;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.stat-item {
-  transition: transform 0.3s ease;
-}
-
-.stat-item:hover {
-  transform: scale(1.05);
+.border-accent {
+  border-color: var(--accent);
 }
 </style>

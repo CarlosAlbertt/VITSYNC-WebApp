@@ -4,6 +4,8 @@ import { isAuthenticated } from './store/auth';
 import { loadProfile } from './store/profile';
 import ChatWidget from './components/chat/ChatWidget.vue'; // Cambiar ChatWindow por ChatWidget
 import ChatButton from './components/chat/ChatButton.vue';
+import AgendaCita from './pages/AgendaCita.vue';
+import { isBookingOpen, closeBooking } from './store/bookingModal';
 
 const isChatOpen = ref(false);
 
@@ -26,6 +28,9 @@ onMounted(() => {
         <component :is="Component" :key="route.path" />
       </Transition>
     </RouterView>
+
+    <!-- Modal de Reserva de Citas (global) -->
+    <AgendaCita :visible="isBookingOpen" @close="closeBooking" />
     
     <!-- Chat Overlay -->
     <div v-if="isAuthenticated" class="chat-container">
