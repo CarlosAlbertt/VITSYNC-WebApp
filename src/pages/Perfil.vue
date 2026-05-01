@@ -44,21 +44,35 @@ import GeneralSection from '../components/profile/sections/GeneralSection.vue';
 import InformesSection from '../components/profile/sections/InformesSection.vue';
 import CitasSection from '../components/profile/sections/CitasSection.vue';
 import ConfiguracionSection from '../components/profile/sections/ConfiguracionSection.vue';
+import MiSaludSection from '../components/profile/sections/MiSaludSection.vue';
 
-import { activeSection, loadProfile } from '../store/profile';
-import { computed } from 'vue';
+import { activeSection, loadProfile, setSection } from '../store/profile';
+import { computed, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 const sectionMap = {
   general: GeneralSection,
   informes: InformesSection,
   citas: CitasSection,
-  configuracion: ConfiguracionSection
+  configuracion: ConfiguracionSection,
+  misalud: MiSaludSection
 };
 
 const currentSection = computed(() => sectionMap[activeSection.value] || GeneralSection);
 
+const route = useRoute();
+
 onMounted(() => {
+  if (route.query.section) {
+    setSection(route.query.section);
+  }
   loadProfile();
+});
+
+watch(() => route.query.section, (newVal) => {
+  if (newVal) {
+    setSection(newVal);
+  }
 });
 </script>
 

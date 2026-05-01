@@ -39,6 +39,7 @@ import { activeSection, setSection } from '../../store/profile';
 
 const sections = [
   { id: 'general',       icon: '', label: 'General' },
+  { id: 'misalud',       icon: '', label: 'Mi Salud' },
   { id: 'informes',      icon: '', label: 'Informes' },
   { id: 'citas',         icon: '', label: 'Citas' },
   { id: 'configuracion', icon: '',  label: 'Configuración' }

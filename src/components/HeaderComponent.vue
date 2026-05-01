@@ -1,7 +1,7 @@
 <template>
-  <header class="bg-white dark:bg-gray-900 shadow-sm transition-colors duration-300">
+  <header class="bg-[var(--bg-surface)] border-b border-[var(--border)] shadow-sm">
     <!-- Barra superior de contacto e idioma -->
-    <div class="bg-teal-600 dark:bg-teal-800 text-white text-sm px-4 py-2 relative z-50 transition-colors duration-300">
+    <div class="topbar text-white text-sm px-4 py-2 relative z-50">
       <div class="max-w-7xl mx-auto">
         <!-- Mobile Toggle (visible < 550px) -->
         <div class="flex justify-center min-[550px]:hidden">
@@ -27,26 +27,38 @@
             <!-- Dark Mode Toggle -->
             <button @click="toggleDark()"
               class="p-2 rounded-full hover:bg-teal-700 transition-colors focus:outline-none" title="Toggle Dark Mode">
-              <svg v-if="isDark" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
+             <Transition name="icon-swap" mode="out-in">
+              <!-- Icono "Sol" (modo oscuro activo → click para volver a claro) -->
+              <svg v-if="isDark" key="sun"
+                  xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
+              <!-- Icono "Luna" (modo claro activo → click para pasar a oscuro) -->
+              <svg v-else key="moon"
+                  xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
               </svg>
+            </Transition>
             </button>
           </div>
-          <router-link v-if="!isAuthenticated" to="/login"
-            class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700 transition-colors">
-            Iniciar sesion
-          </router-link>
-          <button v-else @click="handleLogout"
-            class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700 transition-colors">
-            Cerrar sesion
-          </button>
+          <div class="flex items-center gap-6">
+            <router-link v-if="isAuthenticated && currentUser.role === 'ADMIN'" to="/admin"
+              class="bg-teal-800 dark:bg-teal-700 text-white px-3 py-1 rounded text-sm font-medium hover:bg-teal-900 dark:hover:bg-teal-600 transition-colors">
+              Panel Admin
+            </router-link>
+            <router-link v-if="!isAuthenticated" to="/login"
+              class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700 transition-colors">
+              Iniciar sesion
+            </router-link>
+            <button v-else @click="handleLogout"
+              class="bg-white text-teal-600 px-3 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:bg-gray-800 dark:text-teal-400 dark:hover:bg-gray-700 transition-colors">
+              Cerrar sesion
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -55,7 +67,7 @@
     <nav class="max-w-7xl mx-auto px-4 py-4">
       <div class="flex flex-wrap items-center justify-between">
         <router-link to="/"
-          class="text-2xl font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors cursor-pointer">
+          class="text-2xl font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors cursor-pointer px-8">
           VitSync
         </router-link>
 
@@ -85,7 +97,7 @@
 
       <!-- Menú de navegación (oculto en móviles) -->
       <div class="hidden lg:flex pt-4 border-t border-gray-100 dark:border-gray-700 mt-4 transition-colors">
-        <nav class="flex space-x-8">
+        <nav class="flex justify-between w-full px-16">
           <template v-for="item in menuItems" :key="item.name">
             <router-link v-if="item.route" :to="item.route"
               class="text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 text-sm font-medium transition-colors">
@@ -118,15 +130,22 @@
         </nav>
       </div>
     </nav>
+    <LogoutModal
+      :visible="showLogoutModal"
+      @confirm="confirmLogout"
+      @cancel="showLogoutModal = false">
+    </LogoutModal>
   </header>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router'
-import { isAuthenticated, logout } from '../store/auth'
+import { isAuthenticated, currentUser, logout } from '../store/auth'
 import { useDark, useToggle } from '@vueuse/core'
+import LogoutModal from './LogoutModal.vue';
 
+const showLogoutModal = ref(false);
 const router = useRouter()
 const isMobileMenuOpen = ref(false);
 const isTopBarMenuOpen = ref(false);
@@ -141,6 +160,11 @@ const isDark = useDark({
 const toggleDark = useToggle(isDark)
 
 const handleLogout = () => {
+  showLogoutModal.value = true;  
+}
+
+const confirmLogout = () => {
+  showLogoutModal.value = false;
   logout()
   router.push('/')
 }
@@ -154,14 +178,76 @@ const toggleTopBarMenu = () => {
 }
 
 const menuItems = [
-  { name: 'Hospitales', route: null },
-  { name: 'Cuadro médico', route: null },
+  { name: 'Cuadro médico', route: '/cuadro-medico' },
   { name: 'Especialidades', route: '/especialidades' },
-  { name: 'Enfermedades y tratamientos', route: null },
-  { name: 'Unidades médicas', route: null },
-  { name: 'Investigación', route: null },
-  { name: 'El grupo', route: null },
-  { name: 'Comunicación', route: null },
-  { name: 'Orientador de salud', route: null }
+  { name: 'Enfermedades y tratamientos', route: '/enfermedades-tratamientos' },
+  { name: 'Comunicación', route: '/comunicacion' },
 ]
+
 </script>
+
+<style scoped>
+/* ─── Barra superior ─────────────────────────────── */
+.topbar {
+  background-color: #0D9488; /* teal-600 en claro */
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+html.dark .topbar {
+  background-color: var(--bg-surface); /* #141E2E */
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+/* ─── Botón topbar (Iniciar/Cerrar sesión) ─────── */
+.topbar-btn {
+  background-color: #fff;
+  color: #0D9488;
+}
+.topbar-btn:hover {
+  background-color: #f1f5f9;
+}
+html.dark .topbar-btn {
+  background-color: var(--bg-elevated); /* #1E2D42 */
+  color: var(--accent); /* #14B8A6 */
+}
+html.dark .topbar-btn:hover {
+  background-color: #273a52;
+}
+
+/* Botón toggle */
+.dark-toggle-btn {
+  padding: 0.5rem;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.dark-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  transform: scale(1.1);
+}
+.dark-toggle-btn:active {
+  transform: scale(0.92) rotate(15deg);
+}
+
+/* Swap del icono */
+.icon-swap-enter-active {
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.icon-swap-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.icon-swap-enter-from {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.6);
+}
+.icon-swap-leave-to {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.6);
+}
+</style>

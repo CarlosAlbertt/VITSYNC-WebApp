@@ -13,7 +13,6 @@ const routes = [
         path: '/',
         name: 'home',
         component: Home,
-        /*
         beforeEnter: (to, from, next) => {
             if (isAuthenticated()) {
                 next();
@@ -21,20 +20,33 @@ const routes = [
                 next({ name: 'login' });
             }
         }
-        */
     },
     {
         path: '/especialidades',
         name: 'especialidades',
         component: Especialidades,
-        /*
         beforeEnter: (to, from, next) => {
-            /*if (isAuthenticated()) {
+            if (isAuthenticated()) {
                 next();
             } else {
                 next({ name: 'login' });
             }
-        }*/
+        }
+    },
+    {
+        path: '/cuadro-medico',
+        name: 'cuadro-medico',
+        component: () => import('../pages/CuadroMedico.vue')
+    },
+    {
+        path: '/enfermedades-tratamientos',
+        name: 'enfermedades',
+        component: () => import('../pages/EnfermedadesTratamientos.vue')
+    },
+    {
+        path: '/especialidad/:id',
+        name: 'especialidad-detalle',
+        component: () => import('../pages/EspecialidadDetalle.vue')
     },
     {
         path: '/login',
@@ -52,6 +64,23 @@ const routes = [
         component: () => import('../pages/VerifyAccount.vue')
     },
     {
+        path: '/agendar-cita',
+        name: 'agendar-cita',
+        // Redirigir al home y abrir el modal de booking
+        beforeEnter: (to, from, next) => {
+            if (!isAuthenticated()) {
+                next({ name: 'login' });
+            } else {
+                // Importar dinámicamente para evitar dependencia circular
+                import('../store/bookingModal').then(({ openBooking }) => {
+                    openBooking();
+                });
+                next({ name: 'home' });
+            }
+        },
+        component: () => import('../pages/AgendaCita.vue')
+    },
+    {
         path: '/perfil',
         name: 'perfil',
         component: () => import('../pages/Perfil.vue'),
@@ -64,7 +93,25 @@ const routes = [
         }
     },
     {
+        path: '/mi-salud/:categoria',
+        name: 'mi-salud-detalle',
+        component: () => import('../pages/MiSaludDetalle.vue'),
+        beforeEnter: (to, from, next) => {
+            if (isAuthenticated()) {
+                next();
+            } else {
+                next({ name: 'login' });
+            }
+        }
+    },
+    {
+        path: '/comunicacion',
+        name: 'comunicacion',
+        component: () => import('../pages/Comunicacion.vue')
+    },
+    {
         path: '/admin',
+        component: () => import('../pages/admin/AdminLayout.vue'),
         children: [
             {
                 path: '',
@@ -85,6 +132,11 @@ const routes = [
                 path: 'especialidades',
                 name: 'admin-especialidades',
                 component: () => import('../pages/admin/AdminEspecialidades.vue')
+            },
+            {
+                path: 'enfermedades',
+                name: 'admin-enfermedades',
+                component: () => import('../pages/admin/AdminEnfermedades.vue')
             }
         ],
         beforeEnter: (to, from, next) => {

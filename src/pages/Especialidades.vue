@@ -3,7 +3,7 @@
     <Header />
 
     <!-- Page Header -->
-    <section class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 transition-colors duration-300">
+    <section class="bg-white dark:bg-gray-800 dark:border-gray-700 transition-colors duration-300">
       <div class="max-w-7xl mx-auto px-6 py-8">
         <nav class="text-sm text-gray-600 dark:text-gray-400 mb-4">
           <span>Inicio</span> / <span class="text-teal-600 font-semibold">Especialidades</span>
@@ -33,7 +33,7 @@
     <template v-else>
       <!-- Alphabetical Index -->
       <section
-        class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 sticky top-0 z-10 shadow-sm transition-colors duration-300">
+        class="bg-white dark:bg-gray-800 dark:border-gray-700 sticky top-0 z-10 shadow-sm transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-6 py-4">
           <div class="flex flex-wrap gap-3 justify-center">
             <button v-for="letter in alphabet" :key="letter" @click="scrollToLetter(letter)" :class="[
@@ -64,18 +64,21 @@
                 :key="especialidad.id"
                 class="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
               >
-                <!-- Specialty Icon (Updated) -->
-                <div class="h-40 bg-white dark:bg-gray-800 flex items-center justify-center relative group border-b border-gray-100 overflow-hidden">
-                  <img 
-                    :src="getEspecialidadImage(especialidad.nombre, especialidad.tipo)" 
+                <!-- Specialty Image -->
+                <div class="aspect-[4/3] relative overflow-hidden border-b border-gray-100 dark:border-gray-700 group">
+                  <img
+                    :src="getEspecialidadImage(especialidad.nombre, especialidad.tipo)"
                     :alt="especialidad.nombre"
-                    class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    class="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                    @error="onImageError"
                   />
                 </div>
 
                 <!-- Specialty Info -->
                 <div class="p-6 flex flex-col grow">
-                  <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">{{ especialidad.nombre }}</h3>
+                  <router-link :to="`/especialidad/${especialidad.id}`" class="hover:text-teal-600 transition-colors">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">{{ especialidad.nombre }}</h3>
+                  </router-link>
                   <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">{{ especialidad.descripcion }}</p>
 
                   <!-- Tipo badge -->
@@ -102,6 +105,7 @@
                   <!-- Action Buttons - Fixed at bottom -->
                   <div class="flex gap-3 mt-auto">
                     <button
+                      @click="pedirCita(especialidad)"
                       class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300">
                       Pedir cita
                     </button>
@@ -126,6 +130,7 @@
 import Header from '../components/HeaderComponent.vue';
 import Footer from '../components/FooterComponent.vue';
 import { fetchEspecialidades } from '../store/especialidades';
+import { openBooking } from '../store/bookingModal';
 
 // Import all specialty images
 const specialtyImages = import.meta.glob('../assets/images/specialties/*.png', { eager: true, query: '?url', import: 'default' });
@@ -150,6 +155,13 @@ export default {
     }
   },
   methods: {
+    pedirCita(especialidad) {
+      openBooking({
+        specialty: especialidad,
+        specialtyName: especialidad.nombre
+      });
+    },
+    
     async loadEspecialidades() {
       try {
         this.isLoading = true;
@@ -232,8 +244,15 @@ export default {
         }
       }
       
-      // Fallback: usar medicina_general por defecto si no hay imagen específica
-      //return specialtyImages['../assets/images/specialties/medicina_general.png'];
+      // Fallback cuando no hay imagen específica para la especialidad
+      return specialtyImages['../assets/images/specialties/medicina_general.png'];
+    },
+
+    onImageError(event) {
+      const fallback = specialtyImages['../assets/images/specialties/medicina_general.png'];
+      if (fallback && event.target.src !== fallback) {
+        event.target.src = fallback;
+      }
     },
 
     getTipoBadgeClass(tipo) {

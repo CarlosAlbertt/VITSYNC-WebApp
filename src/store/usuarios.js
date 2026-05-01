@@ -27,8 +27,25 @@ export const fetchUsuarios = async () => {
 
 // ── Escritura ─────────────────────────────────────────────────────────────────
 
+// Crear usuario
+export const createUsuario = async (userData) => {
+    try {
+        const response = await api.post('/api/auth/register', userData);
+        // Si el registro devuelve el usuario, lo añadimos
+        if (response.data && response.data.id) {
+            usuarios.value.push(response.data);
+        } else {
+            // Refrescar para asegurar
+            await fetchUsuarios();
+        }
+        return response.data;
+    } catch (err) {
+        console.error('Error creando usuario:', err);
+        throw err;
+    }
+};
+
 // Actualizar usuario
-// Nota: los usuarios se crean mediante POST /api/auth/register, no desde este panel
 export const updateUsuario = async (id, userData) => {
     try {
         const response = await api.put(`/api/usuarios/${id}`, userData);
