@@ -1,13 +1,15 @@
+/**
+ * Punto de entrada principal de la aplicación VitSync WebApp.
+ *
+ * Inicializa Vue 3, registra el router y monta la app en el DOM.
+ * Los componentes de página (Home, Login, etc.) se importan
+ * automáticamente a través del router — no necesitan importarse aquí.
+ */
 import './assets/main.css'
-// APP
-import { createApp } from 'vue' // Importa la función para crear la aplicación Vue
-import App from './App.vue' // Importa el componente raíz de la aplicación
+import { createApp } from 'vue'
+import App from './App.vue'
 import router from './router'
 
-import Home from './pages/Home.vue'
-import Login from './pages/Login.vue'
-
 const app = createApp(App)
-
-app.use(router);
-app.mount('#app');
+app.use(router)
+app.mount('#app')
