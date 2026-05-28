@@ -12,7 +12,7 @@
             class="absolute inset-0 w-full h-full bg-cover bg-center" :style="{ backgroundImage: `url(${image})` }">
             <!-- Gradient Overlay -->
             <div
-              class="absolute inset-0 bg-gradient-to-r from-teal-900 opacity-70 via-teal-800 opacity-70 to-transparent">
+              class="absolute inset-0 bg-gradient-to-r from-teal-900/70 via-teal-800/70 to-transparent">
             </div>
           </div>
         </transition-group>
@@ -143,14 +143,14 @@ export default {
     Header,
     Footer,
   },
-  methods: {
-    irAAgendarCita() {
-      openBooking();
-    }
-  },
   data() {
     return {
       heroBackground,
+      heroImages: [
+        '/images/hero-background.png',
+      ],
+      currentHeroIndex: 0,
+      heroInterval: null,
       statistics: [
         { value: '15k+', label: 'Pacientes' },
         { value: '25+', label: 'Años Exp.' },
@@ -206,19 +206,39 @@ export default {
         },
       ],
     };
+  },
+  methods: {
+    irAAgendarCita() {
+      openBooking();
+    }
+  },
+  mounted() {
+    if (this.heroImages.length > 1) {
+      this.heroInterval = setInterval(() => {
+        this.currentHeroIndex = (this.currentHeroIndex + 1) % this.heroImages.length;
+      }, 6000);
+    }
+  },
+  beforeUnmount() {
+    if (this.heroInterval) {
+      clearInterval(this.heroInterval);
+    }
   }
 };
 </script>
 
 <style scoped>
-/* Estilos extra si es necesario. Tailwind hace el 99% del trabajo. */
-.bg-accent {
-  background-color: var(--accent);
+/* Transición para el carrusel del hero */
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: all 0.8s ease-in-out;
 }
-.text-accent {
-  color: var(--accent);
+.slide-left-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
 }
-.border-accent {
-  border-color: var(--accent);
+.slide-left-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
 }
 </style>
