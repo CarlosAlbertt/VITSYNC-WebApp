@@ -25,7 +25,7 @@
             atención de calidad y profesionales altamente capacitados para cuidar de tu bienestar
             y el de tu familia.
           </p>
-          <button
+          <button @click="irAAgendarCita"
             class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-10 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
             Solicitar Cita
           </button>
@@ -122,7 +122,7 @@
         <p class="text-lg text-white/90 mb-10 font-light max-w-2xl mx-auto">
           Únete a los miles de pacientes que ya confían en VitSync para gestionar su bienestar médico de forma rápida, segura y profesional.
         </p>
-        <button @click="irAAgendarCita" class="bg-white text-accent hover:bg-slate-50 font-bold px-10 py-4 rounded-xl shadow-xl transform transition-transform hover:-translate-y-1 text-lg">
+        <button @click="$router.push('/register')" class="bg-white text-accent hover:bg-slate-50 font-bold px-10 py-4 rounded-xl shadow-xl transform transition-transform hover:-translate-y-1 text-lg">
           Crear mi cuenta gratis
         </button>
       </div>
