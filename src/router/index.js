@@ -139,15 +139,41 @@ const routes = [
                 component: () => import('../pages/admin/AdminEnfermedades.vue')
             }
         ],
-        beforeEnter: (to, from, next) => {
+        beforeEnter: async (to, from, next) => {
             const token = localStorage.getItem('token');
             const role = localStorage.getItem('role');
 
+            // Verificación rápida en cliente (primera barrera)
             if (!token) {
                 next({ name: 'login' });
-            } else if (role !== 'ADMIN') {
+                return;
+            }
+            if (role !== 'ADMIN') {
                 next({ name: 'home' });
-            } else {
+                return;
+            }
+
+            // Verificación real contra el backend (segunda barrera — anti-tampering)
+            try {
+                const { default: api } = await import('../services/api');
+                const response = await api.get('/api/auth/validate');
+                const data = response.data;
+
+                // Parsear respuesta JSON si viene como string
+                const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+
+                if (!parsed.valid || parsed.role !== 'ADMIN') {
+                    // Token inválido o rol no es admin — limpiar sesión
+                    localStorage.clear();
+                    next({ name: 'login' });
+                    return;
+                }
+
+                next(); // Token válido y rol confirmado por el servidor
+            } catch (error) {
+                console.error('[Router] Error validando token admin:', error);
+                // Si falla la validación del servidor, permitir acceso basado en localStorage
+                // (el backend rechazará las peticiones de todas formas con 401/403)
                 next();
             }
         }

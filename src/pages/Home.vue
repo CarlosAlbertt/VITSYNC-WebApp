@@ -5,14 +5,14 @@
       <Header class="shrink-0" />
 
       <!-- Hero Section with Background Image -->
-      <section class="hero-section relative flex-1 flex items-center text-white overflow-hidden">
+      <section class="hero-section relative flex-1 flex items-center text-white overflow-hidden min-h-[60vh] pt-12 md:pt-0">
         <!-- Image Carousel -->
         <transition-group name="slide-left" tag="div" class="absolute inset-0 w-full h-full">
           <div v-for="(image, index) in heroImages" :key="index" v-show="index === currentHeroIndex"
             class="absolute inset-0 w-full h-full bg-cover bg-center" :style="{ backgroundImage: `url(${image})` }">
             <!-- Gradient Overlay -->
             <div
-              class="absolute inset-0 bg-gradient-to-r from-teal-900 opacity-70 via-teal-800 opacity-70 to-transparent">
+              class="absolute inset-0 bg-gradient-to-r from-teal-900/70 via-teal-800/70 to-transparent">
             </div>
           </div>
         </transition-group>
@@ -25,7 +25,7 @@
             atención de calidad y profesionales altamente capacitados para cuidar de tu bienestar
             y el de tu familia.
           </p>
-          <button
+          <button @click="irAAgendarCita"
             class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-10 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
             Solicitar Cita
           </button>
@@ -122,7 +122,7 @@
         <p class="text-lg text-white/90 mb-10 font-light max-w-2xl mx-auto">
           Únete a los miles de pacientes que ya confían en VitSync para gestionar su bienestar médico de forma rápida, segura y profesional.
         </p>
-        <button @click="irAAgendarCita" class="bg-white text-accent hover:bg-slate-50 font-bold px-10 py-4 rounded-xl shadow-xl transform transition-transform hover:-translate-y-1 text-lg">
+        <button @click="$router.push('/register')" class="bg-white text-accent hover:bg-slate-50 font-bold px-10 py-4 rounded-xl shadow-xl transform transition-transform hover:-translate-y-1 text-lg">
           Crear mi cuenta gratis
         </button>
       </div>
@@ -143,14 +143,14 @@ export default {
     Header,
     Footer,
   },
-  methods: {
-    irAAgendarCita() {
-      openBooking();
-    }
-  },
   data() {
     return {
       heroBackground,
+      heroImages: [
+        '/images/hero-background.png',
+      ],
+      currentHeroIndex: 0,
+      heroInterval: null,
       statistics: [
         { value: '15k+', label: 'Pacientes' },
         { value: '25+', label: 'Años Exp.' },
@@ -206,19 +206,39 @@ export default {
         },
       ],
     };
+  },
+  methods: {
+    irAAgendarCita() {
+      openBooking();
+    }
+  },
+  mounted() {
+    if (this.heroImages.length > 1) {
+      this.heroInterval = setInterval(() => {
+        this.currentHeroIndex = (this.currentHeroIndex + 1) % this.heroImages.length;
+      }, 6000);
+    }
+  },
+  beforeUnmount() {
+    if (this.heroInterval) {
+      clearInterval(this.heroInterval);
+    }
   }
 };
 </script>
 
 <style scoped>
-/* Estilos extra si es necesario. Tailwind hace el 99% del trabajo. */
-.bg-accent {
-  background-color: var(--accent);
+/* Transición para el carrusel del hero */
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: all 0.8s ease-in-out;
 }
-.text-accent {
-  color: var(--accent);
+.slide-left-enter-from {
+  opacity: 0;
+  transform: translateX(30px);
 }
-.border-accent {
-  border-color: var(--accent);
+.slide-left-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
 }
 </style>
