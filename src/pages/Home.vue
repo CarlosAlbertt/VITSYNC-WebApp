@@ -5,7 +5,7 @@
       <Header class="shrink-0" />
 
       <!-- Hero Section with Background Image -->
-      <section class="hero-section relative flex-1 flex items-center text-white overflow-hidden">
+      <section class="hero-section relative flex-1 flex items-center text-white overflow-hidden min-h-[60vh] pt-12 md:pt-0">
         <!-- Image Carousel -->
         <transition-group name="slide-left" tag="div" class="absolute inset-0 w-full h-full">
           <div v-for="(image, index) in heroImages" :key="index" v-show="index === currentHeroIndex"

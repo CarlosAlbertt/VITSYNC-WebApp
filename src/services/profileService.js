@@ -50,10 +50,13 @@ export const updateProfile = async (data) => {
 export const uploadAvatar = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    // Content-Type: undefined anula el default 'application/json' de la instancia
-    // para que axios asigne multipart/form-data con el boundary correcto
+    // Para multipart/form-data NO debemos enviar Content-Type manualmente;
+    // axios lo genera automáticamente con el boundary correcto.
     const response = await api.post('/api/upload/avatar', formData, {
-        headers: { 'Content-Type': undefined }
+        headers: {
+            ...getAuthHeader(),
+            'Content-Type': 'multipart/form-data'
+        }
     });
     const avatarUrl = response.data.url;
     const id = localStorage.getItem('id');
