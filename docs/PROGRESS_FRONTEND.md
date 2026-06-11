@@ -155,3 +155,35 @@ firme el userId con la Secret Key (no está en ningún repo, bien). Pendiente.
 **Pendiente para Fase 5:** sanitización de mensajes TalkJS ya la gestiona su
 iframe; V-F14 (Identity Verification TalkJS) sigue abierto — necesita
 endpoint backend de firma HMAC.
+
+## Fase 5 — WebSocket ✅ (2026-06-11, adelantada en Fase 3)
+
+Cliente STOMP reescrito con JWT en handshake, refresh ante caducidad,
+heartbeats y sin logs de contenido (ver Fase 3). El chat activo es TalkJS;
+V-F14 (firma de identidad) pendiente de endpoint backend.
+
+## Fase 6 — RGPD en el frontend ✅ (2026-06-11)
+
+**Qué se hizo:**
+- **6.1** `components/CookieConsent.vue`: aviso de almacenamiento técnico
+  (no hay tracking que requiera consentimiento previo; si se añade
+  analítica, debe bloquearse hasta opt-in aquí). Preferencia "visto" en
+  localStorage (uso legítimo). Montado global en App.vue.
+- **6.2** `pages/PrivacyDashboard.vue` (ruta `/privacidad`, autenticada) +
+  `services/gdprService.js` contra los endpoints REALES del backend:
+  ver mis datos (GET my-data, Art. 15), exportar ZIP (Art. 20, maneja el
+  429 del límite 1/24h), eliminar cuenta (DELETE gdpr-delete, Art. 17 —
+  explica la anonimización a 30 días y la conservación clínica Ley 41/2002,
+  doble confirmación, logout automático tras la solicitud). Información de
+  qué datos se tratan, para qué y cuánto se conservan. Enlace en footer.
+- **6.3** Register: checkbox de Política de Privacidad **obligatorio y no
+  pre-marcado** (submit deshabilitado + validación), checkbox separado
+  opcional para comunicaciones (Art. 7: consentimiento granular).
+- App.vue: `loadProfile` pasaba de `onMounted` a `watch(isAuthenticated)` —
+  con la sesión asíncrona el mounted corría antes del refresh.
+
+**Limitación documentada:** el backend `RegisterRequest` aún no tiene campos
+de consentimiento (fecha/hora + opt-in comunicaciones): se aplican
+client-side pero no se persisten. Pendiente añadir columnas + DTO en la API.
+
+**Pendiente para Fase 7:** tests (Vitest no está configurado aún).

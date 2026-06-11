@@ -1,18 +1,19 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { watch } from 'vue';
 import { isAuthenticated } from './store/auth';
 import { loadProfile } from './store/profile';
 import ChatWidget from './components/chat/ChatWidget.vue'; // Cambiar ChatWindow por ChatWidget
 import ChatButton from './components/chat/ChatButton.vue';
+import CookieConsent from './components/CookieConsent.vue';
 import { isChatOpen, toggleChat } from './store/chat';
 import AgendaCita from './pages/AgendaCita.vue';
 import { isBookingOpen, closeBooking } from './store/bookingModal';
 
-onMounted(() => {
-  if (isAuthenticated.value) {
-    loadProfile();
-  }
-});
+// La sesión se restaura de forma asíncrona (refresh httpOnly): watch en vez
+// de onMounted, que se ejecutaba antes de que initializeAuth() terminara
+watch(isAuthenticated, (authed) => {
+  if (authed) loadProfile();
+}, { immediate: true });
 </script>
 
 <template>
@@ -26,6 +27,9 @@ onMounted(() => {
 
     <!-- Modal de Reserva de Citas (global) -->
     <AgendaCita :visible="isBookingOpen" @close="closeBooking" />
+
+    <!-- Aviso de cookies/almacenamiento (RGPD/LSSI) -->
+    <CookieConsent />
     
     <!-- Chat Overlay -->
     <div v-if="isAuthenticated" class="chat-container">

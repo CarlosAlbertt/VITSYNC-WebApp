@@ -72,6 +72,13 @@ const routes = [
         meta: { requiresAuth: true }
     },
     {
+        // Panel RGPD: acceso, portabilidad y olvido (Arts. 15/20/17)
+        path: '/privacidad',
+        name: 'privacidad',
+        component: () => import('../pages/PrivacyDashboard.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
         path: '/mi-salud/:categoria',
         name: 'mi-salud-detalle',
         component: () => import('../pages/MiSaludDetalle.vue'),

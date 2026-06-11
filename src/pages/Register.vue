@@ -31,6 +31,10 @@ const successMessage = ref(null);
 const isLoading = ref(false);
 const router = useRouter();
 
+// Consentimiento RGPD (Art. 7): explícito, granular y nunca pre-marcado
+const privacyAccepted = ref(false);
+const commsAccepted = ref(false);
+
 // Validación espejo del backend (src/utils/validators.js): mismo dígito de
 // control de NIF/NIE y misma política de contraseña que @ValidNif y los DTOs.
 // Esto es UX: la validación de seguridad real la hace el backend.
@@ -50,6 +54,9 @@ const validateForm = () => {
     ];
     const firstError = checks.find(e => e);
     if (firstError) throw new Error(firstError);
+    if (!privacyAccepted.value) {
+        throw new Error('Debes aceptar la Política de Privacidad para crear la cuenta');
+    }
 };
 
 const handleRegister = async () => {
@@ -219,11 +226,30 @@ const handleRegister = async () => {
                     </div>
                 </div>
 
+                <!-- Consentimiento RGPD: obligatorio, NUNCA pre-marcado -->
+                <div class="mb-4 space-y-3">
+                    <label class="flex items-start gap-3 text-sm text-[var(--text-secondary)] cursor-pointer">
+                        <input type="checkbox" v-model="privacyAccepted" :disabled="isLoading"
+                            class="mt-0.5 h-4 w-4 rounded border-[var(--border)] accent-[var(--accent)]" />
+                        <span>
+                            He leído y acepto la
+                            <router-link to="/privacidad" target="_blank"
+                                class="font-semibold text-[var(--accent)] underline">Política de Privacidad</router-link>
+                            y el tratamiento de mis datos de salud para la prestación asistencial *
+                        </span>
+                    </label>
+                    <label class="flex items-start gap-3 text-sm text-[var(--text-secondary)] cursor-pointer">
+                        <input type="checkbox" v-model="commsAccepted" :disabled="isLoading"
+                            class="mt-0.5 h-4 w-4 rounded border-[var(--border)] accent-[var(--accent)]" />
+                        <span>Acepto recibir comunicaciones por email (opcional)</span>
+                    </label>
+                </div>
+
                 <button type="submit"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !privacyAccepted"
                     :class="[
                         'w-full py-3 px-4 rounded-xl text-lg font-medium text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50 focus:ring-offset-2 transition-colors',
-                        isLoading
+                        (isLoading || !privacyAccepted)
                             ? 'bg-[var(--accent)]/60 cursor-not-allowed'
                             : 'bg-[var(--accent)] hover:bg-[var(--accent-hover)]'
                     ]">
