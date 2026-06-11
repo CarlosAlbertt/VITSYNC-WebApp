@@ -124,3 +124,34 @@ chat. Arreglo real = Identity Verification de TalkJS: endpoint backend que
 firme el userId con la Secret Key (no está en ningún repo, bien). Pendiente.
 
 **Pendiente para Fase 4:** CSP + security headers en vercel.json e index.html.
+
+## Fase 4 — CSP y headers de seguridad ✅ (2026-06-11)
+
+**Qué se hizo (A05):**
+- `vercel.json`: CSP completa como header HTTP (mejor que meta tag: el meta
+  no soporta `frame-ancestors`): `default-src 'self'`, scripts solo self +
+  cdn.talkjs.com, `connect-src` limitado a las APIs Render (https+wss) y
+  TalkJS, `frame-src` solo TalkJS (su widget es iframe), `object-src 'none'`,
+  `frame-ancestors 'none'`, `base-uri/form-action 'self'`. Más nosniff,
+  X-Frame-Options DENY, Referrer-Policy, Permissions-Policy (cámara/micro/
+  geo/payment bloqueados), HSTS 1 año.
+- `nginx.conf` (deploy Docker): mismos headers en paridad (+ localhost en
+  connect-src para dev); X-Frame-Options SAMEORIGIN→DENY; eliminado
+  X-XSS-Protection (deprecado; el auditor XSS antiguo creaba vulns propias).
+- `index.html`: scripts inline (tema oscuro + shim global de sockjs) movidos
+  a `public/boot.js` — la CSP `script-src 'self'` prohíbe inline sin
+  nonce/hash. `lang="es"`.
+
+**Decisiones:**
+- CSP en header (vercel.json/nginx) y no en meta: cubre frame-ancestors y
+  se aplica antes del parseo del documento.
+- `style-src 'unsafe-inline'` se mantiene: Vue/Tailwind generan estilos
+  inline; quitarlo rompería el render y su riesgo es muy inferior al de
+  scripts inline.
+- Los dominios de la CSP son estáticos (vercel.json no interpola env vars):
+  incluye testing y prod de Render; al cambiar de dominio API hay que
+  actualizar vercel.json y nginx.conf a la vez.
+
+**Pendiente para Fase 5:** sanitización de mensajes TalkJS ya la gestiona su
+iframe; V-F14 (Identity Verification TalkJS) sigue abierto — necesita
+endpoint backend de firma HMAC.
