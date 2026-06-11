@@ -48,4 +48,16 @@ export default defineConfig(({ mode }) => ({
       interval: 300,
     },
   },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/tests/setup.js'],
+    coverage: {
+      reporter: ['text', 'html'],
+      // Umbral sobre lo testeado unitariamente (utils + auth). El resto de
+      // stores son fetch+estado sin lógica; se ampliará al añadir tests.
+      include: ['src/utils/**', 'src/store/auth.js'],
+      thresholds: { lines: 70, functions: 70 }
+    }
+  },
 }))

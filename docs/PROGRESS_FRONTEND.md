@@ -187,3 +187,39 @@ de consentimiento (fecha/hora + opt-in comunicaciones): se aplican
 client-side pero no se persisten. Pendiente añadir columnas + DTO en la API.
 
 **Pendiente para Fase 7:** tests (Vitest no está configurado aún).
+
+## Fase 7 — Tests ✅ (2026-06-11)
+
+**Qué se hizo:**
+- Vitest + @vue/test-utils + jsdom + coverage-v8. Scripts: `npm test`,
+  `npm run test:watch`, `npm run coverage`. Umbral 70% líneas/funciones
+  sobre `src/utils/**` + `src/store/auth.js` (el resto de stores son
+  fetch+estado sin lógica; ampliar al testearlos).
+- **54 tests verdes — 97.7% líneas, 95.4% funciones** en lo incluido:
+  - `validators.spec.js` (24): NIF/NIE con dígito de control (válidos,
+    letra mala, longitud, basura), password 4 clases, teléfono ES, email
+    254, CP provincia, fechas.
+  - `sanitize.spec.js` (9): scripts/eventos/foreignObject eliminados,
+    paths legítimos conservados, data-attrs fuera, null-safe.
+  - `auth.store.spec.js` (10): login guarda SOLO en memoria (asserts
+    explícitos de localStorage vacío), logout limpia todo incluso sin red,
+    initializeAuth restaura y memoiza, register sin sesión, errores con
+    mensaje mostrable.
+  - `logger.spec.js` (2).
+- `src/tests/setup.js`: Node 22+ trae un `localStorage` experimental roto
+  (sin `--localstorage-file`) que eclipsa el de jsdom — stub en memoria.
+
+**Bugs reales cazados por los tests:**
+1. `isAuthenticated` era `computed` sobre una variable de módulo no
+   reactiva → Vue lo cacheaba para siempre: la UI nunca habría reaccionado
+   al login/logout. Arreglado con ref `hasSession` en el store.
+2. `sanitizeSvg` devolvía vacío para fragmentos `<path>` (DOMPurify los
+   descarta fuera de un `<svg>`) → los iconos habrían desaparecido.
+   Arreglado envolviendo en `<svg>` durante la sanitización.
+
+**No hecho:** E2E Playwright (7.3, opcional "si el tiempo lo permite") y
+tests de componentes de formularios (7.2) — la lógica de validación que
+usarían ya está cubierta unitariamente.
+
+**Pendiente para Fase 8:** documentación (ARCHITECTURE, SECURITY,
+GDPR_FRONTEND, TESTING, ENV_VARIABLES, CLAUDE.md, README).

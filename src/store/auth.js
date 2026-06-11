@@ -16,7 +16,12 @@ import { resetProfile } from './profile';
 // Identidad mínima en memoria: nunca datos médicos, nunca persistida
 export const currentUser = ref({ nif: null, email: null, role: null, id: null });
 
-export const isAuthenticated = computed(() => !!getAccessToken());
+// Espejo REACTIVO del token (el holder de api.js es una variable de módulo
+// plana: un computed sobre ella no tendría dependencias y Vue lo cachearía
+// para siempre — la UI no reaccionaría al login/logout)
+const hasSession = ref(false);
+
+export const isAuthenticated = computed(() => hasSession.value);
 
 // Señal para que el router espere a que initializeAuth() termine antes de
 // resolver la primera navegación (si no, recarga en ruta protegida → /login)
@@ -25,6 +30,7 @@ let initPromise = null;
 /** Applies an auth payload (login/refresh response) to the in-memory state. */
 const applySession = (data) => {
     setAccessToken(data.token);
+    hasSession.value = !!data.token;
     currentUser.value = {
         nif: data.nif ?? null,
         email: data.email ?? null,
@@ -36,13 +42,17 @@ const applySession = (data) => {
 /** Wipes every trace of the session from memory. */
 const clearSession = () => {
     setAccessToken(null);
+    hasSession.value = false;
     currentUser.value = { nif: null, email: null, role: null, id: null };
     resetProfile();
 };
 
 // Migración: purgar restos de la implementación antigua basada en localStorage.
 // Sin esto, usuarios con sesión previa conservarían token+NIF expuestos.
-['token', 'nif', 'email', 'role', 'id'].forEach(k => localStorage.removeItem(k));
+// Best-effort: en entornos sin Web Storage (tests/SSR) simplemente no aplica.
+try {
+    ['token', 'nif', 'email', 'role', 'id'].forEach(k => localStorage.removeItem(k));
+} catch { /* sin localStorage no hay nada que migrar */ }
 
 /**
  * Restores the session on app startup via the httpOnly refresh cookie.

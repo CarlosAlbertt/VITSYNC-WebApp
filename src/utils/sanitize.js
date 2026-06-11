@@ -22,7 +22,8 @@ const SVG_CONFIG = {
 /** Strict config for server/user-provided rich text (sanitary domain). */
 const HTML_CONFIG = {
     ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'br', 'p'],
-    ALLOWED_ATTR: []
+    ALLOWED_ATTR: [],
+    ALLOW_DATA_ATTR: false
 };
 
 /**
@@ -31,7 +32,12 @@ const HTML_CONFIG = {
  * @param {string} svg raw SVG markup
  * @returns {string} safe markup (event handlers/scripts stripped)
  */
-export const sanitizeSvg = (svg) => DOMPurify.sanitize(svg || '', SVG_CONFIG);
+export const sanitizeSvg = (svg) => {
+    // Los fragmentos (<path>, <g>…) se envuelven en <svg> para que el parser
+    // los trate en namespace SVG: sueltos en contexto HTML se descartarían
+    const clean = DOMPurify.sanitize(`<svg>${svg || ''}</svg>`, SVG_CONFIG);
+    return clean.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+};
 
 /**
  * Sanitises rich text coming from the API or the user before `v-html`.
