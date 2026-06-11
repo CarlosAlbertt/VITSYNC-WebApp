@@ -1,67 +1,103 @@
 # VitSync WebApp
 
-Frontend de la plataforma **VitSync** — aplicación web para la gestión de la relación paciente-médico.
+Frontend de **VitSync** — plataforma SaaS de gestión sanitaria
+(paciente ↔ médico): citas, informes clínicos, indicadores de salud, chat
+y panel de administración. Maneja datos de salud (categoría especial,
+Art. 9 RGPD): la seguridad es requisito de primera clase también en el
+cliente — ver [`docs/SECURITY.md`](docs/SECURITY.md).
 
-Construido con **Vue 3** + **Vite** + **Tailwind CSS**.
+Backend: [VITSYNC-API](https://github.com/CarlosAlbertt/VITSYNC-API)
+(Spring Boot 3 + PostgreSQL).
 
-## 🚀 Guía Rápida para Desarrolladores (Setup Inicial)
+## Stack
 
-Si acabas de clonar el repositorio o has hecho `git pull` y te da error, sigue estos pasos:
+| Capa | Tecnología |
+|---|---|
+| Framework | Vue 3 (Composition API, `<script setup>`) |
+| Build | Vite 7 |
+| Estilos | Tailwind CSS 4 |
+| Routing | Vue Router 4 (guard global declarativo por `meta`) |
+| HTTP | Axios (instancia central con auth en memoria + refresh httpOnly) |
+| Chat | TalkJS · cliente STOMP/SockJS propio |
+| Tests | Vitest + jsdom + @vue/test-utils (cobertura v8) |
+| Deploy | Vercel (develop → testing, main → prod) · Docker + nginx |
 
-### 1. Backend (VITSYNC-API)
-Necesitas crear tu configuración local (ya que los secretos no se suben a git).
-1. Copia el archivo de ejemplo:
-   ```bash
-   cp src/main/resources/application-dev.properties.example src/main/resources/application-dev.properties
-   ```
-2. (Opcional) Edita `application-dev.properties` si necesitas cambiar la BD o credenciales.
-3. Ejecuta la app con el perfil `dev`:
-   ```bash
-   ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-   ```
+## Setup de desarrollo
 
-### 2. Frontend (VITSYNC-WebApp)
-Lo mismo para las variables de entorno del front.
-1. Copia el archivo de ejemplo:
-   ```bash
-   cp .env.development.example .env.development
-   ```
-2. Instala y corre:
-   ```bash
-   npm install
-   npm run dev
-   ```
+Requisitos: Node `^20.19.0 || >=22.12.0`, backend VITSYNC-API corriendo
+(por defecto en `http://localhost:8080`).
 
----
-
-## 🛠 Configuración del Proyectorno
-
-### Requisitos
-- Node.js ^20.19.0 o >=22.12.0
-
-### Instalación
-```sh
+```bash
+# 1. Dependencias
 npm install
+
+# 2. Variables de entorno (ver docs/ENV_VARIABLES.md)
+cp .env.example .env
+#    → ajusta VITE_API_URL si tu backend no está en localhost:8080
+
+# 3. Arrancar
+npm run dev          # http://localhost:5173
 ```
 
-### Desarrollo local
-1. Copia `.env.development.example` a `.env.development`
-2. Rellena las variables con tus credenciales de desarrollo
-3. Ejecuta:
-```sh
-npm run dev
+> ⚠️ `.env` está gitignorado y purgado del historial: **no lo comitees**.
+> Todo `VITE_*` acaba en el bundle público — nunca secretos en el frontend.
+
+## Comandos
+
+```bash
+npm run dev          # desarrollo con HMR
+npm run build        # build de producción (console.* eliminados, chunks)
+npm run preview      # sirve el build localmente
+npm test             # suite Vitest completa
+npm run test:watch   # tests en modo watch
+npm run coverage     # tests + cobertura (umbral 70% en utils/auth)
 ```
 
-### Build de producción
-```sh
-npm run build
+## Arquitectura de carpetas (resumen)
+
+```
+src/
+├── components/   Reutilizables (chat, booking, profile, admin, Cookie/Header/Footer)
+├── pages/        Vistas enrutadas (+ admin/)
+├── router/       Rutas + guard global (meta.public / requiresAuth / role)
+├── services/     api.js (Axios central), gdprService, profileService, websocket
+├── store/        Módulos reactivos planos (auth, profile, catálogos, UI)
+├── tests/        Vitest (setup + unit/)
+└── utils/        logger, sanitize (DOMPurify), validators (espejo backend)
 ```
 
-## Estructura de configuración
+Detalle completo: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-| Archivo | Entorno | Commiteado |
-|---|---|---|
-| `.env` | Base (vacío) | ✅ Sí |
-| `.env.development` | Desarrollo local | ❌ No (gitignored) |
-| `.env.development.example` | Plantilla para devs | ✅ Sí |
-| `.env.production` | Producción (Vercel) | ✅ Sí |
+## Seguridad (resumen)
+
+- Access token **solo en memoria**; refresh token en **cookie httpOnly**
+  rotada por el backend. Nada en localStorage.
+- Interceptor 401 → refresh silencioso → retry; sesión restaurada al
+  recargar vía `initializeAuth()`.
+- CSP + headers de seguridad (`vercel.json` / `nginx.conf`), DOMPurify en
+  todo `v-html`, validación espejo del backend (NIF con letra de control).
+- Panel RGPD en `/privacidad`: acceso, exportación y derecho al olvido.
+
+## Documentación
+
+| Doc | Contenido |
+|---|---|
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Decisiones de seguridad y porqués |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Estructura, patrones, flujo de sesión |
+| [`docs/GDPR_FRONTEND.md`](docs/GDPR_FRONTEND.md) | RGPD: derechos, consentimiento, inventario de storage |
+| [`docs/TESTING.md`](docs/TESTING.md) | Cómo ejecutar y escribir tests |
+| [`docs/ENV_VARIABLES.md`](docs/ENV_VARIABLES.md) | Variables de entorno |
+| [`docs/AUDITORIA_FRONTEND.md`](docs/AUDITORIA_FRONTEND.md) | Auditoría de seguridad (2026-06) |
+| [`docs/PROGRESS_FRONTEND.md`](docs/PROGRESS_FRONTEND.md) | Cronología del hardening |
+
+## Contribuir
+
+1. Rama desde `develop` (`VITSYNC-XX-descripcion` o `feature/...`).
+2. Respeta las reglas de `CLAUDE.md` (seguridad no negociable: nada de
+   tokens en storage, nada de `v-html` sin sanitizar, URLs solo por env).
+3. `npm test` y `npm run build` verdes antes del PR a `develop`.
+4. Commits en español, formato conventional commits.
+
+> **Nota (2026-06-11):** el historial git fue reescrito para purgar un
+> `.env` comiteado. Si tienes un clon antiguo: bórralo y re-clona. No
+> hagas push desde clones previos a esa fecha.

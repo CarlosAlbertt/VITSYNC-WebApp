@@ -223,3 +223,25 @@ usarían ya está cubierta unitariamente.
 
 **Pendiente para Fase 8:** documentación (ARCHITECTURE, SECURITY,
 GDPR_FRONTEND, TESTING, ENV_VARIABLES, CLAUDE.md, README).
+
+## Fase 8 — Documentación ✅ (2026-06-11)
+
+**Qué se hizo:**
+- `docs/SECURITY.md`: modelo de sesión (tabla token↔dónde↔porqué), guards,
+  XSS, headers, pendientes.
+- `docs/ARCHITECTURE.md`: árbol comentado, patrones, diagrama del flujo de
+  sesión, estado del doble chat.
+- `docs/GDPR_FRONTEND.md`: derechos implementados, consentimiento,
+  inventario completo del almacenamiento cliente.
+- `docs/TESTING.md` y `docs/ENV_VARIABLES.md`.
+- `CLAUDE.md`: contexto para futuras sesiones con las reglas de seguridad
+  no negociables.
+- `README.md` reescrito: stack, setup, comandos, arquitectura, seguridad,
+  guía de contribución y aviso del rewrite de historial.
+- JSDoc: aplicado durante las fases en todo el código nuevo/reescrito
+  (api, auth, gdprService, profileService, websocket, utils, guards).
+
+**HARDENING COMPLETO — Fases 0-8 cerradas.** Pendientes fuera de alcance:
+TalkJS Identity Verification (V-F14, endpoint backend), persistencia del
+consentimiento (API), retirar refresh-en-body legado (API), E2E Playwright,
+tests de componentes de formularios.
