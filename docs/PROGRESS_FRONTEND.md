@@ -88,3 +88,39 @@ dependencias basura (`@anthropic-ai/claude-code`, `npx`, `yarn`, `node.url`);
 
 **Pendiente para Fase 3:** console.log (59), DOMPurify/v-html, validación de
 formularios, limpieza deps basura (68 vulns npm).
+
+## Fase 3 — Datos y comunicaciones ✅ (2026-06-11)
+
+**Qué se hizo:**
+- **Dependencias (A06): 68 → 0 vulnerabilidades npm.** Desinstaladas
+  `@anthropic-ai/claude-code`, `npx`, `yarn`, `node.url` (instalaciones
+  accidentales que arrastraban árboles antiguos); axios 1.13→1.17;
+  `npm audit fix` para el resto. +`dompurify`.
+- **console (V-F13/A09):** `vite.config.js` → `esbuild.drop` elimina
+  `console.*` y `debugger` del bundle de producción (verificado: 0
+  ocurrencias en dist). `src/utils/logger.js` para logging condicional en
+  dev con regla escrita: nunca tokens/NIF/contenido clínico.
+  `vite-plugin-vue-devtools` ahora solo en modo development.
+- **XSS (V-F10):** `src/utils/sanitize.js` (DOMPurify, perfiles estrictos
+  SVG y rich-text); los 4 `v-html` (Home + MiSaludSection) pasan por
+  `sanitizeSvg()` — defensa en profundidad sobre iconos hoy locales.
+- **Validación (3.3):** `src/utils/validators.js` espejo del backend:
+  NIF/NIE con dígito de control mod-23 (mismo algoritmo que @ValidNif),
+  password ≥12 con mayúscula/minúscula/número/especial (antes el frontend
+  aceptaba 8 alfanumérica y el backend la rechazaba con 400), teléfono
+  español, email ≤254, CP provincia 01-52, fecha no futura. Cableado en
+  Register.vue.
+- **WebSocket STOMP (V-F12, adelanta Fase 5.1):** `websocket.js` reescrito —
+  era código muerto roto (importaba `addMessage` inexistente, nadie lo
+  importaba a él): JWT en `connectHeaders` (el backend lo exige), refresh
+  automático del token en `beforeConnect` y ante error de auth, heartbeats
+  10s, sin URLs hardcodeadas (deriva de `VITE_API_URL`), nunca loguea
+  payloads clínicos. Expone connect/send/disconnect.
+- `vite.config.js`: `envPrefix` explícito, `manualChunks` (vendor/utils).
+
+**Hallazgo nuevo (V-F14):** TalkJS (chat activo) crea la sesión sin firma de
+identidad — cualquier cliente puede suplantar el id de otro usuario en el
+chat. Arreglo real = Identity Verification de TalkJS: endpoint backend que
+firme el userId con la Secret Key (no está en ningún repo, bien). Pendiente.
+
+**Pendiente para Fase 4:** CSP + security headers en vercel.json e index.html.

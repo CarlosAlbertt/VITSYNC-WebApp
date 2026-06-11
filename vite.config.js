@@ -6,16 +6,37 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite' // Import Tailwind CSS plugin
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     vue(),
-    vueDevTools(),
+    // DevTools solo en desarrollo: nunca instrumentar el bundle de producción
+    ...(mode === 'development' ? [vueDevTools()] : []),
     tailwindcss(),
   ],
+  // Solo variables VITE_ llegan al cliente (default de Vite, explícito aquí).
+  // Recordatorio: TODO lo VITE_ es público en el bundle — nunca secretos.
+  envPrefix: 'VITE_',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
+  },
+  esbuild: {
+    // SEGURIDAD (A09): en producción se eliminan console.* y debugger del
+    // bundle — evita fugas de datos clínicos/identidad por la consola.
+    // En dev se conservan para depurar.
+    drop: mode === 'production' ? ['console', 'debugger'] : []
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // Separar vendor para mejor cacheado entre deploys
+        manualChunks: {
+          vendor: ['vue', 'vue-router'],
+          utils: ['axios', 'dompurify']
+        }
+      }
+    }
   },
   server: {
     host: true,
@@ -27,4 +48,4 @@ export default defineConfig({
       interval: 300,
     },
   },
-})
+}))

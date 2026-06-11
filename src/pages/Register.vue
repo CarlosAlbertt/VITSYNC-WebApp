@@ -3,6 +3,10 @@ import { register } from '../store/auth';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import BackButton from '../components/BackButton.vue';
+import {
+    validateNif, validateEmail, validatePassword, validatePhone,
+    validateName, validatePostalCode, validateBirthDate
+} from '../utils/validators';
 
 // Refs para los datos del formulario
 const formData = ref({
@@ -27,40 +31,25 @@ const successMessage = ref(null);
 const isLoading = ref(false);
 const router = useRouter();
 
+// Validación espejo del backend (src/utils/validators.js): mismo dígito de
+// control de NIF/NIE y misma política de contraseña que @ValidNif y los DTOs.
+// Esto es UX: la validación de seguridad real la hace el backend.
 const validateForm = () => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
-    if (!nameRegex.test(formData.value.name) || !nameRegex.test(formData.value.firstName) || !nameRegex.test(formData.value.secondName)) {
-        throw new Error('El nombre y apellidos solo pueden contener letras');
-    }
-    const birthDate = new Date(formData.value.birthDate);
-    if (birthDate > new Date()) {
-        throw new Error('La fecha de nacimiento no puede ser en el futuro');
-    }
-    const nifClean = formData.value.nif.trim();
-    const nifRegex = /^[XYZ]?\d{5,8}[A-Z]$/i;
-    const cifRegex = /^[A-HJ-NP-SV-W]\d{7}[0-9A-J]$/i;
-    if (!nifRegex.test(nifClean) && !cifRegex.test(nifClean)) {
-        throw new Error('El formato del documento no es un NIF, NIE ni CIF válido');
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.value.email.trim())) {
-        throw new Error('El formato de correo electrónico no es válido');
-    }
-    if (formData.value.password !== formData.value.confirmPassword) {
-        throw new Error('Las contraseñas no coinciden');
-    }
-    const passRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-    if (!passRegex.test(formData.value.password)) {
-        throw new Error('La contraseña debe tener al menos 8 caracteres, conteniendo letras y números');
-    }
-    const phoneRegex = /^\+?[\d\s-]{9,15}$/;
-    if (!phoneRegex.test(formData.value.phone)) {
-        throw new Error('El formato del teléfono es inválido (debe tener entre 9 y 15 dígitos)');
-    }
-    const cpRegex = /^\d{5}$/;
-    if (!cpRegex.test(formData.value.postCode)) {
-        throw new Error('El código postal debe contener exactamente 5 dígitos');
-    }
+    const f = formData.value;
+    const checks = [
+        validateName(f.name) && `Nombre: ${validateName(f.name)}`,
+        validateName(f.firstName) && `Primer apellido: ${validateName(f.firstName)}`,
+        validateName(f.secondName) && `Segundo apellido: ${validateName(f.secondName)}`,
+        validateBirthDate(f.birthDate),
+        validateNif(f.nif),
+        validateEmail(f.email),
+        f.password !== f.confirmPassword ? 'Las contraseñas no coinciden' : null,
+        validatePassword(f.password),
+        validatePhone(f.phone),
+        validatePostalCode(f.postCode)
+    ];
+    const firstError = checks.find(e => e);
+    if (firstError) throw new Error(firstError);
 };
 
 const handleRegister = async () => {

@@ -65,7 +65,7 @@
                   <div class="absolute inset-0 flex items-center justify-center">
                     <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
                       stroke-linecap="round" stroke-linejoin="round" class="w-9 h-9">
-                      <g v-html="cat.icon" />
+                      <g v-html="sanitizeSvg(cat.icon)" />
                     </svg>
                   </div>
                 </div>
@@ -93,7 +93,7 @@
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
                   stroke-linecap="round" stroke-linejoin="round" class="w-9 h-9">
-                  <g v-html="modalCat?.icon" />
+                  <g v-html="sanitizeSvg(modalCat?.icon)" />
                 </svg>
               </div>
             </div>
@@ -137,7 +137,7 @@
                 <div class="flex items-center justify-center gap-6 mb-4">
                   <div class="w-20 h-20 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-4xl shadow-inner">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-10 h-10">
-                      <g v-html="detailCat?.icon" />
+                      <g v-html="sanitizeSvg(detailCat?.icon)" />
                     </svg>
                   </div>
                   <div class="text-left">
@@ -260,6 +260,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { getSaludResumen, getSaludDetalle } from '../../../services/profileService'
+import { sanitizeSvg } from '../../../utils/sanitize'
 
 const loading = ref(true)
 const showDetailModal = ref(false)

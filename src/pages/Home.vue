@@ -105,7 +105,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div v-for="value in values" :key="value.title" class="p-6 rounded-2xl bg-slate-50 dark:bg-[var(--bg-base)] border border-slate-100 dark:border-[var(--border)] hover:border-accent transition-colors duration-300">
             <div class="w-12 h-12 mb-6 bg-white dark:bg-[var(--bg-surface)] rounded-xl shadow-sm flex items-center justify-center text-accent">
-              <span v-html="value.icon"></span>
+              <!-- Iconos SVG locales; DOMPurify como defensa en profundidad -->
+              <span v-html="sanitizeSvg(value.icon)"></span>
             </div>
             <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">{{ value.title }}</h3>
             <p class="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm">{{ value.description }}</p>
@@ -137,6 +138,7 @@ import Header from '../components/HeaderComponent.vue';
 import Footer from '../components/FooterComponent.vue';
 import heroBackground from '/images/hero-background.png';
 import { openBooking } from '../store/bookingModal';
+import { sanitizeSvg } from '../utils/sanitize';
 
 export default {
   components: {
@@ -146,7 +148,8 @@ export default {
   methods: {
     irAAgendarCita() {
       openBooking();
-    }
+    },
+    sanitizeSvg
   },
   data() {
     return {
