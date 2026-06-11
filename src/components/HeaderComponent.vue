@@ -163,10 +163,12 @@ const handleLogout = () => {
   showLogoutModal.value = true;  
 }
 
-const confirmLogout = () => {
+const confirmLogout = async () => {
   showLogoutModal.value = false;
-  logout()
-  router.push('/')
+  // Esperar a que el backend revoque el refresh token y se limpie la sesión
+  // en memoria antes de navegar (evita carrera con el guard del router)
+  await logout()
+  router.push('/login')
 }
 
 const toggleMobileMenu = () => {

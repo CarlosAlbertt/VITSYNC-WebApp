@@ -20,9 +20,9 @@ const handleLogout = () => {
   showLogoutModal.value = true;
 };
 
-const confirmLogout = () => {
+const confirmLogout = async () => {
   showLogoutModal.value = false;
-  logout();
+  await logout();
   router.push('/login');
 };
 

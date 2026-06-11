@@ -42,3 +42,49 @@ dependencias basura (`@anthropic-ai/claude-code`, `npx`, `yarn`, `node.url`);
 
 **Pendiente para Fase 2:** auth en memoria + refresh httpOnly, interceptor
 401-refresh-retry, guard global con `meta.role`, limpieza de deps.
+
+## Fase 2 — Seguridad de autenticación ✅ (2026-06-11)
+
+**Qué se hizo (V-F01/02/03/04/06/07/08/09):**
+- **Backend (VITSYNC-API, commit `93565c8`):** `/login` y `/refresh` setean
+  cookie `refresh_token` HttpOnly+Secure+SameSite=None (Vercel↔Render es
+  cross-site) con Path=/api/auth; `/refresh` y `/logout` leen cookie con
+  fallback a body (legado); `/logout` borra la cookie. 160 tests verdes.
+- `services/api.js` reescrito: access token SOLO en memoria de módulo
+  (`setAccessToken`/`getAccessToken`), `withCredentials: true`, timeout 10s,
+  interceptor request inyecta Bearer, interceptor response 401→refresh
+  silencioso (single-flight, compatible con rotación)→retry una vez→si falla,
+  logout y redirect. Sin fallback de URL hardcodeado (falla claro si falta
+  `VITE_API_URL`). Eliminado header `X-API-Key` (el backend no lo validaba).
+- `store/auth.js` reescrito: nada persistido en cliente; `initializeAuth()`
+  restaura sesión al arrancar vía cookie httpOnly; identidad mínima en
+  memoria; migración que purga las claves antiguas de localStorage
+  (token/nif/email/role/id); `logout()` revoca en servidor y limpia memoria.
+- `router/index.js` reescrito: guard global `beforeEach` declarativo con
+  `meta.public/requiresAuth/role` (espera a `initializeAuth()` para que la
+  recarga en ruta protegida no expulse al login antes del refresh);
+  `/comunicacion` ahora requiere sesión (V-F07); redirect post-login con
+  `?redirect=` validado solo-rutas-internas (anti open-redirect); catch-all
+  404 → `pages/NotFound.vue` (V-F09); logueado en /login|/register → home.
+- `profileService.js` **reconstruido**: estaba truncado a mitad de
+  `getSettings` en el commit anterior (bug preexistente: rompía
+  Configuración y Mi Salud). Restaurado completo desde `e71c854` y migrado:
+  id desde el store en memoria, sin headers manuales (los pone el
+  interceptor), sin `vitsync_settings` con datos sensibles (solo prefs UI).
+- `store/profile.js`: eliminado el manejo manual de 401 (limpieza
+  localStorage + redirect) — lo hace el interceptor.
+- `HeaderComponent`/`AdminHeader`: `await logout()` antes de navegar
+  (evita carrera con el guard).
+
+**Decisiones:**
+- El token de acceso vive en `api.js` (módulo), no en el store: rompe el
+  ciclo de imports api⇄auth.
+- El refresh usa single-flight: con rotación de tokens en el backend, dos
+  refresh concurrentes serían replay (el segundo revocaría la sesión).
+- El campo `refreshToken` del body de la API queda como legado hasta retirar
+  los clientes antiguos; el frontend ya no lo lee ni almacena.
+- Sesión se pierde al recargar SOLO si la cookie expiró (7d) — comportamiento
+  esperado; el refresh silencioso la restaura en caso normal.
+
+**Pendiente para Fase 3:** console.log (59), DOMPurify/v-html, validación de
+formularios, limpieza deps basura (68 vulns npm).
