@@ -69,6 +69,11 @@ const formatDate = (dateString) => {
 
 const submit = () => {
   isSubmitting.value = true;
-  emit('submit', { reason: reason.value });
+  try {
+    emit('submit', { reason: reason.value });
+  } catch (error) {
+    console.error('Error en la confirmación:', error);
+    isSubmitting.value = false;
+  }
 };
 </script>

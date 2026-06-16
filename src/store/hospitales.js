@@ -16,7 +16,7 @@ export const getLocations = async () => {
 /* Opcional a futuro, obtener el hospital por su ID */
 export const getLocationById = async (id) => {
     try {
-        const response = await api.get(`api/hospitales/${id}`);
+        const response = await api.get(`/api/hospitales/${id}`);
         return response.data;
     } catch (error) {
         console.error(`Error al obtener el hospital con ID ${id}: `, error);

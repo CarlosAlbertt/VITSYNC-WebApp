@@ -174,13 +174,13 @@ const handleRegister = async () => {
                         <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Contraseña *</label>
                         <input type="password" v-model="formData.password"
                             class="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]"
-                            required :disabled="isLoading" minlength="6" />
+                            required :disabled="isLoading" minlength="12" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Confirmar contraseña *</label>
                         <input type="password" v-model="formData.confirmPassword"
                             class="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]"
-                            required :disabled="isLoading" minlength="6" />
+                            required :disabled="isLoading" minlength="12" />
                     </div>
                 </div>
 

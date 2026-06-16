@@ -87,7 +87,7 @@ export const loadCitasUsuario = async () => {
  */
 export const addCitaLocal = (bookingData) => {
     const nuevaCita = {
-        id: Date.now(), // ID temporal hasta que el backend devuelva uno real
+        id: `temp_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
         date: bookingData.date instanceof Date
             ? bookingData.date.toISOString().split('T')[0]
             : bookingData.date,
@@ -141,15 +141,15 @@ export const fetchHorariosDisponibles = async (medicoId, fecha) => {
 
 export const crearCita = async (datosCita) => {
   try {
-    // El token ya se inyecta automáticamente gracias a tu interceptor en api.js
     const response = await api.post('/api/citas', datosCita);
-    // Tras POST exitoso, añadir la cita al store compartido
     addCitaLocal(datosCita);
     return { success: true, message: 'Cita reservada con éxito', data: response.data };
   } catch (error) {
     console.error("Error al agendar la cita:", error);
-    // Aun si falla el backend, guardamos localmente para demo/mock
-    addCitaLocal(datosCita);
-    return { success: true, message: 'Cita guardada localmente' };
+    return {
+      success: false,
+      message: error.response?.data?.message || 'No se pudo agendar la cita. Intenta de nuevo.',
+      error
+    };
   }
 };

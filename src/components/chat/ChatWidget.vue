@@ -40,12 +40,7 @@ const clearSelection = () => {
             @close="$emit('close')"
             @back="clearSelection"
             />
-        
-        <!-- Script de debug (oculto en consola) -->
-        <div v-if="selectedContact" style="display:none">
-            {{ console.log('DEBUG [ChatWidget]: Seleccionado un contacto:', JSON.stringify(selectedContact, null, 2)) }}
-        </div>
-        
+
         <!-- Si NO hay contacto, mostramos la Lista -->
         <ContactList 
             v-else 

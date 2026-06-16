@@ -27,9 +27,6 @@ const handleLogin = async () => {
     // 6. ¡ÉXITO! El backend nos dio una respuesta 200 (OK)
     console.log('Login exitoso:', response.data);
 
-    // Opcional: Guardar el token (JWT) que nos envía el backend
-    // localStorage.setItem('token', response.data.token);
-
     // 7. REDIRIGIMOS al usuario a la página de "Dashboard"
     router.push('/dashboard');
 
