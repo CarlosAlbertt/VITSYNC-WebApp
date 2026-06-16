@@ -76,7 +76,7 @@
           <div class="relative">
             <input type="text" placeholder="Buscar centro, médico, especialidad..."
               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-colors" />
-            <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hidden min-[550px]:block">
+            <button aria-label="Buscar centro, médico o especialidad" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hidden min-[550px]:block">
               🔍
             </button>
           </div>
@@ -88,7 +88,11 @@
             class="text-teal-600 dark:text-teal-400 font-medium hover:text-teal-800 dark:hover:text-teal-200 transition-colors">
             Mi Perfil
           </router-link>
-          <button class="lg:hidden text-gray-600 dark:text-gray-300 focus:outline-none" @click="toggleMobileMenu">
+          <button class="lg:hidden text-gray-600 dark:text-gray-300 focus:outline-none"
+            @click="toggleMobileMenu"
+            :aria-expanded="isMobileMenuOpen"
+            aria-controls="mobile-nav"
+            aria-label="Menú de navegación">
             <span v-if="!isMobileMenuOpen">☰</span>
             <span v-else>✕</span>
           </button>
@@ -112,7 +116,7 @@
       </div>
 
       <!-- Mobile Navigation Menu -->
-      <div v-show="isMobileMenuOpen"
+      <div v-show="isMobileMenuOpen" id="mobile-nav"
         class="lg:hidden mt-4 border-t border-gray-100 dark:border-gray-700 pt-4 transition-colors">
         <nav class="flex flex-col space-y-4">
           <template v-for="item in menuItems" :key="item.name">
@@ -163,10 +167,12 @@ const handleLogout = () => {
   showLogoutModal.value = true;  
 }
 
-const confirmLogout = () => {
+const confirmLogout = async () => {
   showLogoutModal.value = false;
-  logout()
-  router.push('/')
+  // Esperar a que el backend revoque el refresh token y se limpie la sesión
+  // en memoria antes de navegar (evita carrera con el guard del router)
+  await logout()
+  router.push('/login')
 }
 
 const toggleMobileMenu = () => {

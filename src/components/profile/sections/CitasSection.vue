@@ -137,8 +137,15 @@ const formatDate = (d) => {
 };
 
 const confirmCancel = (appt) => {
-  // Validar política: >24h de anticipación
-  const apptDate = new Date(appt.date + 'T' + appt.time);
+  if (!['Programada', 'Confirmada'].includes(appt.status)) {
+    showToast('Solo se pueden cancelar citas programadas o confirmadas', 'error');
+    return;
+  }
+  if (new Date(appt.date + 'T00:00:00') < new Date(new Date().toISOString().split('T')[0] + 'T00:00:00')) {
+    showToast('No se puede cancelar una cita pasada', 'error');
+    return;
+  }
+  const apptDate = new Date(appt.date + 'T' + (appt.time || '00:00'));
   const diff = apptDate - new Date();
   if (diff < 24 * 60 * 60 * 1000) {
     showToast('Solo puedes cancelar citas con más de 24 horas de antelación', 'error');
@@ -173,6 +180,10 @@ const fetchAppointments = async () => {
   loading.value = true;
   try {
     appointments.value = await getAppointments();
+  } catch (error) {
+    console.error('Error al cargar citas:', error);
+    showToast('Error al cargar las citas', 'error');
+    appointments.value = [];
   } finally {
     loading.value = false;
   }

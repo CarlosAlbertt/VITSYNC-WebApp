@@ -22,6 +22,7 @@
                     <li><router-link to="/cuadro-medico" class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Cuadro Médico</router-link></li>
                     <li><router-link to="/especialidades" class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Especialidades</router-link></li>
                     <li><router-link to="/enfermedades-tratamientos" class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Enfermedades y Tratamientos</router-link></li>
+                    <li><router-link to="/privacidad" class="hover:text-teal-600 dark:hover:text-teal-400 transition-colors">Privacidad y tus datos</router-link></li>
                 </ul>
             </div>
             <div>

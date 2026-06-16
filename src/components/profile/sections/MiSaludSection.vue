@@ -65,7 +65,7 @@
                   <div class="absolute inset-0 flex items-center justify-center">
                     <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
                       stroke-linecap="round" stroke-linejoin="round" class="w-9 h-9">
-                      <g v-html="cat.icon" />
+                      <g v-html="sanitizeSvg(cat.icon)" />
                     </svg>
                   </div>
                 </div>
@@ -93,7 +93,7 @@
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
                   stroke-linecap="round" stroke-linejoin="round" class="w-9 h-9">
-                  <g v-html="modalCat?.icon" />
+                  <g v-html="sanitizeSvg(modalCat?.icon)" />
                 </svg>
               </div>
             </div>
@@ -137,7 +137,7 @@
                 <div class="flex items-center justify-center gap-6 mb-4">
                   <div class="w-20 h-20 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-4xl shadow-inner">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-10 h-10">
-                      <g v-html="detailCat?.icon" />
+                      <g v-html="sanitizeSvg(detailCat?.icon)" />
                     </svg>
                   </div>
                   <div class="text-left">
@@ -260,6 +260,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { getSaludResumen, getSaludDetalle } from '../../../services/profileService'
+import { sanitizeSvg } from '../../../utils/sanitize'
 
 const loading = ref(true)
 const showDetailModal = ref(false)
@@ -375,14 +376,6 @@ onMounted(async () => {
     })
   } catch (err) {
     console.error('Error cargando resumen de salud:', err)
-    categorias.value = [
-      { id: 'cardio', nombre: 'Cardio', gradient: 'linear-gradient(135deg,#f43f5e,#be123c)', icon: '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>', porcentaje: 78 },
-      { id: 'metabolismo', nombre: 'Metabolismo', gradient: 'linear-gradient(135deg,#f97316,#b45309)', icon: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>', porcentaje: 65 },
-      { id: 'actividad', nombre: 'Actividad', gradient: 'linear-gradient(135deg,#22c55e,#15803d)', icon: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>', porcentaje: 0, comingSoon: true },
-      { id: 'nutricion', nombre: 'Nutrición', gradient: 'linear-gradient(135deg,#14b8a6,#0f766e)', icon: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>', porcentaje: 0, comingSoon: true },
-      { id: 'audicion', nombre: 'Audición', gradient: 'linear-gradient(135deg,#a855f7,#7c3aed)', icon: '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>', porcentaje: 82 },
-      { id: 'pulmones', nombre: 'Pulmones', gradient: 'linear-gradient(135deg,#3b82f6,#1d4ed8)', icon: '<path d="M9.59 4.59A2 2 0 1 1 11 8H2"/>', porcentaje: 71 },
-    ]
   } finally {
     loading.value = false
   }

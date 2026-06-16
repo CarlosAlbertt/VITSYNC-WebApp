@@ -3,6 +3,10 @@ import { register } from '../store/auth';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import BackButton from '../components/BackButton.vue';
+import {
+    validateNif, validateEmail, validatePassword, validatePhone,
+    validateName, validatePostalCode, validateBirthDate
+} from '../utils/validators';
 
 // Refs para los datos del formulario
 const formData = ref({
@@ -27,39 +31,31 @@ const successMessage = ref(null);
 const isLoading = ref(false);
 const router = useRouter();
 
+// Consentimiento RGPD (Art. 7): explícito, granular y nunca pre-marcado
+const privacyAccepted = ref(false);
+const commsAccepted = ref(false);
+
+// Validación espejo del backend (src/utils/validators.js): mismo dígito de
+// control de NIF/NIE y misma política de contraseña que @ValidNif y los DTOs.
+// Esto es UX: la validación de seguridad real la hace el backend.
 const validateForm = () => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
-    if (!nameRegex.test(formData.value.name) || !nameRegex.test(formData.value.firstName) || !nameRegex.test(formData.value.secondName)) {
-        throw new Error('El nombre y apellidos solo pueden contener letras');
-    }
-    const birthDate = new Date(formData.value.birthDate);
-    if (birthDate > new Date()) {
-        throw new Error('La fecha de nacimiento no puede ser en el futuro');
-    }
-    const nifClean = formData.value.nif.trim();
-    const nifRegex = /^[XYZ]?\d{5,8}[A-Z]$/i;
-    const cifRegex = /^[A-HJ-NP-SV-W]\d{7}[0-9A-J]$/i;
-    if (!nifRegex.test(nifClean) && !cifRegex.test(nifClean)) {
-        throw new Error('El formato del documento no es un NIF, NIE ni CIF válido');
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.value.email.trim())) {
-        throw new Error('El formato de correo electrónico no es válido');
-    }
-    if (formData.value.password !== formData.value.confirmPassword) {
-        throw new Error('Las contraseñas no coinciden');
-    }
-    const passRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-    if (!passRegex.test(formData.value.password)) {
-        throw new Error('La contraseña debe tener al menos 8 caracteres, conteniendo letras y números');
-    }
-    const phoneRegex = /^\+?[\d\s-]{9,15}$/;
-    if (!phoneRegex.test(formData.value.phone)) {
-        throw new Error('El formato del teléfono es inválido (debe tener entre 9 y 15 dígitos)');
-    }
-    const cpRegex = /^\d{5}$/;
-    if (!cpRegex.test(formData.value.postCode)) {
-        throw new Error('El código postal debe contener exactamente 5 dígitos');
+    const f = formData.value;
+    const checks = [
+        validateName(f.name) && `Nombre: ${validateName(f.name)}`,
+        validateName(f.firstName) && `Primer apellido: ${validateName(f.firstName)}`,
+        validateName(f.secondName) && `Segundo apellido: ${validateName(f.secondName)}`,
+        validateBirthDate(f.birthDate),
+        validateNif(f.nif),
+        validateEmail(f.email),
+        f.password !== f.confirmPassword ? 'Las contraseñas no coinciden' : null,
+        validatePassword(f.password),
+        validatePhone(f.phone),
+        validatePostalCode(f.postCode)
+    ];
+    const firstError = checks.find(e => e);
+    if (firstError) throw new Error(firstError);
+    if (!privacyAccepted.value) {
+        throw new Error('Debes aceptar la Política de Privacidad para crear la cuenta');
     }
 };
 
@@ -178,13 +174,13 @@ const handleRegister = async () => {
                         <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Contraseña *</label>
                         <input type="password" v-model="formData.password"
                             class="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]"
-                            required :disabled="isLoading" minlength="6" />
+                            required :disabled="isLoading" minlength="12" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Confirmar contraseña *</label>
                         <input type="password" v-model="formData.confirmPassword"
                             class="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]"
-                            required :disabled="isLoading" minlength="6" />
+                            required :disabled="isLoading" minlength="12" />
                     </div>
                 </div>
 
@@ -230,11 +226,30 @@ const handleRegister = async () => {
                     </div>
                 </div>
 
+                <!-- Consentimiento RGPD: obligatorio, NUNCA pre-marcado -->
+                <div class="mb-4 space-y-3">
+                    <label class="flex items-start gap-3 text-sm text-[var(--text-secondary)] cursor-pointer">
+                        <input type="checkbox" v-model="privacyAccepted" :disabled="isLoading"
+                            class="mt-0.5 h-4 w-4 rounded border-[var(--border)] accent-[var(--accent)]" />
+                        <span>
+                            He leído y acepto la
+                            <router-link to="/privacidad" target="_blank"
+                                class="font-semibold text-[var(--accent)] underline">Política de Privacidad</router-link>
+                            y el tratamiento de mis datos de salud para la prestación asistencial *
+                        </span>
+                    </label>
+                    <label class="flex items-start gap-3 text-sm text-[var(--text-secondary)] cursor-pointer">
+                        <input type="checkbox" v-model="commsAccepted" :disabled="isLoading"
+                            class="mt-0.5 h-4 w-4 rounded border-[var(--border)] accent-[var(--accent)]" />
+                        <span>Acepto recibir comunicaciones por email (opcional)</span>
+                    </label>
+                </div>
+
                 <button type="submit"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !privacyAccepted"
                     :class="[
                         'w-full py-3 px-4 rounded-xl text-lg font-medium text-white focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50 focus:ring-offset-2 transition-colors',
-                        isLoading
+                        (isLoading || !privacyAccepted)
                             ? 'bg-[var(--accent)]/60 cursor-not-allowed'
                             : 'bg-[var(--accent)] hover:bg-[var(--accent-hover)]'
                     ]">

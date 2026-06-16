@@ -5,14 +5,14 @@
       <Header class="shrink-0" />
 
       <!-- Hero Section with Background Image -->
-      <section class="hero-section relative flex-1 flex items-center text-white overflow-hidden min-h-[60vh] pt-12 md:pt-0">
+      <section class="hero-section relative flex-1 flex items-center text-white overflow-hidden">
         <!-- Image Carousel -->
         <transition-group name="slide-left" tag="div" class="absolute inset-0 w-full h-full">
           <div v-for="(image, index) in heroImages" :key="index" v-show="index === currentHeroIndex"
             class="absolute inset-0 w-full h-full bg-cover bg-center" :style="{ backgroundImage: `url(${image})` }">
             <!-- Gradient Overlay -->
             <div
-              class="absolute inset-0 bg-gradient-to-r from-teal-900/70 via-teal-800/70 to-transparent">
+              class="absolute inset-0 bg-gradient-to-r from-teal-900 opacity-70 via-teal-800 opacity-70 to-transparent">
             </div>
           </div>
         </transition-group>
@@ -25,7 +25,7 @@
             atención de calidad y profesionales altamente capacitados para cuidar de tu bienestar
             y el de tu familia.
           </p>
-          <button @click="irAAgendarCita"
+          <button
             class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-10 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
             Solicitar Cita
           </button>
@@ -105,7 +105,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div v-for="value in values" :key="value.title" class="p-6 rounded-2xl bg-slate-50 dark:bg-[var(--bg-base)] border border-slate-100 dark:border-[var(--border)] hover:border-accent transition-colors duration-300">
             <div class="w-12 h-12 mb-6 bg-white dark:bg-[var(--bg-surface)] rounded-xl shadow-sm flex items-center justify-center text-accent">
-              <span v-html="value.icon"></span>
+              <!-- Iconos SVG locales; DOMPurify como defensa en profundidad -->
+              <span v-html="sanitizeSvg(value.icon)"></span>
             </div>
             <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-3">{{ value.title }}</h3>
             <p class="text-slate-600 dark:text-slate-400 leading-relaxed font-light text-sm">{{ value.description }}</p>
@@ -122,7 +123,7 @@
         <p class="text-lg text-white/90 mb-10 font-light max-w-2xl mx-auto">
           Únete a los miles de pacientes que ya confían en VitSync para gestionar su bienestar médico de forma rápida, segura y profesional.
         </p>
-        <button @click="$router.push('/register')" class="bg-white text-accent hover:bg-slate-50 font-bold px-10 py-4 rounded-xl shadow-xl transform transition-transform hover:-translate-y-1 text-lg">
+        <button @click="irAAgendarCita" class="bg-white text-accent hover:bg-slate-50 font-bold px-10 py-4 rounded-xl shadow-xl transform transition-transform hover:-translate-y-1 text-lg">
           Crear mi cuenta gratis
         </button>
       </div>
@@ -137,20 +138,22 @@ import Header from '../components/HeaderComponent.vue';
 import Footer from '../components/FooterComponent.vue';
 import heroBackground from '/images/hero-background.png';
 import { openBooking } from '../store/bookingModal';
+import { sanitizeSvg } from '../utils/sanitize';
 
 export default {
   components: {
     Header,
     Footer,
   },
+  methods: {
+    irAAgendarCita() {
+      openBooking();
+    },
+    sanitizeSvg
+  },
   data() {
     return {
       heroBackground,
-      heroImages: [
-        '/images/hero-background.png',
-      ],
-      currentHeroIndex: 0,
-      heroInterval: null,
       statistics: [
         { value: '15k+', label: 'Pacientes' },
         { value: '25+', label: 'Años Exp.' },
@@ -206,39 +209,19 @@ export default {
         },
       ],
     };
-  },
-  methods: {
-    irAAgendarCita() {
-      openBooking();
-    }
-  },
-  mounted() {
-    if (this.heroImages.length > 1) {
-      this.heroInterval = setInterval(() => {
-        this.currentHeroIndex = (this.currentHeroIndex + 1) % this.heroImages.length;
-      }, 6000);
-    }
-  },
-  beforeUnmount() {
-    if (this.heroInterval) {
-      clearInterval(this.heroInterval);
-    }
   }
 };
 </script>
 
 <style scoped>
-/* Transición para el carrusel del hero */
-.slide-left-enter-active,
-.slide-left-leave-active {
-  transition: all 0.8s ease-in-out;
+/* Estilos extra si es necesario. Tailwind hace el 99% del trabajo. */
+.bg-accent {
+  background-color: var(--accent);
 }
-.slide-left-enter-from {
-  opacity: 0;
-  transform: translateX(30px);
+.text-accent {
+  color: var(--accent);
 }
-.slide-left-leave-to {
-  opacity: 0;
-  transform: translateX(-30px);
+.border-accent {
+  border-color: var(--accent);
 }
 </style>

@@ -12,6 +12,6 @@ export const getMyPacientes = async (medicoId) => {
 };
 
 export const assignPatientToProfessional = async (patientId, medicoId) => {
-    const response = await api.post(`/api/relationships/assign?patientId=${patientId}&medicoId=${medicoId}`);
+    const response = await api.post('/api/relationships/assign', { patientId, medicoId });
     return response.data;
 };

@@ -1,12 +1,13 @@
 <script setup>
 import { login } from '../store/auth';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 const nif = ref('');
 const password = ref('');
 const errorMessage = ref(null);
 const isLoading = ref(false);
 const router = useRouter();
+const route = useRoute();
 
 const validateLogin = () => {
     if(!nif.value.trim()){
@@ -23,9 +24,12 @@ const handleLogin = async () => {
         validateLogin();
         isLoading.value = true;
         await login(nif.value, password.value);
-        router.push({ name: 'home' });
+        // Volver a la ruta protegida que originó el redirect (solo rutas
+        // internas: un redirect absoluto permitiría open-redirect)
+        const redirect = typeof route.query.redirect === 'string'
+            && route.query.redirect.startsWith('/') ? route.query.redirect : null;
+        router.push(redirect || { name: 'home' });
     } catch (error) {
-        console.error('Error en el login:', error);
         errorMessage.value = error.message || 'Error de conexión con el servidor';
     } finally {
         isLoading.value = false;

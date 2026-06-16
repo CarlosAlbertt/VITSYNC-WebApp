@@ -1,110 +1,111 @@
-/**
- * Servicio de WebSocket para el chat en tiempo real.
- *
- * Usa STOMP sobre SockJS para comunicación bidireccional con el backend.
- * La URL del servidor se lee de las variables de entorno (VITE_API_URL)
- * para evitar URLs hardcodeadas que apunten al entorno incorrecto.
- *
- * Flujo:
- * 1. connectWebSocket() → Establece conexión con el servidor
- * 2. Al conectar → Se suscribe a /user/queue/messages (buzón personal)
- * 3. Al recibir mensaje → Lo parsea y lo guarda en el store de chat
- * 4. disconnectWebSocket() → Cierra la conexión limpiamente
- */
-
-// Cliente STOMP: Es el protocolo que organiza los mensajes (como HTTP pero para chat)
+// Cliente STOMP: protocolo de mensajería sobre WebSocket (chat propio)
 import { Client } from '@stomp/stompjs';
-// SockJS: es un respaldo por si el navegador no soporta WebSockets puros
+// SockJS: fallback si el navegador no soporta WebSockets puros
 import SockJS from 'sockjs-client';
-// Importamos el store (memoria) para guardar los mensajes que lleguen
-import { addMessage } from '../store/chat';
+import { getAccessToken, refreshAccessToken } from './api';
+import { logger } from '../utils/logger';
 
 /**
- * Construye la URL del WebSocket dinámicamente.
- * Usa VITE_API_URL de las variables de entorno para apuntar al servidor correcto
- * según el entorno (local, testing, producción).
+ * Secure STOMP client for the backend chat (`/ws` + WebSocketAuthInterceptor).
  *
- * @returns {string} URL completa del endpoint WebSocket (ej: "http://localhost:8080/ws")
+ * Security model (V-F12/V-F13 of the audit):
+ * - The JWT travels in the STOMP CONNECT headers: the backend interceptor
+ *   rejects anonymous connections.
+ * - On auth errors the access token is silently refreshed and the client
+ *   reconnects with the new one.
+ * - Message PAYLOADS are never logged (clinical content) — only events.
+ *
+ * NOTA: el chat de producción usa TalkJS (ChatWindow.vue); este cliente
+ * queda operativo para el chat STOMP propio del backend.
  */
-const getSocketUrl = () => {
-    // Leer la URL base de la API desde las variables de entorno
-    const apiUrl = import.meta.env.VITE_API_URL;
 
-    if (apiUrl) {
-        // Usar la URL configurada en el entorno (funciona para local, testing y producción)
-        return `${apiUrl}/ws`;
-    }
+// La URL del WS deriva de la de la API (V-F05: nada hardcodeado)
+const WS_URL = `${import.meta.env.VITE_API_URL}/ws`;
 
-    // Fallback: detectar por hostname si no hay variable de entorno
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://localhost:8080/ws';
-    }
-
-    // Último recurso: producción
-    return 'https://vitsync-api.onrender.com/ws';
-};
-
-const SOCKET_URL = getSocketUrl();
-
-// Variable para guardar la conexión activa.
 let client = null;
 
 /**
- * Establece la conexión WebSocket con el servidor.
- * Si ya hay una conexión activa, no crea una nueva (evita duplicados).
- * Incluye reconexión automática cada 5 segundos si se pierde la conexión.
+ * Opens (or reuses) the authenticated STOMP connection.
+ *
+ * @param {(message: object) => void} onMessage callback per incoming message
+ * @returns {Client|null} the active client, or null without a session
  */
-export const connectWebSocket = () => {
-    // Si ya estamos conectados, no hacemos nada para evitar duplicados
-    if (client && client.active) return;
+export const connectWebSocket = (onMessage) => {
+    // Si ya estamos conectados, no duplicar conexión
+    if (client && client.active) return client;
 
-    // CONFIGURACIÓN DEL CLIENTE
+    const token = getAccessToken();
+    if (!token) {
+        logger.warn('WS: sin sesión activa, no se conecta');
+        return null;
+    }
+
     client = new Client({
-        // Fábrica: Indica qué tecnología usar (SockJS sobre la URL definida)
-        webSocketFactory: () => new SockJS(SOCKET_URL),
-        // RECONEXIÓN: Si se cae internet, intenta volver en 5 segundos
+        webSocketFactory: () => new SockJS(WS_URL),
+
+        // Autenticación del handshake STOMP (el backend valida el Bearer)
+        connectHeaders: { Authorization: `Bearer ${getAccessToken()}` },
+
+        // Heartbeats: detectan conexiones zombi en ambos sentidos
+        heartbeatIncoming: 10000,
+        heartbeatOutgoing: 10000,
+
+        // Reconexión automática; refresca el header por si el token rotó
         reconnectDelay: 5000,
+        beforeConnect: () => {
+            client.connectHeaders = { Authorization: `Bearer ${getAccessToken()}` };
+        },
 
-        // EVENTO 1: ÉXITO AL CONECTAR
         onConnect: () => {
-            console.log('[WebSocket] Conectado al chat en:', SOCKET_URL);
-
-            // SUSCRIPCIÓN (OÍDO)
-            // Nos "suscribimos" a nuestro buzón personal.
-            // Cuando Spring envíe algo al usuario, se ejecutará este código.
+            logger.log('WS conectado');
+            // Buzón personal: Spring enruta aquí los mensajes dirigidos al usuario
             client.subscribe('/user/queue/messages', (message) => {
-                // message.body es un texto JSON, hay que convertirlo a objeto JS
-                const parsedContent = JSON.parse(message.body);
-                console.log('[WebSocket] Nuevo mensaje:', parsedContent);
-
-                // Guardamos el mensaje en nuestra "caja" (store) para verlo en pantalla
-                addMessage(parsedContent);
+                // Nunca loguear el contenido: es texto clínico
+                logger.log('WS: mensaje recibido');
+                try {
+                    onMessage?.(JSON.parse(message.body));
+                } catch {
+                    logger.warn('WS: mensaje con cuerpo no-JSON descartado');
+                }
             });
         },
 
-        // EVENTO 2: ERROR
-        onStompError: (frame) => {
-            console.error('[WebSocket] Error STOMP:', frame.headers['message']);
-        },
-
-        // EVENTO 3: DESCONEXIÓN
-        onDisconnect: () => {
-            console.log('[WebSocket] Desconectado del chat');
+        onStompError: async (frame) => {
+            logger.warn('WS error STOMP:', frame.headers?.message);
+            // Token caducado a mitad de sesión: refrescar y reconectar
+            if (/unauthorized|expirado|inv[áa]lido/i.test(frame.headers?.message || '')) {
+                try {
+                    await refreshAccessToken();
+                    // reconnectDelay reactivará con el header renovado (beforeConnect)
+                } catch {
+                    disconnectWebSocket();
+                }
+            }
         }
     });
 
-    // ACTIVAR LA CONEXIÓN
     client.activate();
+    return client;
 };
 
 /**
- * Cierra la conexión WebSocket de forma limpia.
- * Debe llamarse al hacer logout o al desmontar componentes que usen el chat.
+ * Sends a chat message through the authenticated connection.
+ *
+ * @param {string} destination STOMP destination (e.g. '/app/chat')
+ * @param {object} payload message body
  */
+export const sendMessage = (destination, payload) => {
+    if (!client || !client.active) {
+        logger.warn('WS: intento de envío sin conexión');
+        return;
+    }
+    client.publish({ destination, body: JSON.stringify(payload) });
+};
+
+/** Closes the connection (logout / unmount). */
 export const disconnectWebSocket = () => {
-    if (client && client.active) {
+    if (client) {
         client.deactivate();
-        console.log('[WebSocket] Conexión cerrada manualmente');
+        client = null;
     }
 };

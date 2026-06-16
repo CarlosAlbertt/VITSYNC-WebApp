@@ -46,16 +46,9 @@ export const loadProfile = async () => {
         }
         avatarUrl.value = avatar;
     } catch (err) {
-        console.error('Error cargando perfil:', err);
-        if (err.response?.status === 401 || err.response?.status === 403) {
-            // Si el token es inválido o no hay permisos, hacer logout y redirigir
-            localStorage.removeItem('token');
-            localStorage.removeItem('nif');
-            localStorage.removeItem('email');
-            localStorage.removeItem('role');
-            localStorage.removeItem('id');
-            window.location.href = '/login';
-        } else {
+        // Los 401 los gestiona el interceptor de api.js (refresh + retry o
+        // redirect a login): aquí solo informamos del resto de errores
+        if (err.response?.status !== 401) {
             showToast('Error al cargar el perfil', 'error');
         }
     } finally {

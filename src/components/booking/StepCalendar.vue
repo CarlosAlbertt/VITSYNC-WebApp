@@ -87,10 +87,15 @@ const loadingSlots = ref(false);
 const loadSlots = async () => {
   if (!selectedDate.value) return;
   loadingSlots.value = true;
-  selectedTime.value = null; // reset time
-  // Llama al backend (mock) enviando el id del médico y la fecha
-  slots.value = await fetchHorariosDisponibles(props.bookingData.doctor.id, selectedDate.value);
-  loadingSlots.value = false;
+  selectedTime.value = null;
+  try {
+    slots.value = await fetchHorariosDisponibles(props.bookingData.doctor.id, selectedDate.value);
+  } catch (error) {
+    console.error('Error loading slots:', error);
+    slots.value = [];
+  } finally {
+    loadingSlots.value = false;
+  }
 };
 
 const confirmSelection = () => {

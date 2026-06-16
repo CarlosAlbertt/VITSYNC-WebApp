@@ -55,7 +55,18 @@ const loading = ref(true);
 const selected = ref(props.bookingData.doctor);
 
 onMounted(async () => {
-  doctors.value = await getMedicosByEspecialidad(props.bookingData.specialty);
-  loading.value = false;
+  if (!props.bookingData.specialty) {
+    emit('back');
+    loading.value = false;
+    return;
+  }
+  try {
+    doctors.value = await getMedicosByEspecialidad(props.bookingData.specialty);
+  } catch (error) {
+    console.error('Error al cargar médicos:', error);
+    doctors.value = [];
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
