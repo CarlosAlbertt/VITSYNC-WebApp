@@ -151,9 +151,26 @@ export default {
     },
     sanitizeSvg
   },
+  mounted() {
+    // Rotación automática del hero solo si hay más de una imagen.
+    if (this.heroImages.length > 1) {
+      this.heroTimer = setInterval(() => {
+        this.currentHeroIndex = (this.currentHeroIndex + 1) % this.heroImages.length;
+      }, 6000);
+    }
+  },
+  beforeUnmount() {
+    if (this.heroTimer) clearInterval(this.heroTimer);
+  },
   data() {
     return {
       heroBackground,
+      // Imágenes del carrusel del hero. El template las recorre con v-for
+      // y muestra la del índice activo; antes no estaban definidas y el
+      // hero quedaba sin fondo.
+      heroImages: ['/images/hero-background.png'],
+      currentHeroIndex: 0,
+      heroTimer: null,
       statistics: [
         { value: '15k+', label: 'Pacientes' },
         { value: '25+', label: 'Años Exp.' },
