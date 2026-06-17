@@ -25,7 +25,7 @@
             atención de calidad y profesionales altamente capacitados para cuidar de tu bienestar
             y el de tu familia.
           </p>
-          <button
+          <button @click="irAAgendarCita"
             class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-10 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
             Solicitar Cita
           </button>
@@ -123,8 +123,12 @@
         <p class="text-lg text-white/90 mb-10 font-light max-w-2xl mx-auto">
           Únete a los miles de pacientes que ya confían en VitSync para gestionar su bienestar médico de forma rápida, segura y profesional.
         </p>
-        <button @click="irAAgendarCita" class="bg-white text-accent hover:bg-slate-50 font-bold px-10 py-4 rounded-xl shadow-xl transform transition-transform hover:-translate-y-1 text-lg">
+        <!-- Sin sesión: invitar a registrarse. Con sesión: agendar directamente. -->
+        <button v-if="!isLoggedIn" @click="irARegistro" class="bg-white text-accent hover:bg-slate-50 font-bold px-10 py-4 rounded-xl shadow-xl transform transition-transform hover:-translate-y-1 text-lg">
           Crear mi cuenta gratis
+        </button>
+        <button v-else @click="irAAgendarCita" class="bg-white text-accent hover:bg-slate-50 font-bold px-10 py-4 rounded-xl shadow-xl transform transition-transform hover:-translate-y-1 text-lg">
+          Agendar una cita
         </button>
       </div>
     </section>
@@ -139,15 +143,25 @@ import Footer from '../components/FooterComponent.vue';
 import heroBackground from '/images/hero-background.png';
 import { openBooking } from '../store/bookingModal';
 import { sanitizeSvg } from '../utils/sanitize';
+import { isAuthenticated } from '../store/auth';
 
 export default {
   components: {
     Header,
     Footer,
   },
+  computed: {
+    // Para mostrar el CTA de "crear cuenta" solo a usuarios sin sesión.
+    isLoggedIn() {
+      return isAuthenticated.value;
+    }
+  },
   methods: {
     irAAgendarCita() {
       openBooking();
+    },
+    irARegistro() {
+      this.$router.push('/register');
     },
     sanitizeSvg
   },
@@ -232,6 +246,10 @@ export default {
 
 <style scoped>
 /* Estilos extra si es necesario. Tailwind hace el 99% del trabajo. */
+/* Garantiza una altura decente del hero aunque el flex no reparta espacio. */
+.hero-section {
+  min-height: 70vh;
+}
 .bg-accent {
   background-color: var(--accent);
 }
