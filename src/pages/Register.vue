@@ -102,7 +102,7 @@ const handleRegister = async () => {
             </div>
 
             <div class="reg-header">
-                <span class="reg-eyebrow">VitSync · Alta de usuario</span>
+                <span class="reg-eyebrow">VitSync</span>
                 <h1 class="reg-title">Crea tu cuenta</h1>
                 <p class="reg-subtitle">Unos pocos datos y tendrás tu área de salud lista. Tu información viaja cifrada y tratada bajo RGPD.</p>
             </div>
@@ -117,7 +117,7 @@ const handleRegister = async () => {
             </div>
 
             <form @submit.prevent="handleRegister">
-                <h3 class="reg-section"><span class="reg-section-num">01</span>Datos personales</h3>
+                <h3 class="reg-section">Datos personales</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
@@ -159,7 +159,7 @@ const handleRegister = async () => {
                     </div>
                 </div>
 
-                <h3 class="reg-section reg-section-mt"><span class="reg-section-num">02</span>Datos de cuenta</h3>
+                <h3 class="reg-section reg-section-mt">Datos de cuenta</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
@@ -201,7 +201,7 @@ const handleRegister = async () => {
                     </select>
                 </div>
 
-                <h3 class="reg-section reg-section-mt"><span class="reg-section-num">03</span>Datos de contacto</h3>
+                <h3 class="reg-section reg-section-mt">Datos de contacto</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
@@ -275,73 +275,44 @@ const handleRegister = async () => {
 </template>
 
 <style scoped>
-/* Dirección "clinical editorial": serif display, eyebrow mono, secciones
-   numeradas y textura de puntos, sobre los tokens del tema. */
+/* Minimalista profesional: sans del sistema, superficies planas, bordes finos. */
 .reg-page {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 3rem 1rem 4rem;
+    padding: 3rem 1.25rem 4rem;
     color: var(--text-primary);
     background-color: var(--bg-base);
-    background-image: radial-gradient(color-mix(in srgb, var(--text-muted) 20%, transparent) 1px, transparent 1px);
-    background-size: 24px 24px;
 }
-.reg-shell { width: 100%; max-width: 44rem; }
+.reg-shell { width: 100%; max-width: 42rem; }
 .reg-topbar { margin-bottom: 1.5rem; }
 
 .reg-header { margin-bottom: 1.5rem; }
 .reg-eyebrow {
-    display: inline-block;
-    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.26em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 0.6rem;
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em;
+    color: var(--accent);
 }
 .reg-title {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 2.4rem; line-height: 1.08; letter-spacing: -0.015em;
-    color: var(--text-primary); margin-bottom: 0.6rem;
+    font-size: 1.625rem; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--text-primary); margin-top: 0.35rem; margin-bottom: 0.4rem;
 }
-.reg-subtitle { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; max-width: 34rem; }
+.reg-subtitle { color: var(--text-secondary); font-size: 0.9375rem; line-height: 1.6; max-width: 36rem; }
 
 .reg-card {
-    position: relative;
     width: 100%;
     background-color: var(--bg-surface);
     border: 1px solid var(--border);
-    border-radius: 1.25rem;
+    border-radius: 0.875rem;
     padding: 2rem;
-    box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 22px 48px -28px rgba(15,23,42,0.28);
-    animation: fadeUp 0.6s ease-out both;
-}
-.reg-card::before {
-    content: ""; position: absolute; top: 0; left: 2rem; right: 2rem; height: 3px;
-    border-radius: 0 0 3px 3px;
-    background: linear-gradient(90deg, var(--accent), transparent);
 }
 
-/* Cabeceras de sección numeradas */
+/* Cabeceras de sección sobrias */
 .reg-section {
-    display: flex; align-items: center; gap: 0.7rem;
-    font-size: 1.05rem; font-weight: 700; color: var(--text-primary);
-    padding-bottom: 0.6rem; margin-bottom: 1.25rem;
+    font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--text-muted);
+    padding-bottom: 0.7rem; margin-bottom: 1.25rem;
     border-bottom: 1px solid var(--border);
 }
-.reg-section-mt { margin-top: 1.75rem; }
-.reg-section-num {
-    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-    font-size: 0.7rem; font-weight: 700; color: var(--accent);
-    background: var(--accent-subtle);
-    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
-    border-radius: 0.5rem; padding: 0.2rem 0.45rem; line-height: 1;
-}
-
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-@media (prefers-reduced-motion: reduce) {
-    .reg-card { animation: none; }
-}
+.reg-section-mt { margin-top: 2rem; }
 </style>
