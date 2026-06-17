@@ -60,7 +60,15 @@
           </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Estado de carga -->
+        <div v-if="loadingMedicos" class="text-center text-slate-500 dark:text-slate-400 py-12">
+          Cargando especialistas...
+        </div>
+        <!-- Sin médicos en la BD -->
+        <div v-else-if="medicos.length === 0" class="text-center text-slate-500 dark:text-slate-400 py-12">
+          No hay especialistas disponibles por el momento.
+        </div>
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div v-for="medico in medicos" :key="medico.id" class="group bg-white dark:bg-[var(--bg-surface)] rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 dark:border-[var(--border)] transition-all duration-300 overflow-hidden">
             <div class="h-64 overflow-hidden relative bg-slate-100 dark:bg-[var(--bg-base)]">
               <img :src="medico.image" :alt="medico.name" class="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105">
@@ -73,13 +81,13 @@
               <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-4">Dr. {{ medico.name }}</h3>
               
               <div class="space-y-3 mb-8">
-                <div class="flex items-center text-slate-600 dark:text-slate-400 text-sm">
+                <div v-if="medico.telefono" class="flex items-center text-slate-600 dark:text-slate-400 text-sm">
                   <svg class="w-5 h-5 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                   {{ medico.telefono }}
                 </div>
                 <div class="flex items-center text-slate-600 dark:text-slate-400 text-sm">
-                  <svg class="w-5 h-5 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                  {{ medico.horario }}
+                  <svg class="w-5 h-5 mr-3 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  {{ medico.especialidad }}
                 </div>
               </div>
 
@@ -144,6 +152,7 @@ import heroBackground from '/images/hero-background.png';
 import { openBooking } from '../store/bookingModal';
 import { sanitizeSvg } from '../utils/sanitize';
 import { isAuthenticated } from '../store/auth';
+import { fetchMedicos } from '../store/medicos';
 
 export default {
   components: {
@@ -163,9 +172,29 @@ export default {
     irARegistro() {
       this.$router.push('/register');
     },
+    // Carga los médicos reales desde la API y los normaliza al formato de la card.
+    async loadMedicos() {
+      this.loadingMedicos = true;
+      try {
+        const data = await fetchMedicos();
+        this.medicos = (data || []).slice(0, 6).map((m) => ({
+          id: m.id,
+          name: m.name,
+          especialidad: m.especialidad?.nombre || 'General',
+          telefono: m.phone || null,
+          image: m.fotoUrl || '/images/doctors/Usuario.png',
+        }));
+      } catch (e) {
+        console.error('No se pudieron cargar los médicos:', e);
+        this.medicos = [];
+      } finally {
+        this.loadingMedicos = false;
+      }
+    },
     sanitizeSvg
   },
   mounted() {
+    this.loadMedicos();
     // Rotación automática del hero solo si hay más de una imagen.
     if (this.heroImages.length > 1) {
       this.heroTimer = setInterval(() => {
@@ -191,32 +220,9 @@ export default {
         { value: '50+', label: 'Especialistas' },
         { value: '98%', label: 'Satisfacción' },
       ],
-      medicos: [
-        {
-          id: 1,
-          name: 'Pablo Escolano',
-          especialidad: 'Traumatología',
-          telefono: '677 77 77 77',
-          horario: 'Lun-Vie 8:00-15:00',
-          image: '/images/doctors/Usuario.png'
-        },
-        {
-          id: 2,
-          name: 'Carlos Albert',
-          especialidad: 'Pediatría',
-          telefono: '655 55 99 00',
-          horario: 'Lun-Vie 15:00-22:00',
-          image: '/images/doctors/Usuario.png'
-        },
-        {
-          id: 3,
-          name: 'Javier Crespo',
-          especialidad: 'Cardiología',
-          telefono: '699 99 00 99',
-          horario: 'Mar-Sáb 22:00-06:00',
-          image: '/images/doctors/Usuario.png'
-        },
-      ],
+      // Se cargan desde la API en mounted() (loadMedicos).
+      medicos: [],
+      loadingMedicos: true,
       values: [
         {
           icon: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>',
