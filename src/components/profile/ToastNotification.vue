@@ -60,7 +60,7 @@ import { toast } from '../../store/profile';
   max-width: 26rem;
   padding: 0.75rem 0.85rem 0.75rem 1rem;
   background-color: var(--bg-surface);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--border);
   border-radius: 0.75rem;
   box-shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.35);
   color: var(--text-primary);
@@ -84,10 +84,10 @@ import { toast } from '../../store/profile';
 .toast-error   .toast-ico { color: #E11D48; background-color: rgba(244, 63, 94, 0.12); }
 .toast-info    .toast-ico { color: #0EA5E9; background-color: rgba(14, 165, 233, 0.12); }
 
-/* Filo de color a la izquierda según el tipo */
-.toast-success { border-left: 3px solid var(--accent); }
-.toast-error   { border-left: 3px solid #E11D48; }
-.toast-info    { border-left: 3px solid #0EA5E9; }
+/* Borde de color completo según el tipo */
+.toast-success { border-color: var(--accent); }
+.toast-error   { border-color: #E11D48; }
+.toast-info    { border-color: #0EA5E9; }
 
 .toast-msg { flex: 1; min-width: 0; line-height: 1.4; }
 
@@ -110,10 +110,10 @@ import { toast } from '../../store/profile';
 
 /* ── Animación: baja desde arriba, suave y fluida ───── */
 .toast-enter-active {
-  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.1s ease;
 }
 .toast-leave-active {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 1, 1), opacity 0.3s ease;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 1, 1), opacity 0.4s ease;
 }
 .toast-enter-from,
 .toast-leave-to {
