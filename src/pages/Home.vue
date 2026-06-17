@@ -10,30 +10,29 @@
         <transition-group name="slide-left" tag="div" class="absolute inset-0 w-full h-full">
           <div v-for="(image, index) in heroImages" :key="index" v-show="index === currentHeroIndex"
             class="absolute inset-0 w-full h-full bg-cover bg-center" :style="{ backgroundImage: `url(${image})` }">
-            <!-- Gradient Overlay -->
-            <div
-              class="absolute inset-0 bg-gradient-to-r from-teal-900 opacity-70 via-teal-800 opacity-70 to-transparent">
-            </div>
+            <!-- Scrim para legibilidad del texto (oscuro a la izquierda, se aclara a la derecha) -->
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-900/55 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/40 to-transparent"></div>
           </div>
         </transition-group>
 
         <!-- Hero Content - Aligned Left -->
-        <div class="relative z-10 px-6 md:px-12 lg:px-20 max-w-2xl">
-          <h1 class="text-4xl md:text-5xl font-bold mb-6 animate-fade-in">Tu Salud, Nuestra Prioridad</h1>
-          <p class="text-lg md:text-xl mb-8 font-light leading-relaxed">
+        <div class="relative z-10 px-6 md:px-12 lg:px-20 max-w-2xl animate-fade-in">
+          <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight leading-tight">Tu Salud, Nuestra Prioridad</h1>
+          <p class="text-lg md:text-xl mb-8 font-light leading-relaxed text-slate-100/90 max-w-xl">
             Somos una empresa líder en servicios médicos especializados, comprometidos con ofrecer
             atención de calidad y profesionales altamente capacitados para cuidar de tu bienestar
             y el de tu familia.
           </p>
           <button @click="irAAgendarCita"
-            class="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-10 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg text-lg">
+            class="cursor-pointer bg-accent hover:bg-[var(--accent-hover)] text-white font-semibold px-10 py-4 rounded-xl transition-colors duration-200 shadow-lg shadow-teal-900/30 text-lg">
             Solicitar Cita
           </button>
         </div>
       </section>
 
       <!-- Statistics Section -->
-      <section class="bg-teal-600 text-white py-16 shrink-0">
+      <section class="bg-accent text-white py-16 shrink-0">
         <div class="max-w-7xl mx-auto px-6">
           <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div v-for="stat in statistics" :key="stat.label" class="stat-item">
@@ -55,7 +54,8 @@
               Un equipo de profesionales altamente calificados, listos para brindarte la mejor atención médica.
             </p>
           </div>
-          <button class="hidden md:block text-accent font-semibold hover:text-teal-700 transition-colors">
+          <button @click="$router.push('/cuadro-medico')"
+            class="hidden md:block cursor-pointer text-accent font-semibold hover:text-[var(--accent-hover)] transition-colors duration-200">
             Ver todo el cuadro médico &rarr;
           </button>
         </div>
@@ -91,7 +91,7 @@
                 </div>
               </div>
 
-              <button @click="irAAgendarCita" class="w-full bg-slate-50 hover:bg-accent hover:text-white dark:bg-slate-800 dark:hover:bg-accent text-accent font-semibold px-6 py-3 rounded-xl transition-colors duration-300">
+              <button @click="irAAgendarCita" class="w-full cursor-pointer bg-slate-50 hover:bg-accent hover:text-white dark:bg-slate-800 dark:hover:bg-accent text-accent font-semibold px-6 py-3 rounded-xl transition-colors duration-200">
                 Agendar Consulta
               </button>
             </div>
@@ -132,10 +132,10 @@
           Únete a los miles de pacientes que ya confían en VitSync para gestionar su bienestar médico de forma rápida, segura y profesional.
         </p>
         <!-- Sin sesión: invitar a registrarse. Con sesión: agendar directamente. -->
-        <button v-if="!isLoggedIn" @click="irARegistro" class="bg-white text-accent hover:bg-slate-50 font-bold px-10 py-4 rounded-xl shadow-xl transform transition-transform hover:-translate-y-1 text-lg">
+        <button v-if="!isLoggedIn" @click="irARegistro" class="cursor-pointer bg-white text-accent hover:bg-slate-100 font-bold px-10 py-4 rounded-xl shadow-xl transition-colors duration-200 text-lg">
           Crear mi cuenta gratis
         </button>
-        <button v-else @click="irAAgendarCita" class="bg-white text-accent hover:bg-slate-50 font-bold px-10 py-4 rounded-xl shadow-xl transform transition-transform hover:-translate-y-1 text-lg">
+        <button v-else @click="irAAgendarCita" class="cursor-pointer bg-white text-accent hover:bg-slate-100 font-bold px-10 py-4 rounded-xl shadow-xl transition-colors duration-200 text-lg">
           Agendar una cita
         </button>
       </div>
@@ -255,6 +255,29 @@ export default {
 /* Garantiza una altura decente del hero aunque el flex no reparta espacio. */
 .hero-section {
   min-height: 70vh;
+}
+
+/* Entrada suave del contenido del hero (la clase se usa en el template). */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeUp 0.6s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in {
+    animation: none;
+  }
 }
 .bg-accent {
   background-color: var(--accent);
