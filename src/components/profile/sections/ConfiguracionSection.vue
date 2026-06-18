@@ -243,7 +243,21 @@
     </Teleport>
 
     <!-- Modales de confirmación existentes -->
-    <ConfirmModal v-model="showDeleteModal" title="¿Eliminar cuenta?" message="Esta acción es irreversible y borrará todo tu historial médico." confirm-text="Sí, eliminar todo" variant="danger" @confirm="requestDataDeletion" />
+    <ConfirmModal
+      v-model="showDeleteModal"
+      title="Eliminar cuenta"
+      message="Esta acción es irreversible. Al eliminar tu cuenta:"
+      :consequences="[
+        'Se borrarán tu perfil y tus datos personales',
+        'Se eliminará tu historial médico, informes y citas',
+        'Perderás el acceso y no podrás recuperar la cuenta',
+        'Recibirás un email de confirmación del borrado'
+      ]"
+      require-text="ELIMINAR"
+      confirm-text="Eliminar mi cuenta"
+      variant="danger"
+      @confirm="requestDataDeletion"
+    />
     <ConfirmModal v-model="showSuspendModal" title="¿Desactivar cuenta?" message="Tu perfil dejará de ser visible para los médicos temporalmente." confirm-text="Sí, desactivar" variant="danger" @confirm="requestAccountSuspension" />
 
   </div>
