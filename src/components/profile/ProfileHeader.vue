@@ -3,7 +3,8 @@
     <!-- Avatar -->
     <div class="relative group flex-shrink-0">
       <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-teal-100 dark:border-teal-800 bg-teal-50 dark:bg-teal-900">
-        <img v-if="avatarUrl" :src="avatarUrl" alt="Avatar" class="w-full h-full object-cover" />
+        <img v-if="avatarUrl && !avatarError" :src="avatarUrl" :alt="`Foto de ${fullName}`"
+             class="w-full h-full object-cover" @error="avatarError = true" />
         <div v-else class="w-full h-full flex items-center justify-center text-3xl font-bold text-teal-600 dark:text-teal-400 select-none">
           {{ initials }}
         </div>
@@ -44,7 +45,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 const props = defineProps({
   name: String,
@@ -59,6 +60,9 @@ const props = defineProps({
 const emit = defineEmits(['avatar-change']);
 
 const fileInput = ref(null);
+const avatarError = ref(false);
+// Si cambia la URL (nueva subida o previsualización) reintenta mostrar la imagen.
+watch(() => props.avatarUrl, () => { avatarError.value = false; });
 
 const fullName = computed(() => [props.name, props.firstName, props.secondName].filter(Boolean).join(' ') || 'Usuario');
 
