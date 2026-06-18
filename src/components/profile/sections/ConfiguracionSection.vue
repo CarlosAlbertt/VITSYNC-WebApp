@@ -392,7 +392,7 @@ const saveQuestions = async () => {
 const validatePw = () => {
   Object.keys(pwErrors).forEach(k => delete pwErrors[k]);
   if (!pwForm.newPw) { pwErrors.newPw = 'Requerida'; return false; }
-  if (pwForm.newPw.length < 8) { pwErrors.newPw = 'Mínimo 8 caracteres'; return false; }
+  if (pwForm.newPw.length < 12) { pwErrors.newPw = 'Mínimo 12 caracteres'; return false; }
   if (!/[A-Z]/.test(pwForm.newPw)) { pwErrors.newPw = 'Debe contener una mayúscula'; return false; }
   if (!/[0-9]/.test(pwForm.newPw)) { pwErrors.newPw = 'Debe contener un número'; return false; }
   if (!/[^A-Za-z0-9]/.test(pwForm.newPw)) { pwErrors.newPw = 'Debe contener un símbolo'; return false; }
