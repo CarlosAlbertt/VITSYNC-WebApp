@@ -6,7 +6,7 @@
       :secondName="form.secondName"
       :email="form.email"
       :role="form.role"
-      :avatarUrl="avatarUrl"
+      :avatarUrl="avatarPreview || avatarUrl"
       :isVerified="profileData.isVerified"
       :editMode="editing"
       @avatar-change="handleAvatarChange"
@@ -64,7 +64,7 @@
       <!-- Datos de Contacto -->
       <InfoCard title="Datos de Contacto">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <EditableField label="Correo electrónico" v-model="form.email" :editing="editing" type="email" required :error="errors.email" />
+          <EditableField label="Correo electrónico" v-model="form.email" :editing="false" readonly />
           <EditableField label="Teléfono móvil" v-model="form.phone" :editing="editing" type="tel" required :error="errors.phone" />
         </div>
       </InfoCard>
@@ -83,12 +83,12 @@
       <!-- Información Médica Básica -->
       <InfoCard title="Información Médica Básica" v-if="form.role === 'PACIENTE'">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <EditableField label="Grupo sanguíneo" v-model="form.bloodType" :editing="editing" />
-          <EditableField label="Alergias conocidas" v-model="form.allergies" :editing="editing" />
+          <EditableField label="Grupo sanguíneo" v-model="form.grupoSanguineo" :editing="editing" />
+          <EditableField label="Alergias conocidas" v-model="form.alergias" :editing="editing" />
           <div class="sm:col-span-2">
-            <EditableField label="Condiciones médicas preexistentes" v-model="form.medicalConditions" :editing="editing" />
+            <EditableField label="Condiciones médicas preexistentes" v-model="form.condicionesPrevias" :editing="editing" />
           </div>
-          <EditableField label="Contacto de emergencia" v-model="form.emergencyContact" :editing="editing" type="tel" />
+          <EditableField label="Contacto de emergencia" v-model="form.contactoEmergencia" :editing="editing" type="tel" />
         </div>
       </InfoCard>
 
@@ -115,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted } from 'vue';
+import { ref, reactive, watch, onUnmounted } from 'vue';
 import ProfileHeader from '../ProfileHeader.vue';
 import InfoCard from '../InfoCard.vue';
 import EditableField from '../EditableField.vue';
@@ -126,12 +126,23 @@ const editing = ref(false);
 const isSaving = ref(false);
 const errors = reactive({});
 
+// Previsualización del avatar: se muestra al elegir el archivo y solo se sube
+// al pulsar "Guardar" (o se descarta al cancelar).
+const avatarPreview = ref(null);
+let pendingAvatarFile = null;
+const clearAvatarPreview = () => {
+  if (avatarPreview.value) URL.revokeObjectURL(avatarPreview.value);
+  avatarPreview.value = null;
+  pendingAvatarFile = null;
+};
+onUnmounted(clearAvatarPreview);
+
 const form = reactive({
   name: '', firstName: '', secondName: '',
   nif: '', email: '', gender: 'HOMBRE',
   role: 'PACIENTE', birthDate: '', phone: '',
   address: '', postCode: '', country: '',
-  bloodType: '', allergies: '', medicalConditions: '', emergencyContact: ''
+  grupoSanguineo: '', alergias: '', condicionesPrevias: '', contactoEmergencia: ''
 });
 
 const originalForm = reactive({});
@@ -148,7 +159,7 @@ const roleOptions = [
 ];
 
 const syncForm = () => {
-  const fields = ['name','firstName','secondName','nif','email','gender','role','birthDate','phone','address','postCode','country','bloodType','allergies','medicalConditions','emergencyContact'];
+  const fields = ['name','firstName','secondName','nif','email','gender','role','birthDate','phone','address','postCode','country','grupoSanguineo','alergias','condicionesPrevias','contactoEmergencia'];
   fields.forEach(f => { form[f] = profileData[f] || ''; });
 };
 
@@ -164,6 +175,7 @@ const startEdit = () => {
 const cancelEdit = () => {
   Object.assign(form, originalForm);
   Object.keys(errors).forEach(k => delete errors[k]);
+  clearAvatarPreview();
   editing.value = false;
 };
 
@@ -181,6 +193,11 @@ const handleSave = async () => {
   if (!validate()) return;
   isSaving.value = true;
   try {
+    // Si hay una foto nueva pendiente, se sube ahora (al guardar).
+    if (pendingAvatarFile) {
+      await uploadAvatar(pendingAvatarFile);
+      clearAvatarPreview();
+    }
     await saveProfile({ ...form });
     editing.value = false;
   } finally {
@@ -188,7 +205,11 @@ const handleSave = async () => {
   }
 };
 
-const handleAvatarChange = async (file) => {
-  await uploadAvatar(file);
+// Solo previsualiza: guarda el archivo y muestra una vista previa local.
+// La subida real ocurre en handleSave().
+const handleAvatarChange = (file) => {
+  if (avatarPreview.value) URL.revokeObjectURL(avatarPreview.value);
+  pendingAvatarFile = file;
+  avatarPreview.value = URL.createObjectURL(file);
 };
 </script>
