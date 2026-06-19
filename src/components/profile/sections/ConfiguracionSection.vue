@@ -115,6 +115,15 @@
                 Cerrar
               </button>
             </div>
+            <p v-if="!sessions.length" class="text-sm text-slate-500 dark:text-slate-400">No hay sesiones activas.</p>
+            <div v-if="sessions.length > 1" class="pt-1">
+              <button
+                @click="doCloseOthers"
+                class="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors"
+              >
+                Cerrar las demás sesiones
+              </button>
+            </div>
           </div>
         </InfoCard>
       </template>
@@ -271,8 +280,8 @@ import SettingsToggle from '../SettingsToggle.vue';
 import LoadingSpinner from '../LoadingSpinner.vue';
 import ConfirmModal from '../ConfirmModal.vue';
 import { 
-  getSettings, updateSettings, changePassword, getSessions, deleteSession, 
-  exportUserData, suspendAccount, deleteAccount, setup2FA, getSecurityQuestions, saveSecurityQuestions 
+  getSettings, updateSettings, changePassword, getSessions, deleteSession, closeOtherSessions,
+  exportUserData, suspendAccount, deleteAccount, setup2FA, getSecurityQuestions, saveSecurityQuestions
 } from '../../../services/profileService';
 import { showToast } from '../../../store/profile';
 import { logout } from '../../../store/auth';
@@ -415,9 +424,23 @@ const handleChangePassword = async () => {
 };
 
 const doDeleteSession = async (id) => {
-  await deleteSession(id);
-  sessions.value = sessions.value.filter(s => s.id !== id);
-  showToast('Sesión cerrada');
+  try {
+    await deleteSession(id);
+    sessions.value = sessions.value.filter(s => s.id !== id);
+    showToast('Sesión cerrada');
+  } catch (err) {
+    showToast(err.response?.data?.message || 'No se pudo cerrar la sesión', 'error');
+  }
+};
+
+const doCloseOthers = async () => {
+  try {
+    await closeOtherSessions();
+    sessions.value = await getSessions();
+    showToast('Se cerraron las demás sesiones');
+  } catch (err) {
+    showToast(err.response?.data?.message || 'No se pudieron cerrar las sesiones', 'error');
+  }
 };
 
 const applyTheme = () => {

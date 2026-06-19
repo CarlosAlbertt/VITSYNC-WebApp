@@ -153,17 +153,26 @@ export const changePassword = async (currentPassword, newPassword) => {
 };
 
 export const getSessions = async () => {
-    await delay(300);
-    // Mock hasta exponer las sesiones reales (tabla refresh_tokens del backend)
-    return [
-        { id: 1, device: 'Chrome · Windows', location: 'Madrid, ES', date: '2026-02-19T10:00:00', current: true },
-        { id: 2, device: 'Safari · iPhone', location: 'Valencia, ES', date: '2026-02-18T18:30:00', current: false }
-    ];
+    const response = await api.get('/api/auth/sessions');
+    const list = Array.isArray(response.data) ? response.data : [];
+    return list.map(s => ({
+        id: s.id,
+        device: s.device,
+        location: s.ipAddress || '—',
+        date: s.lastUsedAt || s.createdAt,
+        current: s.current
+    }));
 };
 
-export const deleteSession = async () => {
-    await delay(400);
+export const deleteSession = async (id) => {
+    await api.delete(`/api/auth/sessions/${id}`);
     return { success: true };
+};
+
+/** Cierra todas las sesiones excepto la actual. */
+export const closeOtherSessions = async () => {
+    const response = await api.post('/api/auth/sessions/revoke-others');
+    return response.data;
 };
 
 // ─── GESTIÓN DE DATOS (RGPD) ────────────────────────────────────────────────
