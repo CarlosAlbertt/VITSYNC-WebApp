@@ -493,7 +493,13 @@ const requestAccountSuspension = async () => {
   }
 };
 
-const formatDate = (d) => d ? new Date(d).toLocaleString('es-ES') : '';
+const formatDate = (d) => {
+  if (!d) return '';
+  // El backend envía LocalDateTime sin zona horaria (el servidor va en UTC).
+  // Si no trae zona, la marcamos como UTC para que se muestre en hora local.
+  const hasTz = /[zZ]$|[+-]\d{2}:?\d{2}$/.test(d);
+  return new Date(hasTz ? d : d + 'Z').toLocaleString('es-ES');
+};
 </script>
 
 <style scoped>
