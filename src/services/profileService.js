@@ -231,9 +231,10 @@ export const getSaludDetalle = async (categoria) => {
 
 // ─── SEGURIDAD AVANZADA ──────────────────────────────────────────────────────
 
+/** Activa o desactiva el 2FA por email. Devuelve { twoFactorEnabled, message }. */
 export const setup2FA = async (enabled) => {
-    await api.put(`/VitSync-app/api/users/${userId()}/security/2fa`, { enabled });
-    return { success: true, qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VITSYNC-AUTH' };
+    const response = await api.put(`/VitSync-app/api/users/${userId()}/security/2fa`, { enabled });
+    return response.data;
 };
 
 export const getSecurityQuestions = async () => {

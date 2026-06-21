@@ -1,5 +1,5 @@
 <script setup>
-import { login } from '../store/auth';
+import { login, verify2FA } from '../store/auth';
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 const nif = ref('');
@@ -8,6 +8,12 @@ const errorMessage = ref(null);
 const isLoading = ref(false);
 const router = useRouter();
 const route = useRoute();
+
+// Segundo paso (2FA por email)
+const twoFactorStep = ref(false);
+const code = ref('');
+const pendingNif = ref('');
+const infoMessage = ref(null);
 
 const validateLogin = () => {
     if(!nif.value.trim()){
@@ -18,22 +24,56 @@ const validateLogin = () => {
     }
 };
 
+const goAfterLogin = () => {
+    // Volver a la ruta protegida que originó el redirect (solo rutas internas:
+    // un redirect absoluto permitiría open-redirect)
+    const redirect = typeof route.query.redirect === 'string'
+        && route.query.redirect.startsWith('/') ? route.query.redirect : null;
+    router.push(redirect || { name: 'home' });
+};
+
 const handleLogin = async () => {
     try {
         errorMessage.value = null;
         validateLogin();
         isLoading.value = true;
-        await login(nif.value, password.value);
-        // Volver a la ruta protegida que originó el redirect (solo rutas
-        // internas: un redirect absoluto permitiría open-redirect)
-        const redirect = typeof route.query.redirect === 'string'
-            && route.query.redirect.startsWith('/') ? route.query.redirect : null;
-        router.push(redirect || { name: 'home' });
+        const result = await login(nif.value, password.value);
+        if (result?.twoFactorRequired) {
+            // Pasamos al segundo paso: pedir el código enviado por email
+            pendingNif.value = result.nif;
+            infoMessage.value = result.message || 'Te hemos enviado un código a tu correo.';
+            twoFactorStep.value = true;
+            return;
+        }
+        goAfterLogin();
     } catch (error) {
         errorMessage.value = error.message || 'Error de conexión con el servidor';
     } finally {
         isLoading.value = false;
     }
+};
+
+const handleVerify2FA = async () => {
+    try {
+        errorMessage.value = null;
+        if (!/^\d{6}$/.test(code.value.trim())) {
+            throw new Error('Introduce el código de 6 dígitos');
+        }
+        isLoading.value = true;
+        await verify2FA(pendingNif.value, code.value.trim());
+        goAfterLogin();
+    } catch (error) {
+        errorMessage.value = error.message || 'Código incorrecto';
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const backToLogin = () => {
+    twoFactorStep.value = false;
+    code.value = '';
+    errorMessage.value = null;
+    infoMessage.value = null;
 };
 </script>
 
@@ -81,45 +121,73 @@ const handleLogin = async () => {
                     Volver al inicio
                 </router-link>
 
-                <header class="auth-head">
-                    <h1 class="auth-title">Inicia sesión</h1>
-                    <p class="auth-sub">Bienvenido de vuelta. Accede a tu área de salud.</p>
-                </header>
-
                 <div v-if="errorMessage" class="auth-error" role="alert">
                     <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                     {{ errorMessage }}
                 </div>
 
-                <form @submit.prevent="handleLogin" novalidate>
-                    <div class="field">
-                        <label for="username">NIF/CIF</label>
-                        <input id="username" type="text" v-model="nif" placeholder="12345678A"
-                               autocomplete="username" required :disabled="isLoading" />
-                    </div>
+                <!-- Paso 1: credenciales -->
+                <template v-if="!twoFactorStep">
+                    <header class="auth-head">
+                        <h1 class="auth-title">Inicia sesión</h1>
+                        <p class="auth-sub">Bienvenido de vuelta. Accede a tu área de salud.</p>
+                    </header>
 
-                    <div class="field">
-                        <div class="field-row">
-                            <label for="password">Contraseña</label>
-                            <a href="#" class="field-aux">¿Olvidaste tu contraseña?</a>
+                    <form @submit.prevent="handleLogin" novalidate>
+                        <div class="field">
+                            <label for="username">NIF/CIF</label>
+                            <input id="username" type="text" v-model="nif" placeholder="12345678A"
+                                   autocomplete="username" required :disabled="isLoading" />
                         </div>
-                        <input id="password" type="password" v-model="password" placeholder="••••••••"
-                               autocomplete="current-password" required :disabled="isLoading" />
-                    </div>
 
-                    <button type="submit" class="btn" :disabled="isLoading">
-                        <span v-if="isLoading" class="btn-spin" aria-hidden="true"></span>
-                        {{ isLoading ? 'Entrando…' : 'Entrar' }}
-                    </button>
-                </form>
+                        <div class="field">
+                            <div class="field-row">
+                                <label for="password">Contraseña</label>
+                                <a href="#" class="field-aux">¿Olvidaste tu contraseña?</a>
+                            </div>
+                            <input id="password" type="password" v-model="password" placeholder="••••••••"
+                                   autocomplete="current-password" required :disabled="isLoading" />
+                        </div>
 
-                <p class="auth-foot">
-                    ¿No tienes usuario?
-                    <router-link to="/register">Date de alta</router-link>
-                </p>
-                <p class="auth-foot-sub">
-                    <a href="#">¿Problemas con el acceso o alta?</a>
-                </p>
+                        <button type="submit" class="btn" :disabled="isLoading">
+                            <span v-if="isLoading" class="btn-spin" aria-hidden="true"></span>
+                            {{ isLoading ? 'Entrando…' : 'Entrar' }}
+                        </button>
+                    </form>
+
+                    <p class="auth-foot">
+                        ¿No tienes usuario?
+                        <router-link to="/register">Date de alta</router-link>
+                    </p>
+                    <p class="auth-foot-sub">
+                        <a href="#">¿Problemas con el acceso o alta?</a>
+                    </p>
+                </template>
+
+                <!-- Paso 2: código 2FA por email -->
+                <template v-else>
+                    <header class="auth-head">
+                        <h1 class="auth-title">Verificación en dos pasos</h1>
+                        <p class="auth-sub">{{ infoMessage }}</p>
+                    </header>
+
+                    <form @submit.prevent="handleVerify2FA" novalidate>
+                        <div class="field">
+                            <label for="code">Código de verificación</label>
+                            <input id="code" type="text" inputmode="numeric" maxlength="6" v-model="code"
+                                   placeholder="000000" autocomplete="one-time-code" required :disabled="isLoading" />
+                        </div>
+
+                        <button type="submit" class="btn" :disabled="isLoading">
+                            <span v-if="isLoading" class="btn-spin" aria-hidden="true"></span>
+                            {{ isLoading ? 'Verificando…' : 'Verificar y entrar' }}
+                        </button>
+                    </form>
+
+                    <p class="auth-foot-sub">
+                        <a href="#" @click.prevent="backToLogin">← Volver al inicio de sesión</a>
+                    </p>
+                </template>
             </div>
         </main>
     </div>

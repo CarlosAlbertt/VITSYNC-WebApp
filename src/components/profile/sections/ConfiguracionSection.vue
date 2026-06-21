@@ -195,18 +195,19 @@
         <div v-if="show2FAModal" class="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xl" @click="show2FAModal = false"></div>
           <div class="relative bg-white dark:bg-slate-900 rounded-[3rem] p-10 max-w-md w-full shadow-2xl border border-white/20 text-center">
-            <h3 class="text-2xl font-black text-slate-800 dark:text-white mb-4 tracking-tighter uppercase">Autenticación 2FA</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-10">
-              Escanea este código con tu aplicación de autenticación para vincular tu cuenta de forma segura.
+            <h3 class="text-2xl font-black text-slate-800 dark:text-white mb-4 tracking-tighter uppercase">Verificación en dos pasos</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-8">
+              <template v-if="!settings.security.twoFactor">
+                Al activarla, cada vez que inicies sesión te enviaremos un <strong>código de un solo uso a tu correo</strong> que tendrás que introducir para entrar. Añade una capa extra de seguridad a tu cuenta.
+              </template>
+              <template v-else>
+                Está <strong>activada</strong>. Recibes un código por email en cada inicio de sesión. Puedes desactivarla cuando quieras.
+              </template>
             </p>
-            
-            <div class="bg-white p-4 rounded-3xl inline-block border-8 border-slate-50 mb-10 shadow-sm">
-              <img :src="qrCodeUrl" alt="QR Code" class="w-40 h-40" />
-            </div>
 
             <div class="flex flex-col gap-3">
               <button @click="toggle2FA" class="w-full py-4 bg-slate-900 text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-teal-600 transition-all shadow-xl">
-                {{ settings.security.twoFactor ? 'Desactivar 2FA' : 'Activar y Finalizar' }}
+                {{ settings.security.twoFactor ? 'Desactivar' : 'Activar' }}
               </button>
               <button @click="show2FAModal = false" class="w-full py-4 text-slate-400 font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-slate-100 transition-all">
                 Cancelar
@@ -281,7 +282,7 @@ import LoadingSpinner from '../LoadingSpinner.vue';
 import ConfirmModal from '../ConfirmModal.vue';
 import { 
   getSettings, updateSettings, changePassword, getSessions, deleteSession, closeOtherSessions,
-  exportUserData, suspendAccount, deleteAccount, setup2FA, getSecurityQuestions, saveSecurityQuestions
+  exportUserData, suspendAccount, deleteAccount, setup2FA, getSecurityQuestions, saveSecurityQuestions, getProfile
 } from '../../../services/profileService';
 import { showToast } from '../../../store/profile';
 import { logout } from '../../../store/auth';
@@ -351,6 +352,11 @@ onMounted(async () => {
   try {
     const s = await getSettings();
     Object.assign(settings, s);
+    // El estado real del 2FA viene del perfil (no del mock de ajustes).
+    try {
+      const profile = await getProfile();
+      settings.security.twoFactor = !!profile.twoFactorEnabled;
+    } catch { /* deja el valor por defecto */ }
     securityQuestions.value = await getSecurityQuestions();
     if (securityQuestions.value.length > 0) {
       questionsForm.value = securityQuestions.value.map(q => ({ ...q }));
@@ -370,17 +376,22 @@ const saveSettings = async () => {
   showToast('Preferencias actualizadas');
 };
 
-const open2FAModal = async () => {
-  const res = await setup2FA(!settings.security.twoFactor);
-  qrCodeUrl.value = res.qrCode;
+const open2FAModal = () => {
   show2FAModal.value = true;
 };
 
 const toggle2FA = async () => {
-  settings.security.twoFactor = !settings.security.twoFactor;
-  await saveSettings();
-  show2FAModal.value = false;
-  showToast(settings.security.twoFactor ? '2FA activado' : '2FA desactivado');
+  try {
+    const target = !settings.security.twoFactor;
+    const res = await setup2FA(target);
+    settings.security.twoFactor = res?.twoFactorEnabled ?? target;
+    show2FAModal.value = false;
+    showToast(res?.message || (settings.security.twoFactor
+      ? 'Verificación en dos pasos activada'
+      : 'Verificación en dos pasos desactivada'));
+  } catch (err) {
+    showToast(err.response?.data?.message || 'No se pudo cambiar la verificación en dos pasos', 'error');
+  }
 };
 
 const openQuestionsModal = () => {
