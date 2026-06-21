@@ -143,7 +143,7 @@ const backToLogin = () => {
                         <div class="field">
                             <div class="field-row">
                                 <label for="password">Contraseña</label>
-                                <a href="#" class="field-aux">¿Olvidaste tu contraseña?</a>
+                                <router-link to="/recuperar-cuenta" class="field-aux">¿Olvidaste tu contraseña?</router-link>
                             </div>
                             <input id="password" type="password" v-model="password" placeholder="••••••••"
                                    autocomplete="current-password" required :disabled="isLoading" />

@@ -43,6 +43,13 @@ const routes = [
     },
     { path: '/login', name: 'login', component: Login, meta: { public: true } },
     {
+        // Recuperación de contraseña por preguntas de seguridad + código email
+        path: '/recuperar-cuenta',
+        name: 'recuperar-cuenta',
+        component: () => import('../pages/RecoverPassword.vue'),
+        meta: { public: true }
+    },
+    {
         path: '/register',
         name: 'register',
         component: () => import('../pages/Register.vue'),
