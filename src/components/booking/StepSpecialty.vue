@@ -30,7 +30,7 @@
       </div>
 
       <!-- Grid de especialidades -->
-      <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[350px] overflow-y-auto pr-1 flex-1">
+      <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[350px] md:max-h-[460px] overflow-y-auto pr-1 flex-1">
         <div 
           v-for="spec in filteredSpecialties" 
           :key="spec.id || spec"

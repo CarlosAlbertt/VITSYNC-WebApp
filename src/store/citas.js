@@ -140,8 +140,32 @@ export const fetchHorariosDisponibles = async (medicoId, fecha) => {
 };
 
 export const crearCita = async (datosCita) => {
+  // Normaliza el payload al contrato del backend (CitaRequest): specialty es un
+  // String, no un objeto. Enviar el objeto especialidad provocaba un 400 (Jackson
+  // no puede mapear objeto → String) y la cita NO se guardaba, por lo que nunca
+  // aparecía en "Mis Citas".
+  const especialidadNombre = datosCita.specialtyName
+    || (typeof datosCita.specialty === 'string'
+      ? datosCita.specialty
+      : (datosCita.specialty?.nombre || datosCita.specialty?.name || ''));
+
+  const fecha = datosCita.date instanceof Date
+    ? datosCita.date.toISOString().split('T')[0]
+    : (typeof datosCita.date === 'string' ? datosCita.date.substring(0, 10) : datosCita.date);
+
+  const payload = {
+    specialty: especialidadNombre,
+    doctor: datosCita.doctor
+      ? { id: datosCita.doctor.id ?? 'any', name: datosCita.doctor.name ?? '' }
+      : null,
+    location: datosCita.location ? { name: datosCita.location.name ?? '' } : null,
+    date: fecha,
+    time: datosCita.time,
+    reason: datosCita.reason || ''
+  };
+
   try {
-    const response = await api.post('/api/citas', datosCita);
+    const response = await api.post('/api/citas', payload);
     addCitaLocal(datosCita);
     return { success: true, message: 'Cita reservada con éxito', data: response.data };
   } catch (error) {
