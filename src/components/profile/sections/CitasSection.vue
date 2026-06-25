@@ -141,16 +141,8 @@ const confirmCancel = (appt) => {
     showToast('Solo se pueden cancelar citas programadas o confirmadas', 'error');
     return;
   }
-  if (new Date(appt.date + 'T00:00:00') < new Date(new Date().toISOString().split('T')[0] + 'T00:00:00')) {
-    showToast('No se puede cancelar una cita pasada', 'error');
-    return;
-  }
-  const apptDate = new Date(appt.date + 'T' + (appt.time || '00:00'));
-  const diff = apptDate - new Date();
-  if (diff < 24 * 60 * 60 * 1000) {
-    showToast('Solo puedes cancelar citas con más de 24 horas de antelación', 'error');
-    return;
-  }
+  // Se puede cancelar en cualquier momento (pueden surgir imprevistos): sin
+  // límite de antelación. Solo se exige que la cita siga activa (arriba).
   cancelTarget.value = appt;
   showCancelModal.value = true;
 };
