@@ -1,5 +1,6 @@
 <script setup>
 import { login, verify2FA } from '../store/auth';
+import { openDevModal } from '../store/devModal';
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 const nif = ref('');
@@ -160,7 +161,7 @@ const backToLogin = () => {
                         <router-link to="/register">Date de alta</router-link>
                     </p>
                     <p class="auth-foot-sub">
-                        <a href="#">¿Problemas con el acceso o alta?</a>
+                        <a href="#" @click.prevent="openDevModal">¿Problemas con el acceso o alta?</a>
                     </p>
                 </template>
 

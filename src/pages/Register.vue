@@ -3,6 +3,7 @@ import { register } from '../store/auth';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import BackButton from '../components/BackButton.vue';
+import { openDevModal } from '../store/devModal';
 import {
     validateNif, validateEmail, validatePassword, validatePhone,
     validateName, validatePostalCode, validateBirthDate
@@ -230,8 +231,8 @@ const handleRegister = async () => {
                             class="mt-0.5 h-4 w-4 rounded border-[var(--border)] accent-[var(--accent)]" />
                         <span>
                             He leído y acepto la
-                            <router-link to="/privacidad" target="_blank"
-                                class="font-semibold text-[var(--accent)] underline">Política de Privacidad</router-link>
+                            <a href="#" @click.prevent="openDevModal"
+                                class="font-semibold text-[var(--accent)] underline">Política de Privacidad</a>
                             y el tratamiento de mis datos de salud para la prestación asistencial *
                         </span>
                     </label>

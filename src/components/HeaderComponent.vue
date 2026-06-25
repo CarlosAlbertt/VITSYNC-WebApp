@@ -21,8 +21,8 @@
             :class="{ 'flex-col space-y-2 space-x-0 min-[550px]:flex-row min-[550px]:space-y-0 min-[550px]:space-x-6': isTopBarMenuOpen }">
             <span>Atención al paciente: 912 33 77 99</span>
             <div class="flex space-x-4">
-              <a href="#" class="hover:underline">Trabaja con nosotros</a>
-              <a href="#" class="hover:underline">International patient</a>
+              <a href="#" class="hover:underline" @click.prevent="openDevModal">Trabaja con nosotros</a>
+              <a href="#" class="hover:underline" @click.prevent="openDevModal">International patient</a>
             </div>
             <!-- Dark Mode Toggle -->
             <button @click="toggleDark()"
@@ -75,8 +75,9 @@
         <div class="flex-1 max-w-2xl mx-6">
           <div class="relative">
             <input type="text" placeholder="Buscar centro, médico, especialidad..."
+              @keyup.enter="openDevModal"
               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-colors" />
-            <button aria-label="Buscar centro, médico o especialidad" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hidden min-[550px]:block">
+            <button aria-label="Buscar centro, médico o especialidad" @click="openDevModal" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hidden min-[550px]:block">
               🔍
             </button>
           </div>
@@ -148,6 +149,7 @@ import { useRouter } from 'vue-router'
 import { isAuthenticated, currentUser, logout } from '../store/auth'
 import { useDark, useToggle } from '@vueuse/core'
 import LogoutModal from './LogoutModal.vue';
+import { openDevModal } from '../store/devModal';
 
 const showLogoutModal = ref(false);
 const router = useRouter()
