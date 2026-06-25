@@ -132,9 +132,9 @@
       <template v-else-if="activeTab === 'notifications'">
         <InfoCard title="Notificaciones por Email">
           <div class="space-y-2">
-            <SettingsToggle label="Recordatorios de citas" description="Recibe un aviso 24h antes de tu consulta" v-model="settings.notifications.emailAppointments" @update:modelValue="saveSettings" />
-            <SettingsToggle label="Nuevos informes" v-model="settings.notifications.emailReports" @update:modelValue="saveSettings" />
-            <SettingsToggle label="Mensajería directa" v-model="settings.notifications.emailMessages" @update:modelValue="saveSettings" />
+            <SettingsToggle label="Recordatorios de citas" description="Recibe un aviso 24h antes de tu consulta" v-model="settings.notifications.emailAppointments" @update:modelValue="devNotif('emailAppointments')" />
+            <SettingsToggle label="Nuevos informes" v-model="settings.notifications.emailReports" @update:modelValue="devNotif('emailReports')" />
+            <SettingsToggle label="Mensajería directa" v-model="settings.notifications.emailMessages" @update:modelValue="devNotif('emailMessages')" />
           </div>
         </InfoCard>
 
@@ -143,7 +143,7 @@
             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Recordatorio anticipado</label>
             <div class="flex gap-4">
               <label v-for="opt in reminderOptions" :key="opt.value" class="flex-1 cursor-pointer group">
-                <input type="radio" v-model="settings.notifications.reminderTime" :value="opt.value" class="hidden" @change="saveSettings" />
+                <input type="radio" v-model="settings.notifications.reminderTime" :value="opt.value" class="hidden" @change="devNotif('reminderTime')" />
                 <div 
                   class="p-4 text-center rounded-2xl border-2 transition-all font-black text-xs uppercase tracking-widest"
                   :class="settings.notifications.reminderTime === opt.value 
@@ -163,7 +163,7 @@
            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
              <div v-for="(field, key) in prefFields" :key="key">
                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{{ field.label }}</label>
-               <select v-model="settings.preferences[key]" @change="key === 'theme' ? applyTheme() : saveSettings()" class="w-full px-4 py-3 text-sm font-bold border border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 appearance-none shadow-sm">
+               <select v-model="settings.preferences[key]" @change="key === 'theme' ? applyTheme() : devPref(key)" class="w-full px-4 py-3 text-sm font-bold border border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 appearance-none shadow-sm">
                  <option v-for="opt in field.options" :key="opt.v" :value="opt.v">{{ opt.t }}</option>
                </select>
              </div>
@@ -188,6 +188,27 @@
       </template>
 
     </div>
+
+    <!-- ── MODAL: Funcionalidad en desarrollo ── -->
+    <Teleport to="body">
+      <Transition name="modal-fade">
+        <div v-if="showDevModal" class="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xl" @click="showDevModal = false"></div>
+          <div class="relative bg-white dark:bg-slate-900 rounded-[3rem] p-10 max-w-md w-full shadow-2xl border border-white/20 text-center">
+            <div class="mx-auto mb-6 w-16 h-16 rounded-2xl bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center">
+              <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+            </div>
+            <h3 class="text-2xl font-black text-slate-800 dark:text-white mb-3 tracking-tighter uppercase">Funcionalidad en desarrollo</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-8">
+              Esta opción todavía no está disponible. Estamos trabajando en ella y llegará en una próxima actualización.
+            </p>
+            <button @click="showDevModal = false" class="w-full py-4 bg-slate-900 text-white font-black uppercase text-xs tracking-widest rounded-2xl hover:bg-teal-600 transition-all shadow-xl">
+              Entendido
+            </button>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- ── MODAL 2FA ── -->
     <Teleport to="body">
@@ -333,6 +354,15 @@ const settings = reactive({
   privacy: { profileVisible: true, shareData: false }
 });
 
+// Modal "Funcionalidad en desarrollo" + copias para revertir los cambios de
+// opciones aún no implementadas (notificaciones, idioma/región). El tema sí
+// funciona (applyTheme), por eso queda fuera.
+const showDevModal = ref(false);
+const notifBackup = reactive({});
+const prefBackup = reactive({});
+const devNotif = (key) => { settings.notifications[key] = notifBackup[key]; showDevModal.value = true; };
+const devPref = (key) => { settings.preferences[key] = prefBackup[key]; showDevModal.value = true; };
+
 const prefFields = {
   language: { label: 'Idioma', options: [{v:'es', t:'Español'}, {v:'en', t:'English'}] },
   dateFormat: { label: 'Formato de fecha', options: [{v:'DD/MM/YYYY', t:'DD/MM/YYYY'}, {v:'MM/DD/YYYY', t:'MM/DD/YYYY'}] },
@@ -352,6 +382,9 @@ onMounted(async () => {
   try {
     const s = await getSettings();
     Object.assign(settings, s);
+    // Guardar los valores actuales para poder revertir las opciones no implementadas
+    Object.assign(notifBackup, JSON.parse(JSON.stringify(settings.notifications)));
+    Object.assign(prefBackup, JSON.parse(JSON.stringify(settings.preferences)));
     // El estado real del 2FA viene del perfil (no del mock de ajustes).
     try {
       const profile = await getProfile();
