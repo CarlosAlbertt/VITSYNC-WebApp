@@ -13,9 +13,13 @@ export const fetchUsuarios = async () => {
     try {
         isLoading.value = true;
         error.value = null;
-        const response = await api.get('/api/usuarios');
-        usuarios.value = response.data;
-        return response.data;
+        // El backend pagina (Page<UserResponse>): pedimos un tamaño amplio y
+        // extraemos `content`. Antes se asignaba el objeto Page entero a un array,
+        // por lo que `.filter()` reventaba y la tabla no se renderizaba.
+        const response = await api.get('/api/usuarios', { params: { page: 0, size: 1000 } });
+        const data = response.data;
+        usuarios.value = Array.isArray(data) ? data : (data?.content ?? []);
+        return usuarios.value;
     } catch (err) {
         console.error('Error cargando usuarios:', err);
         error.value = err.message;
