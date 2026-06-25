@@ -84,10 +84,35 @@ export const downloadReportPdf = async (id) => {
 
 // ─── CITAS ─────────────────────────────────────────────────────────────
 
+// Normaliza el estado del backend (p. ej. "PROGRAMADA") al formato del frontend
+// ("Programada"), que es el que usan los filtros y las tarjetas.
+const STATUS_LABELS = { PROGRAMADA: 'Programada', CONFIRMADA: 'Confirmada', CANCELADA: 'Cancelada', COMPLETADA: 'Completada' };
+const normalizeStatus = (e) => {
+    if (!e) return 'Programada';
+    return STATUS_LABELS[e.toUpperCase()] || (e.charAt(0).toUpperCase() + e.slice(1).toLowerCase());
+};
+
+// Mapea la entidad Cita del backend (fechaHora/estado/tipo/medico) al modelo
+// que esperan los componentes (date/time/status/specialty/doctor).
+const mapCita = (c) => {
+    const fh = c.fechaHora || '';
+    return {
+        id: c.id,
+        date: fh ? fh.substring(0, 10) : '',
+        time: fh.length >= 16 ? fh.substring(11, 16) : '',
+        status: normalizeStatus(c.estado),
+        specialty: c.tipo || 'General',
+        type: 'Presencial',
+        doctor: c.medico?.name || 'Sin asignar',
+        medicoId: c.medico?.id ?? null,
+    };
+};
+
 export const getAppointments = async (filters = {}) => {
     const response = await api.get('/api/citas/me');
     const raw = response.data;
-    let appts = Array.isArray(raw) ? raw : (raw?.content ?? raw?.data ?? raw?.citas ?? []);
+    const citas = Array.isArray(raw) ? raw : (raw?.content ?? raw?.data ?? raw?.citas ?? []);
+    let appts = citas.map(mapCita);
 
     if (filters.status) appts = appts.filter(a => a.status === filters.status);
     if (filters.specialty) appts = appts.filter(a => a.specialty === filters.specialty);
@@ -153,17 +178,26 @@ export const changePassword = async (currentPassword, newPassword) => {
 };
 
 export const getSessions = async () => {
-    await delay(300);
-    // Mock hasta exponer las sesiones reales (tabla refresh_tokens del backend)
-    return [
-        { id: 1, device: 'Chrome · Windows', location: 'Madrid, ES', date: '2026-02-19T10:00:00', current: true },
-        { id: 2, device: 'Safari · iPhone', location: 'Valencia, ES', date: '2026-02-18T18:30:00', current: false }
-    ];
+    const response = await api.get('/api/auth/sessions');
+    const list = Array.isArray(response.data) ? response.data : [];
+    return list.map(s => ({
+        id: s.id,
+        device: s.device,
+        location: s.ipAddress || '—',
+        date: s.lastUsedAt || s.createdAt,
+        current: s.current
+    }));
 };
 
-export const deleteSession = async () => {
-    await delay(400);
+export const deleteSession = async (id) => {
+    await api.delete(`/api/auth/sessions/${id}`);
     return { success: true };
+};
+
+/** Cierra todas las sesiones excepto la actual. */
+export const closeOtherSessions = async () => {
+    const response = await api.post('/api/auth/sessions/revoke-others');
+    return response.data;
 };
 
 // ─── GESTIÓN DE DATOS (RGPD) ────────────────────────────────────────────────
@@ -197,9 +231,10 @@ export const getSaludDetalle = async (categoria) => {
 
 // ─── SEGURIDAD AVANZADA ──────────────────────────────────────────────────────
 
+/** Activa o desactiva el 2FA por email. Devuelve { twoFactorEnabled, message }. */
 export const setup2FA = async (enabled) => {
-    await api.put(`/VitSync-app/api/users/${userId()}/security/2fa`, { enabled });
-    return { success: true, qrCode: 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VITSYNC-AUTH' };
+    const response = await api.put(`/VitSync-app/api/users/${userId()}/security/2fa`, { enabled });
+    return response.data;
 };
 
 export const getSecurityQuestions = async () => {

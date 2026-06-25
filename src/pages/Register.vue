@@ -95,12 +95,19 @@ const handleRegister = async () => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-[var(--bg-base)] flex flex-col items-center justify-center px-4 py-8 text-[var(--text-primary)]">
+    <div class="reg-page">
+        <div class="reg-shell">
+            <div class="reg-topbar">
+                <BackButton to="/" label="Inicio" />
+            </div>
 
-        <h2 class="text-[var(--accent)] font-bold mb-2 text-sm tracking-widest uppercase">VITSYNC</h2>
-        <h1 class="text-3xl font-semibold text-[var(--text-primary)] mb-4">Crear cuenta</h1>
+            <div class="reg-header">
+                <span class="reg-eyebrow">VitSync</span>
+                <h1 class="reg-title">Crea tu cuenta</h1>
+                <p class="reg-subtitle">Unos pocos datos y tendrás tu área de salud lista. Tu información viaja cifrada y tratada bajo RGPD.</p>
+            </div>
 
-        <div class="w-full max-w-2xl bg-[var(--bg-surface)] border border-[var(--border)] p-8 rounded-xl shadow-md dark:shadow-2xl">
+            <div class="reg-card">
 
             <div v-if="errorMessage" class="mb-4 p-3 bg-red-50 dark:bg-rose-500/10 border border-red-400/30 text-red-600 dark:text-red-400 rounded-lg text-sm">
                 {{ errorMessage }}
@@ -110,7 +117,7 @@ const handleRegister = async () => {
             </div>
 
             <form @submit.prevent="handleRegister">
-                <h3 class="text-lg font-medium text-[var(--text-primary)] mb-4 border-b border-[var(--border)] pb-2">Datos personales</h3>
+                <h3 class="reg-section">Datos personales</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
@@ -152,7 +159,7 @@ const handleRegister = async () => {
                     </div>
                 </div>
 
-                <h3 class="text-lg font-medium text-[var(--text-primary)] mb-4 border-b border-[var(--border)] pb-2 mt-6">Datos de cuenta</h3>
+                <h3 class="reg-section reg-section-mt">Datos de cuenta</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
@@ -194,7 +201,7 @@ const handleRegister = async () => {
                     </select>
                 </div>
 
-                <h3 class="text-lg font-medium text-[var(--text-primary)] mb-4 border-b border-[var(--border)] pb-2 mt-6">Datos de contacto</h3>
+                <h3 class="reg-section reg-section-mt">Datos de contacto</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
@@ -262,6 +269,50 @@ const handleRegister = async () => {
                 ¿Ya tienes cuenta?
                 <router-link to="/login" class="font-semibold text-[var(--accent)] hover:opacity-80 transition-opacity">Inicia sesión</router-link>
             </p>
+            </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+/* Minimalista profesional: sans del sistema, superficies planas, bordes finos. */
+.reg-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1.25rem 4rem;
+    color: var(--text-primary);
+    background-color: var(--bg-base);
+}
+.reg-shell { width: 100%; max-width: 42rem; }
+.reg-topbar { margin-bottom: 1.5rem; }
+
+.reg-header { margin-bottom: 1.5rem; }
+.reg-eyebrow {
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em;
+    color: var(--accent);
+}
+.reg-title {
+    font-size: 1.625rem; font-weight: 600; letter-spacing: -0.01em;
+    color: var(--text-primary); margin-top: 0.35rem; margin-bottom: 0.4rem;
+}
+.reg-subtitle { color: var(--text-secondary); font-size: 0.9375rem; line-height: 1.6; max-width: 36rem; }
+
+.reg-card {
+    width: 100%;
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 0.875rem;
+    padding: 2rem;
+}
+
+/* Cabeceras de sección sobrias */
+.reg-section {
+    font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--text-muted);
+    padding-bottom: 0.7rem; margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+.reg-section-mt { margin-top: 2rem; }
+</style>

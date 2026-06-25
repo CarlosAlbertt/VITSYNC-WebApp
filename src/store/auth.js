@@ -82,10 +82,33 @@ export const initializeAuth = () => {
 export const login = async (nif, password) => {
     try {
         const response = await api.post('/api/auth/login', { nif, password });
+        // 2FA por email: aún no hay sesión; el segundo paso la abre con verify2FA.
+        if (response.data?.twoFactorRequired) {
+            return { twoFactorRequired: true, nif: response.data.nif || nif, message: response.data.message };
+        }
         applySession(response.data);
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.message || 'Error en el inicio de sesión');
+    }
+};
+
+/**
+ * Segundo paso del login con 2FA: verifica el código recibido por email y
+ * abre la sesión.
+ *
+ * @param {string} nif  NIF del primer paso
+ * @param {string} code código de 6 dígitos del email
+ * @returns {Promise<object>}
+ * @throws {Error} con mensaje mostrable
+ */
+export const verify2FA = async (nif, code) => {
+    try {
+        const response = await api.post('/api/auth/login/2fa', { nif, code });
+        applySession(response.data);
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Código incorrecto');
     }
 };
 

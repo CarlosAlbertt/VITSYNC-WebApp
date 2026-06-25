@@ -1,5 +1,5 @@
 <script setup>
-import { login } from '../store/auth';
+import { login, verify2FA } from '../store/auth';
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 const nif = ref('');
@@ -8,6 +8,12 @@ const errorMessage = ref(null);
 const isLoading = ref(false);
 const router = useRouter();
 const route = useRoute();
+
+// Segundo paso (2FA por email)
+const twoFactorStep = ref(false);
+const code = ref('');
+const pendingNif = ref('');
+const infoMessage = ref(null);
 
 const validateLogin = () => {
     if(!nif.value.trim()){
@@ -18,418 +24,324 @@ const validateLogin = () => {
     }
 };
 
+const goAfterLogin = () => {
+    // Volver a la ruta protegida que originó el redirect (solo rutas internas:
+    // un redirect absoluto permitiría open-redirect)
+    const redirect = typeof route.query.redirect === 'string'
+        && route.query.redirect.startsWith('/') ? route.query.redirect : null;
+    router.push(redirect || { name: 'home' });
+};
+
 const handleLogin = async () => {
     try {
         errorMessage.value = null;
         validateLogin();
         isLoading.value = true;
-        await login(nif.value, password.value);
-        // Volver a la ruta protegida que originó el redirect (solo rutas
-        // internas: un redirect absoluto permitiría open-redirect)
-        const redirect = typeof route.query.redirect === 'string'
-            && route.query.redirect.startsWith('/') ? route.query.redirect : null;
-        router.push(redirect || { name: 'home' });
+        const result = await login(nif.value, password.value);
+        if (result?.twoFactorRequired) {
+            // Pasamos al segundo paso: pedir el código enviado por email
+            pendingNif.value = result.nif;
+            infoMessage.value = result.message || 'Te hemos enviado un código a tu correo.';
+            twoFactorStep.value = true;
+            return;
+        }
+        goAfterLogin();
     } catch (error) {
         errorMessage.value = error.message || 'Error de conexión con el servidor';
     } finally {
         isLoading.value = false;
     }
 };
+
+const handleVerify2FA = async () => {
+    try {
+        errorMessage.value = null;
+        if (!/^\d{6}$/.test(code.value.trim())) {
+            throw new Error('Introduce el código de 6 dígitos');
+        }
+        isLoading.value = true;
+        await verify2FA(pendingNif.value, code.value.trim());
+        goAfterLogin();
+    } catch (error) {
+        errorMessage.value = error.message || 'Código incorrecto';
+    } finally {
+        isLoading.value = false;
+    }
+};
+
+const backToLogin = () => {
+    twoFactorStep.value = false;
+    code.value = '';
+    errorMessage.value = null;
+    infoMessage.value = null;
+};
 </script>
 
 <template>
-    <!-- Contenedor principal: pantalla completa, dos columnas en desktop -->
-    <div class="login-root">
+    <div class="auth">
+        <!-- Panel lateral con foto + overlay sólido (sin gradiente) -->
+        <aside class="auth-aside">
+            <div class="auth-aside-overlay" aria-hidden="true"></div>
+            <span class="auth-ring auth-ring-1" aria-hidden="true"></span>
+            <span class="auth-ring auth-ring-2" aria-hidden="true"></span>
 
-        <!-- ═══════════════════════════════════ -->
-        <!-- COLUMNA IZQUIERDA: Formulario       -->
-        <!-- ═══════════════════════════════════ -->
-        <div class="login-form-col">
-            <div class="back-button-wrap">
-                <router-link to="/" class="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-teal-600 transition-colors" title="Volver a Inicio">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4" />
+            <div class="auth-aside-content">
+                <div class="auth-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14" stroke-linecap="round" />
                     </svg>
-                    <span class="text-sm font-medium">Inicio</span>
+                </div>
+                <p class="auth-wordmark">VitSync</p>
+                <h2 class="auth-aside-title">Tu salud, en un solo lugar.</h2>
+                <ul class="auth-points">
+                    <li>
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 10.5l3.5 3.5L15 6.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        Historial médico siempre disponible
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 10.5l3.5 3.5L15 6.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        Chat directo con tus especialistas
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 10.5l3.5 3.5L15 6.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        Gestión de citas en tiempo real
+                    </li>
+                </ul>
+                <p class="auth-aside-foot">Datos cifrados · Cumplimiento RGPD</p>
+            </div>
+        </aside>
+
+        <!-- Formulario -->
+        <main class="auth-main">
+            <div class="auth-card">
+                <router-link to="/" class="auth-back">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M19 12H5M11 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Volver al inicio
                 </router-link>
-            </div>
 
-            <!-- Logo y título -->
-            <div class="login-header">
-                <h2 class="login-brand">VITSYNC</h2>
-                <h1 class="login-title">Mi VitSync</h1>
-                <p class="login-subtitle">Inicia sesión para acceder a tu área de salud</p>
-            </div>
-
-            <!-- Tarjeta del formulario -->
-            <div class="login-card">
-
-                <h3 class="login-card-title">Inicia sesión</h3>
-
-                <!-- Mensaje de error -->
-                <div v-if="errorMessage" class="login-error">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="login-error-icon"
-                         viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7
-                              4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1
-                              1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
+                <div v-if="errorMessage" class="auth-error" role="alert">
+                    <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                     {{ errorMessage }}
                 </div>
 
-                <form @submit.prevent="handleLogin">
-                    <!-- Campo NIF -->
-                    <div class="form-group">
-                        <label for="username" class="form-label">NIF/CIF</label>
-                        <div class="input-wrap">
-                            <span class="input-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="icon-sm"
-                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="1.5"
-                                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                            </span>
-                            <input id="username" type="text" v-model="nif"
-                                   placeholder="12345678A"
-                                   class="form-input"
-                                   required :disabled="isLoading" />
+                <!-- Paso 1: credenciales -->
+                <template v-if="!twoFactorStep">
+                    <header class="auth-head">
+                        <h1 class="auth-title">Inicia sesión</h1>
+                        <p class="auth-sub">Bienvenido de vuelta. Accede a tu área de salud.</p>
+                    </header>
+
+                    <form @submit.prevent="handleLogin" novalidate>
+                        <div class="field">
+                            <label for="username">NIF/CIF</label>
+                            <input id="username" type="text" v-model="nif" placeholder="12345678A"
+                                   autocomplete="username" required :disabled="isLoading" />
                         </div>
-                    </div>
 
-                    <!-- Campo Contraseña -->
-                    <div class="form-group">
-                        <div class="form-label-row">
-                            <label for="password" class="form-label">Contraseña</label>
-                            <a href="#" class="form-link">¿Olvidaste tu contraseña?</a>
+                        <div class="field">
+                            <div class="field-row">
+                                <label for="password">Contraseña</label>
+                                <router-link to="/recuperar-cuenta" class="field-aux">¿Olvidaste tu contraseña?</router-link>
+                            </div>
+                            <input id="password" type="password" v-model="password" placeholder="••••••••"
+                                   autocomplete="current-password" required :disabled="isLoading" />
                         </div>
-                        <div class="input-wrap">
-                            <span class="input-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="icon-sm"
-                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="1.5"
-                                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0
-                                             00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4
-                                             4 0 00-8 0v4h8z" />
-                                </svg>
-                            </span>
-                            <input id="password" type="password" v-model="password"
-                                   placeholder="••••••••"
-                                   class="form-input"
-                                   required :disabled="isLoading" />
-                        </div>
-                    </div>
 
-                    <!-- Botón de login -->
-                    <button type="submit" :disabled="isLoading" class="btn-primary"
-                            :class="{ 'btn-loading': isLoading }">
-                        <span v-if="isLoading" class="btn-spinner">
-                            <svg class="spinner-svg" xmlns="http://www.w3.org/2000/svg"
-                                 fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10"
-                                        stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor"
-                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2
-                                         5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824
-                                         3 7.938l3-2.647z"></path>
-                            </svg>
-                            Entrando...
-                        </span>
-                        <span v-else>Entrar</span>
-                    </button>
-                </form>
+                        <button type="submit" class="btn" :disabled="isLoading">
+                            <span v-if="isLoading" class="btn-spin" aria-hidden="true"></span>
+                            {{ isLoading ? 'Entrando…' : 'Entrar' }}
+                        </button>
+                    </form>
 
-                <!-- Enlace de registro -->
-                <p class="register-link-text">
-                    ¿No tienes usuario?
-                    <router-link to="/register" class="text-accent-link">
-                        Date de alta ahora
-                    </router-link>
-                </p>
-
-                <p class="help-link-text">
-                    <a href="#" class="help-link">¿Problemas con el acceso o alta?</a>
-                </p>
-            </div>
-        </div>
-
-        <!-- ═══════════════════════════════════ -->
-        <!-- COLUMNA DERECHA: Panel de marca     -->
-        <!-- ═══════════════════════════════════ -->
-        <div class="login-brand-col">
-            <!-- Círculos decorativos -->
-            <div class="brand-blob brand-blob-top"></div>
-            <div class="brand-blob brand-blob-bottom"></div>
-
-            <!-- Contenido -->
-            <div class="brand-content">
-                <div class="brand-logo-wrap">
-                    <div class="brand-logo-box">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="brand-logo-icon"
-                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  stroke-width="1.5"
-                                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5
-                                     4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0
-                                     00-6.364 0z" />
-                        </svg>
-                    </div>
-                    <h2 class="brand-headline">Tu salud, sincronizada</h2>
-                    <p class="brand-body">
-                        Accede a tu historial médico, gestiona tus citas y comunícate
-                        directamente con tus especialistas desde un solo lugar.
+                    <p class="auth-foot">
+                        ¿No tienes usuario?
+                        <router-link to="/register">Date de alta</router-link>
                     </p>
-                </div>
+                    <p class="auth-foot-sub">
+                        <a href="#">¿Problemas con el acceso o alta?</a>
+                    </p>
+                </template>
 
-                <!-- Features -->
-                <div class="brand-features">
-                    <div v-for="feat in [
-                        'Consulta tu historial desde cualquier lugar',
-                        'Chat directo con tus médicos',
-                        'Gestión de citas en tiempo real'
-                    ]" :key="feat" class="brand-feature-item">
-                        <div class="brand-check">✓</div>
-                        <span>{{ feat }}</span>
-                    </div>
-                </div>
+                <!-- Paso 2: código 2FA por email -->
+                <template v-else>
+                    <header class="auth-head">
+                        <h1 class="auth-title">Verificación en dos pasos</h1>
+                        <p class="auth-sub">{{ infoMessage }}</p>
+                    </header>
+
+                    <form @submit.prevent="handleVerify2FA" novalidate>
+                        <div class="field">
+                            <label for="code">Código de verificación</label>
+                            <input id="code" type="text" inputmode="numeric" maxlength="6" v-model="code"
+                                   placeholder="000000" autocomplete="one-time-code" required :disabled="isLoading" />
+                        </div>
+
+                        <button type="submit" class="btn" :disabled="isLoading">
+                            <span v-if="isLoading" class="btn-spin" aria-hidden="true"></span>
+                            {{ isLoading ? 'Verificando…' : 'Verificar y entrar' }}
+                        </button>
+                    </form>
+
+                    <p class="auth-foot-sub">
+                        <a href="#" @click.prevent="backToLogin">← Volver al inicio de sesión</a>
+                    </p>
+                </template>
             </div>
-        </div>
-
+        </main>
     </div>
 </template>
 
 <style scoped>
-/* ─── Layout raíz ─────────────────────────────────── */
-.login-root {
+.auth {
     min-height: 100vh;
     display: flex;
+    background-color: var(--bg-base);
 }
 
-/* ─── Columna izquierda (formulario) ─────────────── */
-.login-form-col {
-    width: 100%;
+/* ── Panel lateral (solo desktop) ───────────────────── */
+.auth-aside {
+    display: none;
+    position: relative;
+    width: 45%;
+    overflow: hidden;
+    /* Color base sólido + foto; el overlay da legibilidad (sin gradiente) */
+    background-color: #0B3B37;
+    background-image: url('/images/hero-background.png');
+    background-size: cover;
+    background-position: center;
+    color: #fff;
+}
+html.dark .auth-aside { background-color: #0B1120; }
+
+.auth-aside-overlay {
+    position: absolute; inset: 0;
+    background-color: rgba(8, 48, 44, 0.82);
+}
+html.dark .auth-aside-overlay { background-color: rgba(8, 14, 26, 0.86); }
+
+.auth-ring {
+    position: absolute;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    pointer-events: none;
+}
+.auth-ring-1 { width: 30rem; height: 30rem; top: -10rem; right: -8rem; }
+.auth-ring-2 { width: 20rem; height: 20rem; bottom: -6rem; left: -5rem; border-color: rgba(255,255,255,0.08); }
+
+.auth-aside-content {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column;
+    height: 100%;
+    padding: 3.5rem;
+    justify-content: center;
+    max-width: 30rem;
+}
+.auth-mark {
+    width: 2.75rem; height: 2.75rem; border-radius: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.14);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.5rem;
+}
+.auth-mark svg { width: 1.5rem; height: 1.5rem; }
+.auth-wordmark { font-size: 0.875rem; font-weight: 600; letter-spacing: 0.02em; color: rgba(255,255,255,0.7); margin-bottom: 0.75rem; }
+.auth-aside-title { font-size: 2rem; font-weight: 600; line-height: 1.2; letter-spacing: -0.015em; margin-bottom: 2rem; }
+.auth-points { display: flex; flex-direction: column; gap: 0.85rem; }
+.auth-points li { display: flex; align-items: center; gap: 0.7rem; font-size: 0.95rem; color: rgba(255,255,255,0.9); }
+.auth-points svg { width: 1.1rem; height: 1.1rem; color: #fff; flex-shrink: 0; }
+.auth-aside-foot { margin-top: 2.5rem; font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+
+/* ── Zona del formulario ────────────────────────────── */
+.auth-main {
+    flex: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem 1.5rem;
-    background-color: var(--bg-base);
-    transition: background-color 0.25s ease;
-    position: relative; /* necesario para que back-btn-wrap se posicione dentro */
+    padding: 2.5rem 1.5rem;
 }
-
-@media (min-width: 1024px) {
-    .login-form-col { width: 50%; }
-}
-
-/* ─── Botón volver ────────────────────────────────── */
-.back-button-wrap {
-    position: absolute;
-    top: 1.5rem;
-    left: 1.5rem;
-}
-
-/* ─── Cabecera del formulario ─────────────────────── */
-.login-header    { text-align: center; margin-bottom: 2rem; }
-.login-brand     {
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 0.5rem;
-}
-.login-title     {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-}
-.login-subtitle  {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-}
-
-/* ─── Tarjeta del formulario ──────────────────────── */
-.login-card {
+.auth-card {
     width: 100%;
-    max-width: 24rem;
+    max-width: 26rem;
     background-color: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-    transition: background-color 0.25s ease, border-color 0.25s ease;
+    padding: 2.5rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 24px 48px -32px rgba(15, 23, 42, 0.28);
 }
 
-.login-card-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 1.5rem;
+.auth-back {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: 0.8125rem; color: var(--text-muted);
+    text-decoration: none; margin-bottom: 1.75rem;
+    transition: color 0.15s ease;
 }
+.auth-back svg { width: 1rem; height: 1rem; }
+.auth-back:hover { color: var(--text-secondary); }
 
-/* ─── Error ───────────────────────────────────────── */
-.login-error {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    background-color: rgba(244, 63, 94, 0.08);
-    border: 1px solid rgba(244, 63, 94, 0.3);
-    border-radius: 0.75rem;
-    color: #F43F5E;
-    font-size: 0.875rem;
-}
-.login-error-icon { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
+.auth-head { margin-bottom: 1.75rem; }
+.auth-title { font-size: 1.625rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
+.auth-sub { font-size: 0.9375rem; color: var(--text-secondary); margin-top: 0.35rem; }
 
-/* ─── Campos del formulario ────────────────────────── */
-.form-group      { margin-bottom: 1.25rem; }
-.form-label      {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: 0.375rem;
+.auth-error {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 1.25rem; padding: 0.7rem 0.85rem;
+    font-size: 0.875rem; color: #B91C1C;
+    background-color: rgba(244, 63, 94, 0.07);
+    border: 1px solid rgba(244, 63, 94, 0.25);
+    border-radius: 0.6rem;
 }
-.form-label-row  {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.375rem;
-}
-.form-link       { font-size: 0.75rem; color: var(--accent); text-decoration: none; }
-.form-link:hover { text-decoration: underline; }
+.auth-error svg { width: 1.15rem; height: 1.15rem; flex-shrink: 0; }
 
-.input-wrap      { position: relative; }
-.input-icon      {
-    position: absolute;
-    left: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-}
-.icon-sm         { width: 1.25rem; height: 1.25rem; }
+.field { margin-bottom: 1.1rem; }
+.field label { display: block; font-size: 0.8125rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 0.4rem; }
+.field-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem; }
+.field-row label { margin-bottom: 0; }
+.field-aux { font-size: 0.75rem; color: var(--accent); text-decoration: none; }
+.field-aux:hover { text-decoration: underline; }
 
-.form-input {
-    width: 100%;
-    padding: 0.625rem 1rem 0.625rem 2.5rem;
-    border: 1px solid var(--border);
-    border-radius: 0.75rem;
-    background-color: var(--bg-elevated);
-    color: var(--text-primary);
-    font-size: 0.9375rem;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    box-sizing: border-box;
+.field input {
+    width: 100%; box-sizing: border-box;
+    padding: 0.7rem 0.85rem; font-size: 0.9375rem;
+    color: var(--text-primary); background-color: var(--bg-base);
+    border: 1px solid var(--border); border-radius: 0.6rem;
+    outline: none; transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.form-input::placeholder { color: var(--text-muted); }
-.form-input:focus {
+.field input::placeholder { color: var(--text-muted); }
+.field input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
 }
-.form-input:disabled { opacity: 0.6; cursor: not-allowed; }
+.field input:disabled { opacity: 0.6; cursor: not-allowed; }
 
-/* ─── Botón primario ──────────────────────────────── */
-.btn-primary {
-    display: block;
-    width: 100%;
-    padding: 0.625rem 1rem;
-    border-radius: 0.75rem;
-    border: none;
-    background-color: var(--accent);
-    color: #fff;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 35%, transparent);
+.btn {
+    width: 100%; margin-top: 0.5rem;
+    padding: 0.75rem 1rem; font-size: 0.9375rem; font-weight: 600;
+    color: #fff; background-color: var(--accent);
+    border: none; border-radius: 0.6rem; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    transition: background-color 0.15s ease, opacity 0.15s ease;
 }
-.btn-primary:hover:not(:disabled) {
-    background-color: var(--accent-hover);
-    box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 40%, transparent);
+.btn:hover:not(:disabled) { background-color: var(--accent-hover); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-spin {
+    width: 0.95rem; height: 0.95rem;
+    border: 2px solid rgba(255,255,255,0.5); border-top-color: #fff;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
 }
-.btn-loading { opacity: 0.65; cursor: not-allowed; }
-.btn-spinner { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
-.spinner-svg { width: 1rem; height: 1rem; animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ─── Links inferiores ────────────────────────────── */
-.register-link-text {
-    margin-top: 1.5rem;
-    text-align: center;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-}
-.text-accent-link {
-    font-weight: 600;
-    color: var(--accent);
-    text-decoration: none;
-}
-.text-accent-link:hover { text-decoration: underline; }
-
-.help-link-text { margin-top: 0.75rem; text-align: center; }
-.help-link      { font-size: 0.75rem; color: var(--text-muted); text-decoration: none; }
-.help-link:hover { color: var(--text-secondary); }
-
-/* ─── Columna derecha (branding) ──────────────────── */
-.login-brand-col {
-    display: none;
-    position: relative;
-    overflow: hidden;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem;
-    background: linear-gradient(135deg, #0D9488 0%, #0B7A6F 40%, #065F46 100%);
-}
-
-html.dark .login-brand-col {
-    background: linear-gradient(135deg, #141E2E 0%, #1E2D42 50%, #0B1120 100%);
-}
+.auth-foot { margin-top: 1.75rem; text-align: center; font-size: 0.875rem; color: var(--text-secondary); }
+.auth-foot a { color: var(--accent); font-weight: 500; text-decoration: none; }
+.auth-foot a:hover { text-decoration: underline; }
+.auth-foot-sub { margin-top: 0.6rem; text-align: center; }
+.auth-foot-sub a { font-size: 0.8125rem; color: var(--text-muted); text-decoration: none; }
+.auth-foot-sub a:hover { color: var(--text-secondary); }
 
 @media (min-width: 1024px) {
-    .login-brand-col { display: flex; width: 50%; }
+    .auth-aside { display: block; }
 }
-
-.brand-blob {
-    position: absolute;
-    border-radius: 9999px;
-    filter: blur(60px);
-    pointer-events: none;
-}
-.brand-blob-top {
-    top: 5rem; right: 5rem;
-    width: 16rem; height: 16rem;
-    background: rgba(255,255,255,0.08);
-}
-.brand-blob-bottom {
-    bottom: 2.5rem; left: 2.5rem;
-    width: 22rem; height: 22rem;
-    background: rgba(255,255,255,0.05);
-}
-
-.brand-content    { position: relative; z-index: 10; text-align: center; max-width: 28rem; color: #fff; }
-.brand-logo-wrap  { margin-bottom: 2rem; }
-.brand-logo-box   {
-    width: 5rem; height: 5rem; margin: 0 auto 1.5rem;
-    border-radius: 1rem;
-    background: rgba(255,255,255,0.15);
-    backdrop-filter: blur(8px);
-    display: flex; align-items: center; justify-content: center;
-}
-.brand-logo-icon  { width: 2.5rem; height: 2.5rem; }
-.brand-headline   { font-size: 1.875rem; font-weight: 700; margin-bottom: 1rem; }
-.brand-body       { color: rgba(255,255,255,0.82); font-size: 1.0625rem; line-height: 1.7; }
-
-.brand-features        { display: flex; flex-direction: column; gap: 1rem; text-align: left; margin-top: 2rem; }
-.brand-feature-item    { display: flex; align-items: center; gap: 0.75rem; color: rgba(255,255,255,0.9); }
-.brand-check {
-    width: 2rem; height: 2rem; border-radius: 0.5rem;
-    background: rgba(255,255,255,0.18);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; font-size: 0.9rem;
+@media (prefers-reduced-motion: reduce) {
+    .btn-spin { animation-duration: 1.4s; }
 }
 </style>

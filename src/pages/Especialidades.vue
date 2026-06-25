@@ -1,121 +1,98 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+  <div class="esp-page">
     <Header />
 
-    <!-- Page Header -->
-    <section class="bg-white dark:bg-gray-800 dark:border-gray-700 transition-colors duration-300">
-      <div class="max-w-7xl mx-auto px-6 py-8">
-        <nav class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          <span>Inicio</span> / <span class="text-teal-600 font-semibold">Especialidades</span>
+    <!-- Cabecera -->
+    <section class="esp-hero">
+      <div class="esp-hero-inner">
+        <nav class="esp-breadcrumb">
+          <span>Inicio</span>
+          <span class="esp-bc-sep">/</span>
+          <span class="esp-bc-current">Especialidades</span>
         </nav>
-        <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100">Índice de Especialidades</h1>
+        <h1 class="esp-title">Índice de Especialidades</h1>
+        <p class="esp-subtitle">Explora nuestras áreas médicas y pide cita con el especialista adecuado para ti.</p>
       </div>
     </section>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="flex-1 flex items-center justify-center py-20">
-      <div class="text-center">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
-        <p class="text-gray-600 dark:text-gray-400">Cargando especialidades...</p>
-      </div>
+    <div v-if="isLoading" class="esp-state">
+      <div class="esp-spinner" aria-hidden="true"></div>
+      <p>Cargando especialidades...</p>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="errorMessage" class="flex-1 flex items-center justify-center py-20">
-      <div class="text-center">
-        <p class="text-red-600 mb-4">{{ errorMessage }}</p>
-        <button @click="loadEspecialidades" class="bg-teal-600 text-white px-6 py-2 rounded-lg hover:bg-teal-700">
-          Reintentar
-        </button>
-      </div>
+    <div v-else-if="errorMessage" class="esp-state">
+      <p class="esp-state-error">{{ errorMessage }}</p>
+      <button @click="loadEspecialidades" class="esp-btn-primary">Reintentar</button>
     </div>
 
     <template v-else>
-      <!-- Alphabetical Index -->
-      <section
-        class="bg-white dark:bg-gray-800 dark:border-gray-700 sticky top-0 z-10 shadow-sm transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-6 py-4">
-          <div class="flex flex-wrap gap-3 justify-center">
-            <button v-for="letter in alphabet" :key="letter" @click="scrollToLetter(letter)" :class="[
-              'w-10 h-10 rounded-lg font-semibold transition-all duration-200',
-              hasSpecialtiesForLetter(letter)
-                ? 'bg-teal-600 text-white hover:bg-teal-700 cursor-pointer'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-            ]" :disabled="!hasSpecialtiesForLetter(letter)">
-              {{ letter }}
-            </button>
-          </div>
+      <!-- Índice alfabético -->
+      <section class="esp-index">
+        <div class="esp-index-inner">
+          <button v-for="letter in alphabet" :key="letter" @click="scrollToLetter(letter)"
+            class="esp-letter" :class="{ 'is-active': hasSpecialtiesForLetter(letter) }"
+            :disabled="!hasSpecialtiesForLetter(letter)">
+            {{ letter }}
+          </button>
         </div>
       </section>
 
-      <!-- Specialties Grid -->
-      <section class="py-12">
-        <div class="max-w-7xl mx-auto px-6">
-          <!-- Group specialties by first letter -->
-          <div v-for="letter in activeLetters" :key="letter" class="mb-12">
-            <h2 :id="`letter-${letter}`"
-              class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 border-b-2 border-teal-600 pb-2">
-              {{ letter }}
-            </h2>
+      <!-- Grid de especialidades -->
+      <section class="esp-grid-section">
+        <div class="esp-grid-inner">
+          <div v-for="letter in activeLetters" :key="letter" class="esp-group">
+            <h2 :id="`letter-${letter}`" class="esp-group-title">{{ letter }}</h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div 
-                v-for="especialidad in getSpecialtiesByLetter(letter)" 
+            <div class="esp-grid">
+              <article
+                v-for="especialidad in getSpecialtiesByLetter(letter)"
                 :key="especialidad.id"
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
-              >
-                <!-- Specialty Image -->
-                <div class="aspect-[4/3] relative overflow-hidden border-b border-gray-100 dark:border-gray-700 group">
+                class="esp-card">
+                <!-- Imagen + badge -->
+                <div class="esp-card-media">
                   <img
                     :src="getEspecialidadImage(especialidad.nombre, especialidad.tipo)"
                     :alt="especialidad.nombre"
-                    class="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
-                    @error="onImageError"
-                  />
+                    class="esp-card-img"
+                    loading="lazy"
+                    @error="onImageError" />
+                  <span class="esp-card-badge">{{ especialidad.tipo }}</span>
                 </div>
 
-                <!-- Specialty Info -->
-                <div class="p-6 flex flex-col grow">
-                  <router-link :to="`/especialidad/${especialidad.id}`" class="hover:text-teal-600 transition-colors">
-                    <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">{{ especialidad.nombre }}</h3>
+                <!-- Info -->
+                <div class="esp-card-body">
+                  <router-link :to="`/especialidad/${especialidad.id}`" class="esp-card-titlelink">
+                    <h3 class="esp-card-title">{{ especialidad.nombre }}</h3>
                   </router-link>
-                  <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">{{ especialidad.descripcion }}</p>
+                  <p class="esp-card-desc">{{ especialidad.descripcion }}</p>
 
-                  <!-- Tipo badge -->
-                  <span :class="getTipoBadgeClass(especialidad.tipo)"
-                    class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4 w-fit">
-                    {{ especialidad.tipo }}
-                  </span>
-
-                  <!-- Doctors List -->
-                  <div v-if="especialidad.medicos && especialidad.medicos.length > 0" class="mb-4">
-                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">Especialistas disponibles:
-                    </p>
-                    <ul class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-                      <li v-for="medico in especialidad.medicos" :key="medico.id" class="flex items-center">
-                        <span class="w-2 h-2 bg-teal-600 rounded-full mr-2"></span>
+                  <!-- Médicos -->
+                  <div v-if="especialidad.medicos && especialidad.medicos.length > 0" class="esp-doctors">
+                    <p class="esp-doctors-label">Especialistas disponibles</p>
+                    <ul class="esp-doctors-list">
+                      <li v-for="medico in especialidad.medicos" :key="medico.id">
+                        <span class="esp-dot" aria-hidden="true"></span>
                         Dr. {{ medico.nombre }}
                       </li>
                     </ul>
                   </div>
-                  <div v-else class="mb-4">
-                    <p class="text-sm text-gray-400 italic">Sin especialistas asignados</p>
-                  </div>
+                  <p v-else class="esp-doctors-empty">Sin especialistas asignados</p>
 
-                  <!-- Action Buttons - Fixed at bottom -->
-                  <div class="flex gap-3 mt-auto">
-                    <button
-                      @click="pedirCita(especialidad)"
-                      class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300">
+                  <!-- Acciones -->
+                  <div class="esp-card-actions">
+                    <button @click="pedirCita(especialidad)" class="esp-btn-primary esp-btn-grow">
                       Pedir cita
                     </button>
-                    <button
-                      class="w-12 h-12 border-2 border-teal-600 text-teal-600 hover:bg-teal-50 dark:hover:bg-gray-700 rounded-lg transition-all duration-300 flex items-center justify-center">
-                      →
-                    </button>
+                    <router-link :to="`/especialidad/${especialidad.id}`" class="esp-btn-icon" :aria-label="`Ver ${especialidad.nombre}`">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </router-link>
                   </div>
                 </div>
-              </div>
+              </article>
             </div>
           </div>
         </div>
@@ -273,7 +250,131 @@ export default {
 </script>
 
 <style scoped>
-html {
-  scroll-behavior: smooth;
+html { scroll-behavior: smooth; }
+
+.esp-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+}
+
+/* Minimalista profesional: sans del sistema, superficies planas, hairlines. */
+
+/* ─── Cabecera ────────────────────────────────────── */
+.esp-hero {
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+}
+.esp-hero-inner { max-width: 72rem; margin: 0 auto; padding: 2.5rem 1.5rem; }
+.esp-breadcrumb {
+  font-size: 0.8125rem; color: var(--text-muted);
+  display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;
+}
+.esp-bc-sep { opacity: 0.6; }
+.esp-bc-current { color: var(--text-secondary); font-weight: 500; }
+.esp-title { font-size: 1.875rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
+.esp-subtitle { margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.9375rem; max-width: 40rem; }
+
+/* ─── Estados ─────────────────────────────────────── */
+.esp-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 5rem 1.5rem; color: var(--text-secondary); }
+.esp-state-error { color: #B91C1C; }
+.esp-spinner {
+  width: 2.25rem; height: 2.25rem; border-radius: 9999px;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  animation: espSpin 0.8s linear infinite;
+}
+@keyframes espSpin { to { transform: rotate(360deg); } }
+
+/* ─── Índice alfabético ───────────────────────────── */
+.esp-index {
+  position: sticky; top: 0; z-index: 20;
+  background-color: color-mix(in srgb, var(--bg-base) 90%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.esp-index-inner {
+  max-width: 72rem; margin: 0 auto; padding: 0.75rem 1.5rem;
+  display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center;
+}
+.esp-letter {
+  width: 2.25rem; height: 2.25rem; border-radius: 0.5rem;
+  font-weight: 600; font-size: 0.875rem; border: 1px solid transparent;
+  background-color: transparent; color: var(--text-muted);
+  cursor: not-allowed; transition: background-color 0.15s ease, color 0.15s ease;
+}
+.esp-letter.is-active { color: var(--text-secondary); cursor: pointer; }
+.esp-letter.is-active:hover { background-color: var(--bg-elevated); color: var(--accent); }
+
+/* ─── Grid ────────────────────────────────────────── */
+.esp-grid-section { padding: 2.5rem 0 4rem; }
+.esp-grid-inner { max-width: 72rem; margin: 0 auto; padding: 0 1.5rem; }
+.esp-group { margin-bottom: 2.75rem; scroll-margin-top: 5.5rem; }
+.esp-group-title {
+  font-size: 1.125rem; font-weight: 600; color: var(--text-secondary);
+  margin-bottom: 1.25rem; padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+.esp-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+@media (min-width: 768px) { .esp-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .esp-grid { grid-template-columns: repeat(3, 1fr); } }
+
+/* ─── Tarjeta ─────────────────────────────────────── */
+.esp-card {
+  display: flex; flex-direction: column; overflow: hidden;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border); border-radius: 0.75rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.esp-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  box-shadow: 0 8px 24px -16px rgba(15,23,42,0.25);
+}
+.esp-card-media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; border-bottom: 1px solid var(--border); }
+.esp-card-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.esp-card-badge {
+  position: absolute; top: 0.7rem; left: 0.7rem;
+  padding: 0.2rem 0.55rem; border-radius: 0.4rem;
+  font-size: 0.66rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  background-color: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(4px);
+}
+.esp-card-body { display: flex; flex-direction: column; flex: 1; padding: 1.35rem; }
+.esp-card-titlelink { text-decoration: none; }
+.esp-card-title { font-size: 1.0625rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.4rem; transition: color 0.15s ease; }
+.esp-card-titlelink:hover .esp-card-title { color: var(--accent); }
+.esp-card-desc { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 1rem; }
+
+.esp-doctors { margin-bottom: 1.25rem; }
+.esp-doctors-label {
+  font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.45rem;
+}
+.esp-doctors-list { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.875rem; color: var(--text-secondary); }
+.esp-doctors-list li { display: flex; align-items: center; }
+.esp-dot { width: 0.35rem; height: 0.35rem; border-radius: 9999px; background: var(--accent); margin-right: 0.55rem; flex-shrink: 0; }
+.esp-doctors-empty { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+
+.esp-card-actions { display: flex; gap: 0.5rem; margin-top: auto; }
+.esp-btn-primary {
+  background-color: var(--accent); color: #fff;
+  font-weight: 600; font-size: 0.9375rem; padding: 0.6rem 1.1rem; border-radius: 0.6rem; border: none;
+  cursor: pointer; transition: background-color 0.15s ease;
+}
+.esp-btn-primary:hover { background-color: var(--accent-hover); }
+.esp-btn-grow { flex: 1; }
+.esp-btn-icon {
+  width: 2.75rem; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border); color: var(--text-secondary); border-radius: 0.6rem;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.esp-btn-icon svg { width: 1.1rem; height: 1.1rem; }
+.esp-btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .esp-spinner { animation-duration: 1.2s; }
+  .esp-card, .esp-letter { transition: none; }
 }
 </style>

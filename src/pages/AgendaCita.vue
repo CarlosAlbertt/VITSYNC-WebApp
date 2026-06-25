@@ -6,7 +6,7 @@
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
 
         <!-- Modal Container -->
-        <div class="relative z-10 w-full h-full md:h-auto md:max-h-[92vh] md:max-w-4xl md:mx-4 bg-white dark:bg-[var(--bg-surface)] md:rounded-2xl shadow-2xl border-0 md:border border-slate-100 dark:border-[var(--border)] overflow-hidden flex flex-col">
+        <div class="relative z-10 w-full h-full md:h-auto md:max-h-[94vh] md:max-w-5xl lg:max-w-6xl md:mx-4 bg-white dark:bg-[var(--bg-surface)] md:rounded-2xl shadow-2xl border-0 md:border border-slate-100 dark:border-[var(--border)] overflow-hidden flex flex-col">
           
           <!-- Botón de cierre -->
           <button 
@@ -50,9 +50,9 @@
           </div>
 
           <!-- Contenido Dinámico de los Pasos -->
-          <div class="p-6 md:p-8 min-h-[380px] overflow-y-auto flex-1 flex flex-col relative">
+          <div class="p-6 md:p-8 min-h-[380px] md:min-h-[480px] overflow-y-auto flex-1 flex flex-col relative">
             <Transition name="fade" mode="out-in">
-              <div :key="currentStep === totalSteps + 1 ? 'success' : currentStep" class="w-full h-full flex flex-col flex-1">
+              <div :key="currentStep === totalSteps + 1 ? 'success' : `${currentStep}-${confirmKey}`" class="w-full h-full flex flex-col flex-1">
                 <StepSuccess
                   v-if="currentStep > totalSteps"
                   :bookingData="bookingData"
@@ -80,6 +80,7 @@
 import { ref, computed, reactive, watch } from 'vue';
 import { crearCita } from '../store/citas';
 import { closeBooking, initialBookingData } from '../store/bookingModal';
+import { showToast } from '../store/profile';
 
 import StepLocation from '../components/booking/StepLocation.vue';
 import StepSpecialty from '../components/booking/StepSpecialty.vue';
@@ -95,6 +96,9 @@ const emit = defineEmits(['close']);
 
 const currentStep = ref(1);
 const totalSteps = 5;
+// Se incrementa al fallar el envío para remontar el paso de confirmación y
+// liberar su estado "Confirmando..." (botón deshabilitado).
+const confirmKey = ref(0);
 
 // Estado global de la reserva
 const bookingData = reactive({
@@ -152,14 +156,15 @@ const prevStep = () => {
 
 const submitBooking = async (finalData) => {
   Object.assign(bookingData, finalData);
-  
-  try {
-    await crearCita(bookingData);
-    // Avanzar al paso de éxito en vez de alert()
+
+  const result = await crearCita(bookingData);
+  if (result?.success) {
+    // Solo avanzamos a "éxito" si el backend confirmó la reserva
     currentStep.value = totalSteps + 1;
-  } catch (error) {
-    // Aun así avanzamos al éxito (crearCita ya guarda localmente)
-    currentStep.value = totalSteps + 1;
+  } else {
+    // El POST falló: avisamos y remontamos la confirmación para reactivar el botón
+    showToast(result?.message || 'No se pudo agendar la cita. Inténtalo de nuevo.', 'error');
+    confirmKey.value++;
   }
 };
 
