@@ -191,16 +191,6 @@ const handleRegister = async () => {
                     </div>
                 </div>
 
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-[var(--text-secondary)] mb-1">Tipo de cuenta *</label>
-                    <select v-model="formData.role"
-                        class="w-full px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50"
-                        required :disabled="isLoading">
-                        <option value="PACIENTE">Paciente</option>
-                        <option value="MEDICO">Profesional de la salud</option>
-                    </select>
-                </div>
-
                 <h3 class="reg-section reg-section-mt">Datos de contacto</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
