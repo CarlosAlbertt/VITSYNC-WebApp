@@ -96,26 +96,34 @@
                 <!-- Contact Info -->
                 <div class="mt-auto space-y-2 pt-4 border-t border-gray-100 dark:border-gray-700">
                   <a v-if="doctor.email" :href="`mailto:${doctor.email}`"
-                    class="flex items-center text-sm text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors group/link">
-                    <svg class="h-4 w-4 mr-2 text-gray-400 group-hover/link:text-teal-500 flex-shrink-0" fill="none"
-                      viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <span class="truncate">{{ doctor.email }}</span>
+                    class="flex items-center gap-3 rounded-xl px-3 py-2 bg-gray-50 dark:bg-gray-700/40 hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors group/link">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-300 flex-shrink-0">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </span>
+                    <span class="min-w-0">
+                      <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Email</span>
+                      <span class="block text-sm text-gray-700 dark:text-gray-200 truncate group-hover/link:text-teal-600 dark:group-hover/link:text-teal-400">{{ doctor.email }}</span>
+                    </span>
                   </a>
                   <a v-if="doctor.phone" :href="`tel:${doctor.phone}`"
-                    class="flex items-center text-sm text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors group/link">
-                    <svg class="h-4 w-4 mr-2 text-gray-400 group-hover/link:text-teal-500 flex-shrink-0" fill="none"
-                      viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                    <span>{{ doctor.phone }}</span>
+                    class="flex items-center gap-3 rounded-xl px-3 py-2 bg-gray-50 dark:bg-gray-700/40 hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors group/link">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-300 flex-shrink-0">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                    </span>
+                    <span class="min-w-0">
+                      <span class="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Teléfono</span>
+                      <span class="block text-sm text-gray-700 dark:text-gray-200 group-hover/link:text-teal-600 dark:group-hover/link:text-teal-400">{{ doctor.phone }}</span>
+                    </span>
                   </a>
                 </div>
 
-                <button class="mt-6 w-full bg-teal-50 hover:bg-teal-600 text-teal-700 hover:text-white dark:bg-gray-700 dark:text-teal-400 dark:hover:bg-teal-600 dark:hover:text-white font-semibold py-2.5 rounded-lg transition-colors duration-300">
+                <button @click="solicitarCita(doctor)" class="mt-6 w-full bg-teal-50 hover:bg-teal-600 text-teal-700 hover:text-white dark:bg-gray-700 dark:text-teal-400 dark:hover:bg-teal-600 dark:hover:text-white font-semibold py-2.5 rounded-lg transition-colors duration-300">
                   Solicitar Cita
                 </button>
               </div>
@@ -136,6 +144,7 @@ import Header from '../components/HeaderComponent.vue';
 import Footer from '../components/FooterComponent.vue';
 import { fetchEspecialidades, fetchEspecialidadById } from '../store/especialidades';
 import { fetchMedicos } from '../store/medicos';
+import { openBooking } from '../store/bookingModal';
 
 const route = useRoute();
 const especialidad = ref(null);
@@ -143,6 +152,15 @@ const isLoading = ref(true);
 const errorMessage = ref(null);
 
 const fullName = (d) => [d.name, d.firstName, d.secondName].filter(Boolean).join(' ');
+
+// Abre el modal de reserva preseleccionando esta especialidad y este médico.
+const solicitarCita = (doctor) => {
+  openBooking({
+    specialty: especialidad.value,
+    specialtyName: especialidad.value?.nombre,
+    doctor,
+  });
+};
 
 const getTipoBadgeClass = (tipo) => {
   const classes = {

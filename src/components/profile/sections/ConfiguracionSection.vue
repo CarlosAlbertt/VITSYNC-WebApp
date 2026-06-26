@@ -132,9 +132,9 @@
       <template v-else-if="activeTab === 'notifications'">
         <InfoCard title="Notificaciones por Email">
           <div class="space-y-2">
-            <SettingsToggle label="Recordatorios de citas" description="Recibe un aviso 24h antes de tu consulta" v-model="settings.notifications.emailAppointments" @update:modelValue="saveSettings" />
-            <SettingsToggle label="Nuevos informes" v-model="settings.notifications.emailReports" @update:modelValue="saveSettings" />
-            <SettingsToggle label="Mensajería directa" v-model="settings.notifications.emailMessages" @update:modelValue="saveSettings" />
+            <SettingsToggle label="Recordatorios de citas" description="Recibe un aviso 24h antes de tu consulta" v-model="settings.notifications.emailAppointments" @update:modelValue="devNotif('emailAppointments')" />
+            <SettingsToggle label="Nuevos informes" v-model="settings.notifications.emailReports" @update:modelValue="devNotif('emailReports')" />
+            <SettingsToggle label="Mensajería directa" v-model="settings.notifications.emailMessages" @update:modelValue="devNotif('emailMessages')" />
           </div>
         </InfoCard>
 
@@ -143,7 +143,7 @@
             <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Recordatorio anticipado</label>
             <div class="flex gap-4">
               <label v-for="opt in reminderOptions" :key="opt.value" class="flex-1 cursor-pointer group">
-                <input type="radio" v-model="settings.notifications.reminderTime" :value="opt.value" class="hidden" @change="saveSettings" />
+                <input type="radio" v-model="settings.notifications.reminderTime" :value="opt.value" class="hidden" @change="devNotif('reminderTime')" />
                 <div 
                   class="p-4 text-center rounded-2xl border-2 transition-all font-black text-xs uppercase tracking-widest"
                   :class="settings.notifications.reminderTime === opt.value 
@@ -163,7 +163,7 @@
            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
              <div v-for="(field, key) in prefFields" :key="key">
                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{{ field.label }}</label>
-               <select v-model="settings.preferences[key]" @change="key === 'theme' ? applyTheme() : saveSettings()" class="w-full px-4 py-3 text-sm font-bold border border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 appearance-none shadow-sm">
+               <select v-model="settings.preferences[key]" @change="key === 'theme' ? applyTheme() : devPref(key)" class="w-full px-4 py-3 text-sm font-bold border border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 appearance-none shadow-sm">
                  <option v-for="opt in field.options" :key="opt.v" :value="opt.v">{{ opt.t }}</option>
                </select>
              </div>
@@ -286,6 +286,7 @@ import {
 } from '../../../services/profileService';
 import { showToast } from '../../../store/profile';
 import { logout } from '../../../store/auth';
+import { openDevModal } from '../../../store/devModal';
 
 const loading = ref(false);
 const loadingSessions = ref(false);
@@ -333,6 +334,14 @@ const settings = reactive({
   privacy: { profileVisible: true, shareData: false }
 });
 
+// Opciones aún no implementadas (notificaciones, idioma/región): se revierte el
+// cambio y se muestra el modal global "Funcionalidad en desarrollo". El tema sí
+// funciona (applyTheme), por eso queda fuera.
+const notifBackup = reactive({});
+const prefBackup = reactive({});
+const devNotif = (key) => { settings.notifications[key] = notifBackup[key]; openDevModal(); };
+const devPref = (key) => { settings.preferences[key] = prefBackup[key]; openDevModal(); };
+
 const prefFields = {
   language: { label: 'Idioma', options: [{v:'es', t:'Español'}, {v:'en', t:'English'}] },
   dateFormat: { label: 'Formato de fecha', options: [{v:'DD/MM/YYYY', t:'DD/MM/YYYY'}, {v:'MM/DD/YYYY', t:'MM/DD/YYYY'}] },
@@ -352,6 +361,9 @@ onMounted(async () => {
   try {
     const s = await getSettings();
     Object.assign(settings, s);
+    // Guardar los valores actuales para poder revertir las opciones no implementadas
+    Object.assign(notifBackup, JSON.parse(JSON.stringify(settings.notifications)));
+    Object.assign(prefBackup, JSON.parse(JSON.stringify(settings.preferences)));
     // El estado real del 2FA viene del perfil (no del mock de ajustes).
     try {
       const profile = await getProfile();

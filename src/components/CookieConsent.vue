@@ -8,6 +8,7 @@
  * BLOQUEARSE hasta consentimiento explícito en este componente.
  */
 import { ref } from 'vue';
+import { openDevModal } from '../store/devModal';
 
 // localStorage es el sitio correcto para ESTA preferencia: no es dato
 // personal, solo "ya he visto el aviso"
@@ -33,8 +34,8 @@ const accept = () => {
                     una cookie de sesión segura y tus preferencias de interfaz.
                     No usamos cookies de publicidad ni de seguimiento.
                     Más información en la
-                    <router-link to="/privacidad" class="text-teal-600 dark:text-teal-400 font-semibold underline">
-                        Política de Privacidad</router-link>.
+                    <a href="#" @click.prevent="openDevModal" class="text-teal-600 dark:text-teal-400 font-semibold underline">
+                        Política de Privacidad</a>.
                 </p>
                 <button @click="accept"
                     class="shrink-0 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-3 transition-colors">

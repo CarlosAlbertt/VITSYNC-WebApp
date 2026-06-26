@@ -8,6 +8,7 @@ import CookieConsent from './components/CookieConsent.vue';
 import { isChatOpen, toggleChat } from './store/chat';
 import AgendaCita from './pages/AgendaCita.vue';
 import { isBookingOpen, closeBooking } from './store/bookingModal';
+import DevFeatureModal from './components/DevFeatureModal.vue';
 
 // La sesión se restaura de forma asíncrona (refresh httpOnly): watch en vez
 // de onMounted, que se ejecutaba antes de que initializeAuth() terminara
@@ -27,6 +28,9 @@ watch(isAuthenticated, (authed) => {
 
     <!-- Modal de Reserva de Citas (global) -->
     <AgendaCita :visible="isBookingOpen" @close="closeBooking" />
+
+    <!-- Modal global "Funcionalidad en desarrollo" -->
+    <DevFeatureModal />
 
     <!-- Aviso de cookies/almacenamiento (RGPD/LSSI) -->
     <CookieConsent />
