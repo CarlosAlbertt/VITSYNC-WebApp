@@ -520,9 +520,10 @@ const saveUser = async () => {
 
 // ── Toggle verificado ─────────────────────────────────────────────────────────
 const handleToggleVerificado = async (user) => {
+    const target = !user.isVerified;
     try {
-        await setVerificado(user.id, !user.isVerified);
-        showToast(user.isVerified ? 'Usuario marcado como no verificado.' : 'Usuario verificado correctamente.');
+        await setVerificado(user.id, target);
+        showToast(target ? 'Usuario verificado correctamente.' : 'Usuario marcado como no verificado.');
     } catch (err) {
         showToast(extractApiError(err), 'error');
     }
